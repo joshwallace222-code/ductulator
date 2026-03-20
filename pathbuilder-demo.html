@@ -3,277 +3,626 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Path Builder Concept</title>
+<title>System Builder v2</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a1a;color:#e0e0e0;font-family:-apple-system,system-ui,sans-serif;padding:12px;max-width:420px;margin:0 auto}
-h2{color:#d32f2f;font-size:15px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700}
-.section{background:#222;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:14px}
-.section-title{color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a1a;color:#e0e0e0;font-family:-apple-system,system-ui,sans-serif;padding:0;max-width:420px;margin:0 auto;min-height:100vh}
+button,select,input{font-family:inherit;-webkit-appearance:none;appearance:none}
 
-/* Templates */
-.template-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.template-btn{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s}
-.template-btn:active{background:#d32f2f;border-color:#d32f2f;transform:scale(0.97)}
-.template-btn.active{background:#d32f2f;border-color:#d32f2f}
-.template-icon{font-size:22px;margin-bottom:4px}
-.template-label{font-size:11px;font-weight:600;color:#ccc}
-.template-btn.active .template-label{color:#fff}
-.template-desc{font-size:9px;color:#888;margin-top:2px}
-.template-btn.active .template-desc{color:rgba(255,255,255,0.7)}
+/* Header */
+.hdr{background:#111;padding:12px 16px;border-bottom:1px solid #333;position:sticky;top:0;z-index:10}
+.hdr-title{color:#d32f2f;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+.hdr-sub{color:#888;font-size:11px;margin-top:2px}
 
-/* Visual Path */
-.path-container{position:relative;padding:8px 0}
-.path-node{display:flex;align-items:center;gap:10px;padding:8px 0;position:relative}
-.path-dot{width:28px;height:28px;border-radius:50%;background:#d32f2f;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;z-index:2;position:relative}
-.path-dot.fitting{background:#ff9800}
-.path-dot.end{background:#4caf50}
-.path-dot.branch{background:#2196f3}
-.path-line{position:absolute;left:13px;top:36px;width:2px;height:calc(100% - 28px);background:#555;z-index:1}
-.path-node:last-child .path-line{display:none}
-.path-info{flex:1;min-width:0}
-.path-name{font-size:13px;font-weight:600;color:#e0e0e0}
-.path-detail{font-size:11px;color:#888;margin-top:1px}
-.path-edit{font-size:11px;color:#d32f2f;cursor:pointer;padding:4px 8px;border:1px solid #d32f2f;border-radius:4px;flex-shrink:0}
-.path-edit:active{background:#d32f2f;color:#fff}
+/* Step indicator */
+.steps{display:flex;gap:0;padding:12px 16px;background:#1a1a1a;border-bottom:1px solid #2a2a2a}
+.step-pill{flex:1;text-align:center;padding:8px 4px;font-size:11px;font-weight:600;color:#666;border-bottom:2px solid transparent;cursor:pointer}
+.step-pill.active{color:#d32f2f;border-bottom-color:#d32f2f}
+.step-pill.done{color:#4caf50;border-bottom-color:#4caf50}
 
-/* Inline edit row */
-.edit-row{display:flex;gap:6px;margin-top:6px;align-items:center}
-.edit-input{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:6px 8px;font-size:13px;width:60px;text-align:center}
-.edit-label{font-size:10px;color:#888}
-.edit-select{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:6px 8px;font-size:12px;flex:1;-webkit-appearance:none;appearance:none}
+/* Content area */
+.content{padding:16px}
 
-/* Add next piece */
-.add-next{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.add-btn{background:#2a2a2a;border:1px dashed #555;border-radius:8px;padding:8px 10px;font-size:11px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
-.add-btn:active{background:#333;border-color:#d32f2f;color:#d32f2f}
-.add-btn svg{width:14px;height:14px}
+/* Cards */
+.card{background:#222;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;color:#d32f2f;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+.card-desc{font-size:12px;color:#999;line-height:1.5;margin-bottom:10px}
 
-/* Results bar */
-.results-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
-.result-box{background:#2a2a2a;border:1px solid #333;border-radius:8px;padding:8px;text-align:center}
-.result-val{font-size:18px;font-weight:700;font-family:'Courier New',monospace}
-.result-val.red{color:#d32f2f}
-.result-val.green{color:#4caf50}
-.result-val.yellow{color:#ff9800}
-.result-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+/* Guided prompt */
+.prompt{background:#2a2a2a;border-left:3px solid #d32f2f;padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
+.prompt-q{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:6px}
+.prompt-help{font-size:11px;color:#888;line-height:1.4}
 
-/* Disclaimer */
-.note{font-size:10px;color:#666;margin-top:10px;line-height:1.4;padding:8px;background:#1a1a1a;border-radius:6px}
-.note strong{color:#ff9800}
+/* Option buttons */
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.opt-btn{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s}
+.opt-btn:active{transform:scale(0.97)}
+.opt-btn.active{background:#d32f2f;border-color:#d32f2f}
+.opt-btn .opt-icon{font-size:20px;margin-bottom:3px}
+.opt-btn .opt-label{font-size:12px;font-weight:600;color:#ccc}
+.opt-btn.active .opt-label{color:#fff}
+.opt-btn .opt-note{font-size:9px;color:#888;margin-top:2px}
+.opt-btn.active .opt-note{color:rgba(255,255,255,.7)}
 
-/* Branch indicator */
-.branch-indent{margin-left:28px;border-left:2px dashed #2196f3;padding-left:12px;margin-top:0;margin-bottom:0}
-.branch-label{font-size:10px;color:#2196f3;font-weight:600;margin:4px 0 2px 28px;letter-spacing:0.5px}
+/* Input rows */
+.input-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}
+.input-group{flex:1}
+.input-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-weight:600}
+.input-field{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:10px;font-size:14px;width:100%}
+.input-field:focus{border-color:#d32f2f;outline:none}
+select.input-field{padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+
+/* Trunk map */
+.trunk-map{position:relative;padding:20px 0}
+.trunk-center{width:40px;height:40px;background:#d32f2f;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;position:relative;z-index:2}
+.trunk-arms{display:flex;justify-content:center;align-items:flex-start;margin-top:-20px;padding-top:20px}
+.trunk-arm{flex:1;padding:12px 8px 0;position:relative}
+.trunk-arm::before{content:'';position:absolute;top:0;width:2px;height:12px;background:#d32f2f}
+.trunk-arm.left::before{right:0}
+.trunk-arm.right::before{left:0}
+.trunk-arm-label{font-size:10px;color:#d32f2f;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.trunk-arm.left{text-align:right;border-right:2px solid #d32f2f}
+.trunk-arm.right{border-left:2px solid #d32f2f}
+.trunk-arm.left .trunk-arm-label{padding-right:8px}
+.trunk-arm.right .trunk-arm-label{padding-left:8px}
+
+/* Branch list */
+.branch-item{background:#2a2a2a;border:1px solid #3a3a3a;border-radius:6px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.branch-item:active{background:#333}
+.branch-num{width:22px;height:22px;background:#d32f2f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.branch-info{flex:1;min-width:0}
+.branch-name{font-size:12px;font-weight:600;color:#e0e0e0}
+.branch-detail{font-size:10px;color:#888}
+.branch-status{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;flex-shrink:0}
+.branch-status.pending{background:#333;color:#888}
+.branch-status.done{background:rgba(76,175,80,.15);color:#4caf50}
+.branch-status.active-run{background:rgba(211,47,47,.15);color:#d32f2f}
+
+/* Path steps */
+.path-step{display:flex;align-items:center;gap:8px;padding:6px 0;position:relative}
+.path-step-line{position:absolute;left:11px;top:30px;width:2px;height:calc(100% - 22px);background:#444;z-index:0}
+.path-step:last-child .path-step-line{display:none}
+.path-step-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;z-index:1}
+.path-step-dot.start{background:#d32f2f}
+.path-step-dot.duct{background:#555}
+.path-step-dot.fitting{background:#ff9800}
+.path-step-dot.end{background:#4caf50}
+.path-step-info{flex:1}
+.path-step-name{font-size:12px;font-weight:600}
+.path-step-detail{font-size:10px;color:#888}
+.path-step-eq{font-size:10px;color:#ff9800;font-weight:600;flex-shrink:0}
+
+/* Primary button */
+.btn-primary{background:#d32f2f;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-top:8px}
+.btn-primary:active{background:#b71c1c}
+.btn-primary:disabled{background:#555;color:#888;cursor:default}
+.btn-secondary{background:transparent;color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;padding:10px;font-size:13px;font-weight:600;width:100%;cursor:pointer;margin-top:8px}
+.btn-secondary:active{background:rgba(211,47,47,.1)}
+
+/* Results summary */
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.result-cell{background:#2a2a2a;border:1px solid #333;border-radius:8px;padding:8px;text-align:center}
+.result-val{font-size:16px;font-weight:700;font-family:'Courier New',monospace}
+.result-val.ok{color:#4caf50}
+.result-val.warn{color:#ff9800}
+.result-val.bad{color:#d32f2f}
+.result-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.3px;margin-top:2px}
+
+/* Quick add fitting row */
+.quick-fit{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.quick-fit-btn{background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:11px;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:4px}
+.quick-fit-btn:active{background:#d32f2f;border-color:#d32f2f;color:#fff}
+.quick-fit-btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* Info banner */
+.info-banner{background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.info-banner p{font-size:11px;color:#90caf9;line-height:1.5}
+.info-banner strong{color:#64b5f6}
+
+/* Wizard flow */
+.wizard-page{display:none}
+.wizard-page.active{display:block}
 </style>
 </head>
 <body>
 
-<h2>Path Builder Concept</h2>
-
-<!-- Step 1: Pick a template -->
-<div class="section">
-  <div class="section-title">1 — Start with a template</div>
-  <div class="template-grid" id="templates">
-    <div class="template-btn active" data-tpl="trunk-branch">
-      <div class="template-icon">📐</div>
-      <div class="template-label">Trunk → Branch</div>
-      <div class="template-desc">Basic supply run</div>
-    </div>
-    <div class="template-btn" data-tpl="trunk-wye">
-      <div class="template-icon">🔀</div>
-      <div class="template-label">Trunk → Wye Split</div>
-      <div class="template-desc">2 branches</div>
-    </div>
-    <div class="template-btn" data-tpl="return-simple">
-      <div class="template-icon">↩️</div>
-      <div class="template-label">Return Run</div>
-      <div class="template-desc">Grille to plenum</div>
-    </div>
-    <div class="template-btn" data-tpl="blank">
-      <div class="template-icon">✏️</div>
-      <div class="template-label">Blank</div>
-      <div class="template-desc">Build from scratch</div>
-    </div>
-  </div>
+<div class="hdr">
+  <div class="hdr-title">System Builder</div>
+  <div class="hdr-sub">Walk through your system step by step</div>
 </div>
 
-<!-- Step 2: Visual path -->
-<div class="section">
-  <div class="section-title">2 — Walk the run (tap to edit sizes)</div>
-  <div id="pathArea"></div>
-
-  <!-- Add next piece -->
-  <div class="add-next" id="addBtns">
-    <div class="add-btn" data-add="straight">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="21"/></svg>
-      Straight
-    </div>
-    <div class="add-btn" data-add="elbow">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10c0 4 4 4 8 4"/></svg>
-      Elbow
-    </div>
-    <div class="add-btn" data-add="wye">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="12"/><line x1="12" y1="12" x2="6" y2="21"/><line x1="12" y1="12" x2="18" y2="21"/></svg>
-      Wye
-    </div>
-    <div class="add-btn" data-add="register">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="14" width="16" height="6" rx="1"/><line x1="12" y1="4" x2="12" y2="14"/></svg>
-      Register
-    </div>
-  </div>
+<div class="steps" id="stepBar">
+  <div class="step-pill active" data-step="1">1. Layout</div>
+  <div class="step-pill" data-step="2">2. Trunks</div>
+  <div class="step-pill" data-step="3">3. Branches</div>
+  <div class="step-pill" data-step="4">4. Results</div>
 </div>
 
-<!-- Step 3: Results -->
-<div class="section">
-  <div class="section-title">3 — Run results (auto-calculated)</div>
-  <div class="results-bar">
-    <div class="result-box">
-      <div class="result-val red" id="rTEL">95</div>
-      <div class="result-label">Total EQ Len (ft)</div>
+<div class="content">
+
+<!-- ==================== STEP 1: SYSTEM LAYOUT ==================== -->
+<div class="wizard-page active" id="page1">
+  
+  <div class="prompt">
+    <div class="prompt-q">What does this system look like?</div>
+    <div class="prompt-help">Pick the layout that matches what you see. Most residential systems have a unit with trunks going out to branches that serve each room.</div>
+  </div>
+
+  <div class="opt-grid" id="layoutOpts">
+    <div class="opt-btn active" data-layout="LR" style="cursor:pointer">
+      <div class="opt-icon">↙️ ↘️</div>
+      <div class="opt-label">Left + Right</div>
+      <div class="opt-note">Trunk each direction</div>
     </div>
-    <div class="result-box">
-      <div class="result-val green" id="rFR">0.053</div>
-      <div class="result-label">Friction Rate</div>
+    <div class="opt-btn" data-layout="1SIDE" style="cursor:pointer">
+      <div class="opt-icon">➡️</div>
+      <div class="opt-label">One Direction</div>
+      <div class="opt-note">Single trunk run</div>
     </div>
-    <div class="result-box">
-      <div class="result-val yellow" id="rVel">785</div>
-      <div class="result-label">Velocity (FPM)</div>
+    <div class="opt-btn" data-layout="RADIAL" style="cursor:pointer">
+      <div class="opt-icon">✳️</div>
+      <div class="opt-label">Radial / Homerun</div>
+      <div class="opt-note">Branches from plenum</div>
+    </div>
+    <div class="opt-btn" data-layout="CUSTOM" style="cursor:pointer">
+      <div class="opt-icon">🔧</div>
+      <div class="opt-label">Custom</div>
+      <div class="opt-note">I'll set it up</div>
     </div>
   </div>
-  <div class="note"><strong>Concept demo only.</strong> In the real version, these calculate live as you edit sizes and lengths. Tap any piece in the path to change duct size, length, or fitting type.</div>
+
+  <div class="prompt" style="margin-top:8px">
+    <div class="prompt-q">What's the air path?</div>
+  </div>
+  <div class="opt-grid" id="airPathOpts">
+    <div class="opt-btn active" data-ap="supply" style="cursor:pointer">
+      <div class="opt-label">Supply</div>
+      <div class="opt-note">Air to rooms</div>
+    </div>
+    <div class="opt-btn" data-ap="return" style="cursor:pointer">
+      <div class="opt-label">Return</div>
+      <div class="opt-note">Air back to unit</div>
+    </div>
+  </div>
+
+  <div class="prompt" style="margin-top:8px">
+    <div class="prompt-q">What's the main duct material?</div>
+  </div>
+  <div class="opt-grid" id="matOpts">
+    <div class="opt-btn active" data-mat="metal" style="cursor:pointer">
+      <div class="opt-label">Hard Duct</div>
+      <div class="opt-note">Sheet metal / round</div>
+    </div>
+    <div class="opt-btn" data-mat="flex" style="cursor:pointer">
+      <div class="opt-label">Flex Duct</div>
+      <div class="opt-note">Insulated flex</div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="toStep2">Next: Set Up Trunks</button>
 </div>
+
+<!-- ==================== STEP 2: TRUNKS ==================== -->
+<div class="wizard-page" id="page2">
+  
+  <div class="info-banner">
+    <p><strong>You're mapping the trunks.</strong> A trunk is the main large duct coming off the plenum. Tell us the size and how far it runs before branches split off.</p>
+  </div>
+
+  <div id="trunkCards"></div>
+
+  <button class="btn-primary" id="toStep3">Next: Add Branches</button>
+  <button class="btn-secondary" id="backTo1">Back to Layout</button>
+</div>
+
+<!-- ==================== STEP 3: BRANCHES ==================== -->
+<div class="wizard-page" id="page3">
+
+  <div class="info-banner">
+    <p><strong>Now add each branch.</strong> A branch is a smaller duct that splits off the trunk and runs to a room. Tap each one to enter its details — size, length, fittings, and where it ends (boot/register type).</p>
+  </div>
+
+  <div id="branchArea"></div>
+
+  <button class="btn-secondary" id="addBranch" style="margin-bottom:8px">+ Add Another Branch</button>
+  <button class="btn-primary" id="toStep4">Calculate Results</button>
+  <button class="btn-secondary" id="backTo2">Back to Trunks</button>
+</div>
+
+<!-- ==================== STEP 4: RESULTS ==================== -->
+<div class="wizard-page" id="page4">
+
+  <div class="card">
+    <div class="card-title">System Summary</div>
+    <div id="systemSummary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Critical Path (longest run)</div>
+    <div id="critPath"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">All Runs</div>
+    <div id="allRuns"></div>
+  </div>
+
+  <button class="btn-secondary" id="backTo3">Back to Branches</button>
+</div>
+
+</div><!-- /content -->
 
 <script>
-// Templates define a starting path
-var TEMPLATES = {
-  'trunk-branch': [
-    {type:'start', name:'Plenum', detail:'Starting collar → 10″ trunk', dot:'P', size:'10'},
-    {type:'straight', name:'Trunk', detail:'15 ft straight', dot:'—', ft:15, size:'10'},
-    {type:'fitting', name:'90° Elbow', detail:'Smooth R/D=1.5 · +10 ft EQ', dot:'↱', eq:10},
-    {type:'straight', name:'Trunk continues', detail:'8 ft straight', dot:'—', ft:8, size:'10'},
-    {type:'fitting', name:'Reducer', detail:'10″ → 8″ · +5 ft EQ', dot:'▽', eq:5},
-    {type:'straight', name:'Branch', detail:'12 ft to register', dot:'—', ft:12, size:'8'},
-    {type:'end', name:'Floor Register', detail:'4×10 boot · +30 ft EQ', dot:'▣', eq:30},
-  ],
-  'trunk-wye': [
-    {type:'start', name:'Plenum', detail:'Starting collar → 10″ trunk', dot:'P', size:'10'},
-    {type:'straight', name:'Trunk', detail:'12 ft straight', dot:'—', ft:12, size:'10'},
-    {type:'fitting', name:'45° Wye', detail:'Equal split · +10 ft EQ', dot:'⑂', eq:10, branch:true},
-    {type:'straight', name:'Branch 1', detail:'10 ft · 8″ flex', dot:'—', ft:10, size:'8', branchSide:'left'},
-    {type:'end', name:'Ceiling Diffuser', detail:'Top entry · +10 ft EQ', dot:'▣', eq:10, branchSide:'left'},
-    {type:'straight', name:'Branch 2', detail:'14 ft · 8″ flex', dot:'—', ft:14, size:'8', branchSide:'right'},
-    {type:'end', name:'Ceiling Diffuser', detail:'Top entry · +10 ft EQ', dot:'▣', eq:10, branchSide:'right'},
-  ],
-  'return-simple': [
-    {type:'end', name:'Return Grille', detail:'20×20 flush · +5 ft EQ', dot:'▣', eq:5},
-    {type:'straight', name:'Return Trunk', detail:'18 ft · 14″ metal', dot:'—', ft:18, size:'14'},
-    {type:'fitting', name:'90° Elbow', detail:'Smooth · +10 ft EQ', dot:'↱', eq:10},
-    {type:'straight', name:'Return continues', detail:'6 ft to plenum', dot:'—', ft:6, size:'14'},
-    {type:'start', name:'Return Plenum', detail:'End at air handler', dot:'P'},
-  ],
-  'blank': [
-    {type:'start', name:'Start here', detail:'Tap edit to set starting point', dot:'P'},
-  ]
+// ============ STATE ============
+var SYS = {
+  layout: 'LR',
+  airPath: 'supply',
+  material: 'metal',
+  trunks: [],
+  branches: [],
+  activeBranch: -1
 };
 
-var currentTemplate = 'trunk-branch';
-
-function renderPath(tplKey) {
-  var path = TEMPLATES[tplKey];
-  var area = document.getElementById('pathArea');
-  var html = '';
-  var inBranch = null;
-
-  for (var i = 0; i < path.length; i++) {
-    var p = path[i];
-    var dotClass = 'path-dot';
-    if (p.type === 'fitting') dotClass += ' fitting';
-    if (p.type === 'end') dotClass += ' end';
-    if (p.branch) dotClass += ' branch';
-
-    // Branch labeling
-    if (p.branchSide && p.branchSide !== inBranch) {
-      if (inBranch) html += '</div>'; // close previous branch
-      html += '<div class="branch-label">↳ ' + (p.branchSide === 'left' ? 'Branch 1' : 'Branch 2') + '</div>';
-      html += '<div class="branch-indent">';
-      inBranch = p.branchSide;
-    } else if (!p.branchSide && inBranch) {
-      html += '</div>';
-      inBranch = null;
-    }
-
-    html += '<div class="path-node">';
-    html += '<div class="path-line"></div>';
-    html += '<div class="' + dotClass + '">' + (p.dot || '·') + '</div>';
-    html += '<div class="path-info">';
-    html += '<div class="path-name">' + p.name + '</div>';
-    html += '<div class="path-detail">' + p.detail + '</div>';
-    html += '</div>';
-    html += '<div class="path-edit" data-idx="' + i + '">Edit</div>';
-    html += '</div>';
-  }
-
-  if (inBranch) html += '</div>';
-  area.innerHTML = html;
-
-  // Calculate mock results
-  var tel = 0;
-  path.forEach(function(p) {
-    if (p.ft) tel += p.ft;
-    if (p.eq) tel += p.eq;
-    if (p.type === 'start') tel += 10; // starting collar
+// ============ OPTION GRID HELPER ============
+function setupOptGrid(containerId, stateKey, stateObj) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var btns = el.querySelectorAll('.opt-btn');
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var val = btn.dataset.layout || btn.dataset.ap || btn.dataset.mat;
+      if (btn.dataset.layout) stateObj.layout = val;
+      if (btn.dataset.ap) stateObj.airPath = val;
+      if (btn.dataset.mat) stateObj.material = val;
+    });
   });
-  document.getElementById('rTEL').textContent = tel;
-  var fr = tel > 0 ? (0.5 / tel * 100).toFixed(3) : '--';
-  document.getElementById('rFR').textContent = fr;
-  document.getElementById('rVel').textContent = tel > 0 ? Math.round(600 + Math.random() * 200) : '--';
 }
 
-// Template selection — direct listener on each button for iOS
-document.querySelectorAll('.template-btn').forEach(function(b) {
-  b.style.cursor = 'pointer';
-  b.addEventListener('click', function() {
-    document.querySelectorAll('.template-btn').forEach(function(x){ x.classList.remove('active'); });
-    b.classList.add('active');
-    currentTemplate = b.dataset.tpl;
-    renderPath(currentTemplate);
+setupOptGrid('layoutOpts', 'layout', SYS);
+setupOptGrid('airPathOpts', 'airPath', SYS);
+setupOptGrid('matOpts', 'material', SYS);
+
+// ============ STEP NAVIGATION ============
+var currentStep = 1;
+
+function goToStep(n) {
+  currentStep = n;
+  for (var i = 1; i <= 4; i++) {
+    var pg = document.getElementById('page' + i);
+    pg.classList.toggle('active', i === n);
+    var pill = document.querySelector('.step-pill[data-step="' + i + '"]');
+    pill.classList.remove('active', 'done');
+    if (i < n) pill.classList.add('done');
+    if (i === n) pill.classList.add('active');
+  }
+  window.scrollTo(0, 0);
+  if (n === 2) renderTrunks();
+  if (n === 3) renderBranches();
+  if (n === 4) renderResults();
+}
+
+// Step bar taps
+document.getElementById('stepBar').addEventListener('click', function(e) {
+  var pill = e.target.closest('.step-pill');
+  if (!pill) return;
+  var s = parseInt(pill.dataset.step);
+  if (s <= currentStep) goToStep(s);
+});
+
+// Nav buttons
+document.getElementById('toStep2').addEventListener('click', function() {
+  initTrunks();
+  goToStep(2);
+});
+document.getElementById('toStep3').addEventListener('click', function() {
+  saveTrunks();
+  initBranches();
+  goToStep(3);
+});
+document.getElementById('toStep4').addEventListener('click', function() { goToStep(4); });
+document.getElementById('backTo1').addEventListener('click', function() { goToStep(1); });
+document.getElementById('backTo2').addEventListener('click', function() { goToStep(2); });
+document.getElementById('backTo3').addEventListener('click', function() { goToStep(3); });
+
+// ============ STEP 2: TRUNKS ============
+function initTrunks() {
+  if (SYS.trunks.length > 0) return; // already set up
+  if (SYS.layout === 'LR') {
+    SYS.trunks = [
+      {label:'Left Trunk', size:'10', length:'15', elbows:0},
+      {label:'Right Trunk', size:'10', length:'15', elbows:0}
+    ];
+  } else if (SYS.layout === '1SIDE') {
+    SYS.trunks = [{label:'Main Trunk', size:'10', length:'25', elbows:0}];
+  } else if (SYS.layout === 'RADIAL') {
+    SYS.trunks = [{label:'Plenum (direct branches)', size:'--', length:'0', elbows:0}];
+  } else {
+    SYS.trunks = [{label:'Trunk 1', size:'10', length:'15', elbows:0}];
+  }
+}
+
+function renderTrunks() {
+  var html = '';
+  SYS.trunks.forEach(function(t, i) {
+    var isRadial = SYS.layout === 'RADIAL';
+    html += '<div class="card">';
+    html += '<div class="card-title">' + t.label + '</div>';
+    if (!isRadial) {
+      html += '<div class="input-row">';
+      html += '<div class="input-group"><div class="input-label">Duct Size</div><select class="input-field" data-trunk-size="' + i + '">';
+      var sizes = [6,7,8,9,10,12,14,16,18,20,22,24];
+      sizes.forEach(function(s) {
+        html += '<option value="' + s + '"' + (t.size == s ? ' selected' : '') + '>' + s + '"</option>';
+      });
+      html += '</select></div>';
+      html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + t.length + '" data-trunk-len="' + i + '" min="1" max="200" step="1"></div>';
+      html += '</div>';
+      html += '<div class="input-row">';
+      html += '<div class="input-group"><div class="input-label">90° Elbows in trunk</div><select class="input-field" data-trunk-elbow="' + i + '">';
+      for (var e = 0; e <= 6; e++) {
+        html += '<option value="' + e + '"' + (t.elbows == e ? ' selected' : '') + '>' + e + '</option>';
+      }
+      html += '</select></div>';
+      html += '<div class="input-group"></div>';
+      html += '</div>';
+      html += '<div class="prompt-help" style="margin-top:4px">Measure the trunk from the plenum start collar to where the first branch splits off. Include any 90° turns the trunk makes.</div>';
+    } else {
+      html += '<div class="card-desc">Radial / homerun systems have branches going directly from the plenum to each room. Skip trunk setup and go straight to branches.</div>';
+    }
+    html += '</div>';
   });
-});
+  document.getElementById('trunkCards').innerHTML = html;
+}
 
-// Edit tap — just flash for demo (delegated click)
-document.getElementById('pathArea').addEventListener('click', function(e) {
-  var editBtn = e.target.closest('.path-edit');
-  if (!editBtn) return;
-  editBtn.textContent = 'Done';
-  editBtn.style.background = '#d32f2f';
-  editBtn.style.color = '#fff';
-  setTimeout(function() {
-    editBtn.textContent = 'Edit';
-    editBtn.style.background = '';
-    editBtn.style.color = '';
-  }, 800);
-});
+function saveTrunks() {
+  SYS.trunks.forEach(function(t, i) {
+    var sizeEl = document.querySelector('[data-trunk-size="' + i + '"]');
+    var lenEl = document.querySelector('[data-trunk-len="' + i + '"]');
+    var elbEl = document.querySelector('[data-trunk-elbow="' + i + '"]');
+    if (sizeEl) t.size = sizeEl.value;
+    if (lenEl) t.length = lenEl.value;
+    if (elbEl) t.elbows = parseInt(elbEl.value) || 0;
+  });
+}
 
-// Add buttons — delegated click
-document.getElementById('addBtns').addEventListener('click', function(e) {
-  var btn = e.target.closest('.add-btn');
-  if (!btn) return;
-  var type = btn.dataset.add;
-  var path = TEMPLATES[currentTemplate];
-  var newStep;
-  if (type === 'straight') newStep = {type:'straight', name:'Straight Duct', detail:'? ft, tap Edit to set', dot:'\u2014', ft:10};
-  else if (type === 'elbow') newStep = {type:'fitting', name:'90 Elbow', detail:'+10 ft EQ', dot:'\u21b1', eq:10};
-  else if (type === 'wye') newStep = {type:'fitting', name:'45 Wye', detail:'+10 ft EQ', dot:'Y', eq:10, branch:true};
-  else if (type === 'register') newStep = {type:'end', name:'Register/Diffuser', detail:'Tap Edit to pick type', dot:'R', eq:30};
-  if (newStep) {
-    path.push(newStep);
-    renderPath(currentTemplate);
+// ============ STEP 3: BRANCHES ============
+function initBranches() {
+  if (SYS.branches.length > 0) return;
+  // Pre-populate based on layout
+  var branchCount = SYS.layout === 'LR' ? 8 : (SYS.layout === '1SIDE' ? 4 : 4);
+  var perTrunk = SYS.trunks.length > 1 ? Math.ceil(branchCount / SYS.trunks.length) : branchCount;
+  
+  SYS.branches = [];
+  var num = 1;
+  SYS.trunks.forEach(function(trunk, ti) {
+    var count = ti === 0 ? perTrunk : branchCount - perTrunk;
+    for (var b = 0; b < count; b++) {
+      SYS.branches.push({
+        trunkIdx: ti,
+        num: num,
+        room: 'Room ' + num,
+        size: '6',
+        length: '12',
+        elbows: 1,
+        bootType: '90boot',
+        reducerFrom: trunk.size,
+        done: false
+      });
+      num++;
+    }
+  });
+}
+
+function renderBranches() {
+  var html = '';
+  var lastTrunk = -1;
+  
+  SYS.branches.forEach(function(br, i) {
+    if (br.trunkIdx !== lastTrunk) {
+      if (lastTrunk >= 0) html += '</div>'; // close prev group
+      var trunk = SYS.trunks[br.trunkIdx];
+      html += '<div class="card-title" style="margin:12px 0 8px;font-size:12px;color:#d32f2f">';
+      html += '↳ Off ' + trunk.label + ' (' + trunk.size + '″)';
+      html += '</div><div>';
+      lastTrunk = br.trunkIdx;
+    }
+    
+    var statusClass = br.done ? 'done' : (SYS.activeBranch === i ? 'active-run' : 'pending');
+    var statusText = br.done ? 'Done' : (SYS.activeBranch === i ? 'Editing' : 'Tap to edit');
+    
+    html += '<div class="branch-item" data-branch="' + i + '">';
+    html += '<div class="branch-num">' + br.num + '</div>';
+    html += '<div class="branch-info">';
+    html += '<div class="branch-name">' + br.room + '</div>';
+    html += '<div class="branch-detail">' + br.size + '″ · ' + br.length + ' ft · ' + br.elbows + ' elbow' + (br.elbows !== 1 ? 's' : '') + '</div>';
+    html += '</div>';
+    html += '<div class="branch-status ' + statusClass + '">' + statusText + '</div>';
+    html += '</div>';
+    
+    // Expanded edit form
+    if (SYS.activeBranch === i) {
+      html += '<div class="card" style="margin:6px 0 10px;border-color:#d32f2f">';
+      html += '<div class="input-row">';
+      html += '<div class="input-group"><div class="input-label">Room Name</div><input type="text" class="input-field" value="' + br.room + '" data-br-room="' + i + '"></div>';
+      html += '</div>';
+      html += '<div class="input-row">';
+      html += '<div class="input-group"><div class="input-label">Branch Size</div><select class="input-field" data-br-size="' + i + '">';
+      [5,6,7,8,9,10,12,14].forEach(function(s) {
+        html += '<option value="' + s + '"' + (br.size == s ? ' selected' : '') + '>' + s + '″</option>';
+      });
+      html += '</select></div>';
+      html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + br.length + '" data-br-len="' + i + '" min="1" max="200"></div>';
+      html += '</div>';
+      html += '<div class="input-row">';
+      html += '<div class="input-group"><div class="input-label">90° Elbows</div><select class="input-field" data-br-elbow="' + i + '">';
+      for (var e = 0; e <= 6; e++) {
+        html += '<option value="' + e + '"' + (br.elbows == e ? ' selected' : '') + '>' + e + '</option>';
+      }
+      html += '</select></div>';
+      html += '<div class="input-group"><div class="input-label">Ends At</div><select class="input-field" data-br-boot="' + i + '">';
+      html += '<option value="90boot"' + (br.bootType === '90boot' ? ' selected' : '') + '>90° Boot (common)</option>';
+      html += '<option value="straightboot"' + (br.bootType === 'straightboot' ? ' selected' : '') + '>Straight Boot</option>';
+      html += '<option value="ceilTop"' + (br.bootType === 'ceilTop' ? ' selected' : '') + '>Ceiling Diff (top)</option>';
+      html += '<option value="ceilSide"' + (br.bootType === 'ceilSide' ? ' selected' : '') + '>Ceiling Diff (side)</option>';
+      html += '<option value="floorReg"' + (br.bootType === 'floorReg' ? ' selected' : '') + '>Floor Register</option>';
+      html += '<option value="wallReg"' + (br.bootType === 'wallReg' ? ' selected' : '') + '>Wall Register</option>';
+      html += '</select></div>';
+      html += '</div>';
+      html += '<button class="btn-primary" data-br-save="' + i + '">Save Branch ' + br.num + '</button>';
+      html += '</div>';
+    }
+  });
+  if (lastTrunk >= 0) html += '</div>';
+  
+  document.getElementById('branchArea').innerHTML = html;
+}
+
+// Branch interactions
+document.getElementById('branchArea').addEventListener('click', function(e) {
+  var saveBtn = e.target.closest('[data-br-save]');
+  if (saveBtn) {
+    var idx = parseInt(saveBtn.dataset.brSave);
+    saveBranchForm(idx);
+    SYS.branches[idx].done = true;
+    SYS.activeBranch = -1;
+    renderBranches();
+    return;
+  }
+  var item = e.target.closest('.branch-item');
+  if (item) {
+    var idx2 = parseInt(item.dataset.branch);
+    // Save current if open
+    if (SYS.activeBranch >= 0 && SYS.activeBranch !== idx2) saveBranchForm(SYS.activeBranch);
+    SYS.activeBranch = SYS.activeBranch === idx2 ? -1 : idx2;
+    renderBranches();
   }
 });
 
-// Init
-renderPath('trunk-branch');
+function saveBranchForm(idx) {
+  var br = SYS.branches[idx];
+  var roomEl = document.querySelector('[data-br-room="' + idx + '"]');
+  var sizeEl = document.querySelector('[data-br-size="' + idx + '"]');
+  var lenEl = document.querySelector('[data-br-len="' + idx + '"]');
+  var elbEl = document.querySelector('[data-br-elbow="' + idx + '"]');
+  var bootEl = document.querySelector('[data-br-boot="' + idx + '"]');
+  if (roomEl) br.room = roomEl.value;
+  if (sizeEl) br.size = sizeEl.value;
+  if (lenEl) br.length = lenEl.value;
+  if (elbEl) br.elbows = parseInt(elbEl.value) || 0;
+  if (bootEl) br.bootType = bootEl.value;
+}
+
+// Add branch
+document.getElementById('addBranch').addEventListener('click', function() {
+  var lastTrunk = SYS.branches.length > 0 ? SYS.branches[SYS.branches.length - 1].trunkIdx : 0;
+  var num = SYS.branches.length + 1;
+  SYS.branches.push({
+    trunkIdx: lastTrunk,
+    num: num,
+    room: 'Room ' + num,
+    size: '6',
+    length: '12',
+    elbows: 1,
+    bootType: '90boot',
+    reducerFrom: SYS.trunks[lastTrunk] ? SYS.trunks[lastTrunk].size : '10',
+    done: false
+  });
+  SYS.activeBranch = SYS.branches.length - 1;
+  renderBranches();
+});
+
+// ============ STEP 4: RESULTS ============
+var BOOT_EQ = {
+  '90boot': {name: '90° Boot', eq: 55},
+  'straightboot': {name: 'Straight Boot', eq: 35},
+  'ceilTop': {name: 'Ceiling Diffuser (top)', eq: 10},
+  'ceilSide': {name: 'Ceiling Diffuser (side)', eq: 40},
+  'floorReg': {name: 'Floor Register', eq: 35},
+  'wallReg': {name: 'Wall Register', eq: 40}
+};
+
+function calcBranch(br, trunk) {
+  var tel = 0;
+  // Starting collar
+  tel += 10;
+  // Trunk: straight + elbows
+  var tLen = parseFloat(trunk.length) || 0;
+  var tElb = trunk.elbows || 0;
+  tel += tLen + (tElb * 10);
+  // Reducer from trunk to branch
+  if (trunk.size !== br.size && trunk.size !== '--') tel += 5;
+  // Branch: straight + elbows
+  tel += (parseFloat(br.length) || 0) + (br.elbows * 10);
+  // Boot/register
+  var boot = BOOT_EQ[br.bootType] || {eq: 35};
+  tel += boot.eq;
+  
+  return {tel: tel, boot: boot};
+}
+
+function renderResults() {
+  var runs = [];
+  var maxTEL = 0;
+  var critIdx = -1;
+
+  SYS.branches.forEach(function(br, i) {
+    var trunk = SYS.trunks[br.trunkIdx] || SYS.trunks[0];
+    var result = calcBranch(br, trunk);
+    runs.push({branch: br, trunk: trunk, tel: result.tel, boot: result.boot});
+    if (result.tel > maxTEL) { maxTEL = result.tel; critIdx = i; }
+  });
+
+  // System summary
+  var asp = 0.5; // placeholder
+  var critFR = maxTEL > 0 ? (asp / maxTEL * 100) : 0;
+  var totalBranches = SYS.branches.length;
+
+  var sumHTML = '<div class="results-grid">';
+  sumHTML += '<div class="result-cell"><div class="result-val">' + totalBranches + '</div><div class="result-label">Branches</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val">' + SYS.trunks.length + '</div><div class="result-label">Trunks</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val ' + (critFR <= 0.06 ? 'ok' : critFR <= 0.08 ? 'warn' : 'bad') + '">' + critFR.toFixed(3) + '</div><div class="result-label">Friction Rate</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val ' + (maxTEL > 200 ? 'bad' : 'ok') + '">' + Math.round(maxTEL) + ' ft</div><div class="result-label">Longest TEL</div></div>';
+  sumHTML += '</div>';
+  document.getElementById('systemSummary').innerHTML = sumHTML;
+
+  // Critical path detail
+  if (critIdx >= 0) {
+    var cr = runs[critIdx];
+    var cpHTML = '<div style="margin-bottom:8px;font-size:12px;color:#ff9800;font-weight:600">';
+    cpHTML += 'Branch ' + cr.branch.num + ' — ' + cr.branch.room + ' (' + Math.round(cr.tel) + ' ft TEL)';
+    cpHTML += '</div>';
+    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot start">P</div><div class="path-step-info"><div class="path-step-name">Start Collar</div><div class="path-step-detail">Plenum to ' + cr.trunk.size + '″ trunk</div></div><div class="path-step-eq">+10 ft</div></div>';
+    var trunkTEL = parseFloat(cr.trunk.length) + (cr.trunk.elbows * 10);
+    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot duct">—</div><div class="path-step-info"><div class="path-step-name">' + cr.trunk.label + '</div><div class="path-step-detail">' + cr.trunk.length + ' ft + ' + cr.trunk.elbows + ' elbows</div></div><div class="path-step-eq">+' + Math.round(trunkTEL) + ' ft</div></div>';
+    if (cr.trunk.size !== cr.branch.size) {
+      cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot fitting">R</div><div class="path-step-info"><div class="path-step-name">Reducer</div><div class="path-step-detail">' + cr.trunk.size + '″ → ' + cr.branch.size + '″</div></div><div class="path-step-eq">+5 ft</div></div>';
+    }
+    var brTEL = parseFloat(cr.branch.length) + (cr.branch.elbows * 10);
+    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot duct">—</div><div class="path-step-info"><div class="path-step-name">Branch to ' + cr.branch.room + '</div><div class="path-step-detail">' + cr.branch.length + ' ft + ' + cr.branch.elbows + ' elbow(s)</div></div><div class="path-step-eq">+' + Math.round(brTEL) + ' ft</div></div>';
+    cpHTML += '<div class="path-step"><div class="path-step-dot end">E</div><div class="path-step-info"><div class="path-step-name">' + cr.boot.name + '</div><div class="path-step-detail">End of run</div></div><div class="path-step-eq">+' + cr.boot.eq + ' ft</div></div>';
+    document.getElementById('critPath').innerHTML = cpHTML;
+  }
+
+  // All runs table
+  var arHTML = '';
+  runs.forEach(function(r) {
+    var isCrit = r.tel === maxTEL;
+    arHTML += '<div class="branch-item" style="cursor:default' + (isCrit ? ';border-color:#ff9800' : '') + '">';
+    arHTML += '<div class="branch-num" style="' + (isCrit ? 'background:#ff9800' : '') + '">' + r.branch.num + '</div>';
+    arHTML += '<div class="branch-info">';
+    arHTML += '<div class="branch-name">' + r.branch.room + '</div>';
+    arHTML += '<div class="branch-detail">' + r.branch.size + '″ · ' + Math.round(r.tel) + ' ft TEL' + (isCrit ? ' · CRITICAL' : '') + '</div>';
+    arHTML += '</div>';
+    var fr = r.tel > 0 ? (asp / r.tel * 100) : 0;
+    var frClass = fr <= 0.06 ? 'ok' : fr <= 0.08 ? 'warn' : 'bad';
+    arHTML += '<div class="result-val ' + frClass + '" style="font-size:13px">' + fr.toFixed(3) + '</div>';
+    arHTML += '</div>';
+  });
+  document.getElementById('allRuns').innerHTML = arHTML;
+}
+
 </script>
 </body>
 </html>
