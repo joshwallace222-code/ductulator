@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Path Builder Concept</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a1a;color:#e0e0e0;font-family:-apple-system,system-ui,sans-serif;padding:12px;max-width:420px;margin:0 auto}
+h2{color:#d32f2f;font-size:15px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700}
+.section{background:#222;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:14px}
+.section-title{color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:600}
+
+/* Templates */
+.template-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.template-btn{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s}
+.template-btn:active{background:#d32f2f;border-color:#d32f2f;transform:scale(0.97)}
+.template-btn.active{background:#d32f2f;border-color:#d32f2f}
+.template-icon{font-size:22px;margin-bottom:4px}
+.template-label{font-size:11px;font-weight:600;color:#ccc}
+.template-btn.active .template-label{color:#fff}
+.template-desc{font-size:9px;color:#888;margin-top:2px}
+.template-btn.active .template-desc{color:rgba(255,255,255,0.7)}
+
+/* Visual Path */
+.path-container{position:relative;padding:8px 0}
+.path-node{display:flex;align-items:center;gap:10px;padding:8px 0;position:relative}
+.path-dot{width:28px;height:28px;border-radius:50%;background:#d32f2f;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;z-index:2;position:relative}
+.path-dot.fitting{background:#ff9800}
+.path-dot.end{background:#4caf50}
+.path-dot.branch{background:#2196f3}
+.path-line{position:absolute;left:13px;top:36px;width:2px;height:calc(100% - 28px);background:#555;z-index:1}
+.path-node:last-child .path-line{display:none}
+.path-info{flex:1;min-width:0}
+.path-name{font-size:13px;font-weight:600;color:#e0e0e0}
+.path-detail{font-size:11px;color:#888;margin-top:1px}
+.path-edit{font-size:11px;color:#d32f2f;cursor:pointer;padding:4px 8px;border:1px solid #d32f2f;border-radius:4px;flex-shrink:0}
+.path-edit:active{background:#d32f2f;color:#fff}
+
+/* Inline edit row */
+.edit-row{display:flex;gap:6px;margin-top:6px;align-items:center}
+.edit-input{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:6px 8px;font-size:13px;width:60px;text-align:center}
+.edit-label{font-size:10px;color:#888}
+.edit-select{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:6px 8px;font-size:12px;flex:1;-webkit-appearance:none;appearance:none}
+
+/* Add next piece */
+.add-next{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.add-btn{background:#2a2a2a;border:1px dashed #555;border-radius:8px;padding:8px 10px;font-size:11px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
+.add-btn:active{background:#333;border-color:#d32f2f;color:#d32f2f}
+.add-btn svg{width:14px;height:14px}
+
+/* Results bar */
+.results-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.result-box{background:#2a2a2a;border:1px solid #333;border-radius:8px;padding:8px;text-align:center}
+.result-val{font-size:18px;font-weight:700;font-family:'Courier New',monospace}
+.result-val.red{color:#d32f2f}
+.result-val.green{color:#4caf50}
+.result-val.yellow{color:#ff9800}
+.result-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+
+/* Disclaimer */
+.note{font-size:10px;color:#666;margin-top:10px;line-height:1.4;padding:8px;background:#1a1a1a;border-radius:6px}
+.note strong{color:#ff9800}
+
+/* Branch indicator */
+.branch-indent{margin-left:28px;border-left:2px dashed #2196f3;padding-left:12px;margin-top:0;margin-bottom:0}
+.branch-label{font-size:10px;color:#2196f3;font-weight:600;margin:4px 0 2px 28px;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+
+<h2>Path Builder Concept</h2>
+
+<!-- Step 1: Pick a template -->
+<div class="section">
+  <div class="section-title">1 — Start with a template</div>
+  <div class="template-grid" id="templates">
+    <div class="template-btn active" data-tpl="trunk-branch">
+      <div class="template-icon">📐</div>
+      <div class="template-label">Trunk → Branch</div>
+      <div class="template-desc">Basic supply run</div>
+    </div>
+    <div class="template-btn" data-tpl="trunk-wye">
+      <div class="template-icon">🔀</div>
+      <div class="template-label">Trunk → Wye Split</div>
+      <div class="template-desc">2 branches</div>
+    </div>
+    <div class="template-btn" data-tpl="return-simple">
+      <div class="template-icon">↩️</div>
+      <div class="template-label">Return Run</div>
+      <div class="template-desc">Grille to plenum</div>
+    </div>
+    <div class="template-btn" data-tpl="blank">
+      <div class="template-icon">✏️</div>
+      <div class="template-label">Blank</div>
+      <div class="template-desc">Build from scratch</div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Visual path -->
+<div class="section">
+  <div class="section-title">2 — Walk the run (tap to edit sizes)</div>
+  <div id="pathArea"></div>
+
+  <!-- Add next piece -->
+  <div class="add-next" id="addBtns">
+    <div class="add-btn" data-add="straight">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      Straight
+    </div>
+    <div class="add-btn" data-add="elbow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10c0 4 4 4 8 4"/></svg>
+      Elbow
+    </div>
+    <div class="add-btn" data-add="wye">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="12"/><line x1="12" y1="12" x2="6" y2="21"/><line x1="12" y1="12" x2="18" y2="21"/></svg>
+      Wye
+    </div>
+    <div class="add-btn" data-add="register">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="14" width="16" height="6" rx="1"/><line x1="12" y1="4" x2="12" y2="14"/></svg>
+      Register
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Results -->
+<div class="section">
+  <div class="section-title">3 — Run results (auto-calculated)</div>
+  <div class="results-bar">
+    <div class="result-box">
+      <div class="result-val red" id="rTEL">95</div>
+      <div class="result-label">Total EQ Len (ft)</div>
+    </div>
+    <div class="result-box">
+      <div class="result-val green" id="rFR">0.053</div>
+      <div class="result-label">Friction Rate</div>
+    </div>
+    <div class="result-box">
+      <div class="result-val yellow" id="rVel">785</div>
+      <div class="result-label">Velocity (FPM)</div>
+    </div>
+  </div>
+  <div class="note"><strong>Concept demo only.</strong> In the real version, these calculate live as you edit sizes and lengths. Tap any piece in the path to change duct size, length, or fitting type.</div>
+</div>
+
+<script>
+// Templates define a starting path
+var TEMPLATES = {
+  'trunk-branch': [
+    {type:'start', name:'Plenum', detail:'Starting collar → 10″ trunk', dot:'P', size:'10'},
+    {type:'straight', name:'Trunk', detail:'15 ft straight', dot:'—', ft:15, size:'10'},
+    {type:'fitting', name:'90° Elbow', detail:'Smooth R/D=1.5 · +10 ft EQ', dot:'↱', eq:10},
+    {type:'straight', name:'Trunk continues', detail:'8 ft straight', dot:'—', ft:8, size:'10'},
+    {type:'fitting', name:'Reducer', detail:'10″ → 8″ · +5 ft EQ', dot:'▽', eq:5},
+    {type:'straight', name:'Branch', detail:'12 ft to register', dot:'—', ft:12, size:'8'},
+    {type:'end', name:'Floor Register', detail:'4×10 boot · +30 ft EQ', dot:'▣', eq:30},
+  ],
+  'trunk-wye': [
+    {type:'start', name:'Plenum', detail:'Starting collar → 10″ trunk', dot:'P', size:'10'},
+    {type:'straight', name:'Trunk', detail:'12 ft straight', dot:'—', ft:12, size:'10'},
+    {type:'fitting', name:'45° Wye', detail:'Equal split · +10 ft EQ', dot:'⑂', eq:10, branch:true},
+    {type:'straight', name:'Branch 1', detail:'10 ft · 8″ flex', dot:'—', ft:10, size:'8', branchSide:'left'},
+    {type:'end', name:'Ceiling Diffuser', detail:'Top entry · +10 ft EQ', dot:'▣', eq:10, branchSide:'left'},
+    {type:'straight', name:'Branch 2', detail:'14 ft · 8″ flex', dot:'—', ft:14, size:'8', branchSide:'right'},
+    {type:'end', name:'Ceiling Diffuser', detail:'Top entry · +10 ft EQ', dot:'▣', eq:10, branchSide:'right'},
+  ],
+  'return-simple': [
+    {type:'end', name:'Return Grille', detail:'20×20 flush · +5 ft EQ', dot:'▣', eq:5},
+    {type:'straight', name:'Return Trunk', detail:'18 ft · 14″ metal', dot:'—', ft:18, size:'14'},
+    {type:'fitting', name:'90° Elbow', detail:'Smooth · +10 ft EQ', dot:'↱', eq:10},
+    {type:'straight', name:'Return continues', detail:'6 ft to plenum', dot:'—', ft:6, size:'14'},
+    {type:'start', name:'Return Plenum', detail:'End at air handler', dot:'P'},
+  ],
+  'blank': [
+    {type:'start', name:'Start here', detail:'Tap edit to set starting point', dot:'P'},
+  ]
+};
+
+var currentTemplate = 'trunk-branch';
+
+function renderPath(tplKey) {
+  var path = TEMPLATES[tplKey];
+  var area = document.getElementById('pathArea');
+  var html = '';
+  var inBranch = null;
+
+  for (var i = 0; i < path.length; i++) {
+    var p = path[i];
+    var dotClass = 'path-dot';
+    if (p.type === 'fitting') dotClass += ' fitting';
+    if (p.type === 'end') dotClass += ' end';
+    if (p.branch) dotClass += ' branch';
+
+    // Branch labeling
+    if (p.branchSide && p.branchSide !== inBranch) {
+      if (inBranch) html += '</div>'; // close previous branch
+      html += '<div class="branch-label">↳ ' + (p.branchSide === 'left' ? 'Branch 1' : 'Branch 2') + '</div>';
+      html += '<div class="branch-indent">';
+      inBranch = p.branchSide;
+    } else if (!p.branchSide && inBranch) {
+      html += '</div>';
+      inBranch = null;
+    }
+
+    html += '<div class="path-node">';
+    html += '<div class="path-line"></div>';
+    html += '<div class="' + dotClass + '">' + (p.dot || '·') + '</div>';
+    html += '<div class="path-info">';
+    html += '<div class="path-name">' + p.name + '</div>';
+    html += '<div class="path-detail">' + p.detail + '</div>';
+    html += '</div>';
+    html += '<div class="path-edit" data-idx="' + i + '">Edit</div>';
+    html += '</div>';
+  }
+
+  if (inBranch) html += '</div>';
+  area.innerHTML = html;
+
+  // Calculate mock results
+  var tel = 0;
+  path.forEach(function(p) {
+    if (p.ft) tel += p.ft;
+    if (p.eq) tel += p.eq;
+    if (p.type === 'start') tel += 10; // starting collar
+  });
+  document.getElementById('rTEL').textContent = tel;
+  var fr = tel > 0 ? (0.5 / tel * 100).toFixed(3) : '--';
+  document.getElementById('rFR').textContent = fr;
+  document.getElementById('rVel').textContent = tel > 0 ? Math.round(600 + Math.random() * 200) : '--';
+}
+
+// Template selection — direct listener on each button for iOS
+document.querySelectorAll('.template-btn').forEach(function(b) {
+  b.style.cursor = 'pointer';
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.template-btn').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    currentTemplate = b.dataset.tpl;
+    renderPath(currentTemplate);
+  });
+});
+
+// Edit tap — just flash for demo (delegated click)
+document.getElementById('pathArea').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('.path-edit');
+  if (!editBtn) return;
+  editBtn.textContent = 'Done';
+  editBtn.style.background = '#d32f2f';
+  editBtn.style.color = '#fff';
+  setTimeout(function() {
+    editBtn.textContent = 'Edit';
+    editBtn.style.background = '';
+    editBtn.style.color = '';
+  }, 800);
+});
+
+// Add buttons — delegated click
+document.getElementById('addBtns').addEventListener('click', function(e) {
+  var btn = e.target.closest('.add-btn');
+  if (!btn) return;
+  var type = btn.dataset.add;
+  var path = TEMPLATES[currentTemplate];
+  var newStep;
+  if (type === 'straight') newStep = {type:'straight', name:'Straight Duct', detail:'? ft, tap Edit to set', dot:'\u2014', ft:10};
+  else if (type === 'elbow') newStep = {type:'fitting', name:'90 Elbow', detail:'+10 ft EQ', dot:'\u21b1', eq:10};
+  else if (type === 'wye') newStep = {type:'fitting', name:'45 Wye', detail:'+10 ft EQ', dot:'Y', eq:10, branch:true};
+  else if (type === 'register') newStep = {type:'end', name:'Register/Diffuser', detail:'Tap Edit to pick type', dot:'R', eq:30};
+  if (newStep) {
+    path.push(newStep);
+    renderPath(currentTemplate);
+  }
+});
+
+// Init
+renderPath('trunk-branch');
+</script>
+</body>
+</html>
