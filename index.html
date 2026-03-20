@@ -2355,6 +2355,9 @@ footer a:hover { color: var(--text-muted); }
   margin-bottom: 10px;
 }
 
+
+/* ===== RETURN PLENUM ===== */
+.ret-plenum-title { color: var(--orange); }
 /* ===== FILTER WARNING BANNERS ===== */
 .filter-warning-banner {
   display: flex;
@@ -3128,6 +3131,91 @@ footer a:hover { color: var(--text-muted); }
           <button class="add-fitting-btn" id="addCollarBtn" style="padding:8px 12px">+ Collar</button>
         </div>
         <div class="collar-chips" id="collarChips"><span style="font-size:10px;color:var(--text-dim)">No collars</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return Plenum + Filter (collapsible) -->
+  <div class="panel">
+    <div class="section-toggle" data-sys-toggle="retplenum">
+      <div class="panel-title" style="margin-bottom:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Return Plenum &amp; Filter
+      </div>
+      <span class="toggle-arrow">&#9660;</span>
+    </div>
+    <div class="section-body" id="sysRetPlBody">
+      <div class="plenum-grid" style="margin-top:8px">
+        <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlLen" value="48" min="6" max="120" step="1"></div>
+        <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="retPlWid" value="20" min="4" max="48" step="1"></div>
+        <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="retPlHt" value="8" min="4" max="24" step="1"></div>
+      </div>
+
+      <!-- System-level Filter Selection -->
+      <div class="filter-inline-panel" style="margin-top:10px">
+        <div class="filter-inline-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          System Filter at Return
+        </div>
+        <div class="filter-toggle-row">
+          <span class="filter-toggle-label">Filter Installed</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="sysRetFilterToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="sysRetFilterConfig" style="display:none">
+          <div class="filter-select-row">
+            <div>
+              <label class="config-label">Manufacturer</label>
+              <select class="input-field" id="sysRetFilterMfg" style="width:100%">
+                <option value="aprilaire">Aprilaire</option>
+                <option value="honeywell">Honeywell</option>
+                <option value="lennox">Lennox</option>
+                <option value="carrier">Carrier</option>
+                <option value="generic" selected>Generic</option>
+              </select>
+            </div>
+            <div>
+              <label class="config-label">Model / MERV</label>
+              <select class="input-field" id="sysRetFilterModel" style="width:100%"></select>
+            </div>
+          </div>
+          <div class="filter-select-row" style="margin-top:6px">
+            <div>
+              <label class="config-label">Filter Grille / Rack Size</label>
+              <select class="input-field" id="sysRetFilterGrille" style="width:100%">
+                <option value="12x24">12&times;24</option>
+                <option value="14x20">14&times;20</option>
+                <option value="14x25">14&times;25</option>
+                <option value="16x20">16&times;20</option>
+                <option value="16x25">16&times;25</option>
+                <option value="20x20" selected>20&times;20</option>
+                <option value="20x25">20&times;25</option>
+                <option value="20x30">20&times;30</option>
+                <option value="24x24">24&times;24</option>
+                <option value="24x30">24&times;30</option>
+                <option value="25x25">25&times;25</option>
+              </select>
+            </div>
+            <div>
+              <label class="config-label">System CFM</label>
+              <input type="number" class="input-field" id="sysRetFilterCFM" value="1200" min="200" max="5000" step="50" style="width:100%">
+            </div>
+          </div>
+          <!-- Filter Results Display -->
+          <div id="sysRetFilterResults" class="filter-inline-grid" style="margin-top:8px"></div>
+          <div id="sysRetFilterWarn" style="display:none"></div>
+          <!-- Filter Impact on System -->
+          <div id="sysRetFilterImpact" class="filter-impact-card" style="display:none">
+            <div class="filter-impact-title">&#x2692; System Impact</div>
+            <div class="filter-impact-row"><span class="filter-impact-label">Filter PD</span><span class="filter-impact-value" id="sysRetFiltPD">--</span></div>
+            <div class="filter-impact-row"><span class="filter-impact-label">Face Velocity</span><span class="filter-impact-value" id="sysRetFiltVel">--</span></div>
+            <div class="filter-impact-row"><span class="filter-impact-label">Total ASP</span><span class="filter-impact-value" id="sysRetTotalASP">--</span></div>
+            <div class="filter-impact-row"><span class="filter-impact-label">ASP After Filter</span><span class="filter-impact-value" id="sysRetEffASP">--</span></div>
+            <div class="filter-impact-row"><span class="filter-impact-label">Suggested FR (return)</span><span class="filter-impact-value" id="sysRetSugFR">--</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -3989,8 +4077,12 @@ function calcSystem() {
       return;
     }
 
-    // If this return run has a filter, estimate filter PD first, then iterate
+    // System-level return plenum filter PD (applies to ALL return runs)
     var effectiveASP = r.asp;
+    if (r.airPath === 'return' && sysRetFilterState.enabled && sysRetFilterState.filterPD > 0) {
+      effectiveASP = Math.max(0.01, effectiveASP - sysRetFilterState.filterPD);
+    }
+    // Per-run filter (individual filter grille on this run)
     if (r.hasFilter) {
       // Pre-estimate filter PD from rated values for initial pass
       var fModels0 = FILTER_DB[r.filterMfg] || [];
@@ -4818,7 +4910,7 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
   if (crm) { SS.collars.splice(parseInt(crm.dataset.colRm),1); renderCollars(); return; }
   // Section toggle
   const tog = t.closest('[data-sys-toggle]');
-  if (tog) { const key=tog.dataset.sysToggle; const bodies={plenum:'sysPlBody',cfmest:'cfmEstBody',branchtree:'branchTreeBody'}; const b=document.getElementById(bodies[key]); if(b){b.classList.toggle('collapsed');tog.classList.toggle('collapsed');} return; }
+  if (tog) { const key=tog.dataset.sysToggle; const bodies={plenum:'sysPlBody',retplenum:'sysRetPlBody',cfmest:'cfmEstBody',branchtree:'branchTreeBody'}; const b=document.getElementById(bodies[key]); if(b){b.classList.toggle('collapsed');tog.classList.toggle('collapsed');} return; }
   // Go to run from summary
   const go = t.closest('[data-goto]');
   if (go) { saveRunFromDOM(); SS.activeRun=parseInt(go.dataset.goto); SS.addMode=null; renderRunArea(); calcSystem(); document.getElementById('sysRunArea').scrollIntoView({behavior:'smooth'}); return; }
@@ -4869,6 +4961,131 @@ function saveRunFromDOM() {
   const asp = document.getElementById('sysASP');
   if (ds) r.ductSize = parseInt(ds.value)||8;
   if (asp) r.asp = parseFloat(asp.value)||0.50;
+}
+
+
+// ===== RETURN PLENUM FILTER LOGIC =====
+var sysRetFilterState = {
+  enabled: false,
+  mfg: 'generic',
+  model: '4in-M11',
+  grille: '20x20',
+  cfm: 1200,
+  filterPD: 0,
+  faceVel: 0
+};
+
+function initSysRetFilterModels() {
+  var modelSel = document.getElementById('sysRetFilterModel');
+  if (!modelSel) return;
+  var models = FILTER_DB[sysRetFilterState.mfg] || [];
+  modelSel.innerHTML = models.map(function(m) {
+    return '<option value="' + m.model + '">' + m.name + '</option>';
+  }).join('');
+  if (models.length > 0) sysRetFilterState.model = models[0].model;
+  calcSysRetFilter();
+}
+
+function calcSysRetFilter() {
+  var toggle = document.getElementById('sysRetFilterToggle');
+  var configDiv = document.getElementById('sysRetFilterConfig');
+  var resultsDiv = document.getElementById('sysRetFilterResults');
+  var warnDiv = document.getElementById('sysRetFilterWarn');
+  var impactDiv = document.getElementById('sysRetFilterImpact');
+  if (!toggle || !configDiv) return;
+  
+  sysRetFilterState.enabled = toggle.checked;
+  configDiv.style.display = toggle.checked ? '' : 'none';
+  
+  if (!toggle.checked) {
+    sysRetFilterState.filterPD = 0;
+    sysRetFilterState.faceVel = 0;
+    if (resultsDiv) resultsDiv.innerHTML = '';
+    if (warnDiv) { warnDiv.style.display = 'none'; warnDiv.innerHTML = ''; }
+    if (impactDiv) impactDiv.style.display = 'none';
+    return;
+  }
+  
+  var mfg = document.getElementById('sysRetFilterMfg').value;
+  var modelId = document.getElementById('sysRetFilterModel').value;
+  var grille = document.getElementById('sysRetFilterGrille').value;
+  var sysCFM = parseFloat(document.getElementById('sysRetFilterCFM').value) || 1200;
+  
+  sysRetFilterState.mfg = mfg;
+  sysRetFilterState.model = modelId;
+  sysRetFilterState.grille = grille;
+  sysRetFilterState.cfm = sysCFM;
+  
+  var models = FILTER_DB[mfg] || [];
+  var filt = models.find(function(m) { return m.model === modelId; });
+  if (!filt) return;
+  
+  // Face velocity
+  var gParts = grille.split('x');
+  var gArea = (parseInt(gParts[0]) * parseInt(gParts[1])) / 144;
+  var faceVel = sysCFM / gArea;
+  
+  // PD scaled by square law
+  var ratio = sysCFM / filt.ratedCfm;
+  var pd = filt.ratedPD * ratio * ratio;
+  
+  sysRetFilterState.filterPD = pd;
+  sysRetFilterState.faceVel = faceVel;
+  
+  var fvClass = faceVel > 500 ? 'danger' : (faceVel > 400 ? 'warn' : 'ok');
+  var pdClass = pd > 0.25 ? 'danger' : (pd > 0.15 ? 'warn' : 'ok');
+  
+  if (resultsDiv) {
+    resultsDiv.innerHTML = 
+      '<div class="filter-inline-stat"><div class="filter-inline-stat-val ' + fvClass + '">' + Math.round(faceVel) + '</div><div class="filter-inline-stat-label">Face Vel (FPM)</div></div>' +
+      '<div class="filter-inline-stat"><div class="filter-inline-stat-val ' + pdClass + '">' + pd.toFixed(2) + '</div><div class="filter-inline-stat-label">Filter PD (IWC)</div></div>' +
+      '<div class="filter-inline-stat"><div class="filter-inline-stat-val">' + filt.merv + '</div><div class="filter-inline-stat-label">MERV Rating</div></div>' +
+      '<div class="filter-inline-stat"><div class="filter-inline-stat-val">' + filt.depth + '"</div><div class="filter-inline-stat-label">Filter Depth</div></div>';
+  }
+  
+  // Warnings
+  var warns = [];
+  if (faceVel > 500) warns.push('<strong>\u26a0 Face velocity ' + Math.round(faceVel) + ' FPM exceeds 500 FPM max.</strong> Increase filter grille size or add a second return.');
+  if (faceVel > 300 && faceVel <= 500) warns.push('Face velocity ' + Math.round(faceVel) + ' FPM is within ASHRAE 52.2 test range (300\u2013492 FPM).');
+  if (pd > 0.30) warns.push('Filter PD ' + pd.toFixed(2) + ' IWC is very high. Consider lower MERV or deeper media.');
+  
+  if (warns.length > 0 && warnDiv) {
+    var warnClass = faceVel > 500 ? 'danger' : '';
+    warnDiv.style.display = '';
+    warnDiv.innerHTML = '<div class="filter-warning-banner ' + warnClass + '" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>' + warns.join('<br>') + '</span></div>';
+  } else if (warnDiv) {
+    warnDiv.style.display = 'none';
+  }
+  
+  // System impact — show how filter eats into ASP
+  if (impactDiv) {
+    impactDiv.style.display = '';
+    // Get a representative ASP from runs (use first return run, or first run)
+    var asp = 0.50;
+    SS.runs.forEach(function(r) { if (r.airPath === 'return' && r.asp > 0) asp = r.asp; });
+    if (asp === 0.50) SS.runs.forEach(function(r) { if (r.asp > 0) asp = r.asp; });
+    
+    var effASP = Math.max(0, asp - pd);
+    // Suggested FR for return = effASP / estimated longest return TEL * 100
+    var longestRetTEL = 0;
+    SS.runs.forEach(function(r) { if (r.airPath === 'return' && r.totalTEL > longestRetTEL) longestRetTEL = r.totalTEL; });
+    var sugFR = longestRetTEL > 0 ? ((effASP / longestRetTEL) * 100).toFixed(3) : '--';
+    
+    document.getElementById('sysRetFiltPD').textContent = pd.toFixed(2) + ' IWC';
+    document.getElementById('sysRetFiltPD').style.color = pd > 0.25 ? 'var(--red-glow)' : 'var(--text)';
+    
+    var velEl = document.getElementById('sysRetFiltVel');
+    velEl.textContent = Math.round(faceVel) + ' FPM';
+    velEl.className = 'filter-impact-value ' + fvClass;
+    
+    document.getElementById('sysRetTotalASP').textContent = asp.toFixed(2) + ' IWC';
+    
+    var effEl = document.getElementById('sysRetEffASP');
+    effEl.textContent = effASP.toFixed(2) + ' IWC';
+    effEl.style.color = effASP < 0.15 ? 'var(--red-glow)' : (effASP < 0.25 ? 'var(--yellow)' : 'var(--green)');
+    
+    document.getElementById('sysRetSugFR').textContent = sugFR === '--' ? sugFR : sugFR + ' IWC/100ft';
+  }
 }
 
 // ===== SYSTEM FILTER EVENT DELEGATION =====
@@ -6051,6 +6268,29 @@ function applyFilterToFRWorksheet() {
 // Init calc tab filter (must be after FILTER_DB)
 updateCalcFilterModels();
 
+// Init return plenum filter
+initSysRetFilterModels();
+document.getElementById('sysRetFilterToggle').addEventListener('change', function() {
+  calcSysRetFilter();
+  calcSystem();
+});
+document.getElementById('sysRetFilterMfg').addEventListener('change', function() {
+  sysRetFilterState.mfg = this.value;
+  initSysRetFilterModels();
+});
+document.getElementById('sysRetFilterModel').addEventListener('change', function() {
+  sysRetFilterState.model = this.value;
+  calcSysRetFilter();
+  calcSystem();
+});
+document.getElementById('sysRetFilterGrille').addEventListener('change', function() {
+  calcSysRetFilter();
+  calcSystem();
+});
+document.getElementById('sysRetFilterCFM').addEventListener('input', function() {
+  calcSysRetFilter();
+});
+
 // ===== ROOM CFM CALCULATOR =====
 const ROOM_CFM_TYPES = [
   {id:'master_bed', label:'Master Bedroom', cfmPerSqft:0.75, minCfm:100, maxCfm:200, achNote:'0.7-0.8 CFM/ft²'},
@@ -6104,58 +6344,74 @@ function calcRoomCfm(room) {
   return {cfm: Math.round(cfm), sqft: sqft, vol: vol, rt: rt};
 }
 
-function renderRoomCfm() {
+var _roomCardCount = 0;
+
+function renderRoomCfm(fullRebuild) {
   var c = document.getElementById('roomCfmList');
   if (!c) return;
   
+  var needsRebuild = fullRebuild || (_roomCardCount !== roomCfmData.length);
   var totalCfm = 0, totalSqft = 0, totalVol = 0;
-  var typeOpts = ROOM_CFM_TYPES.map(function(t){return '<option value="'+t.id+'">'+t.label+'</option>';}).join('');
   
-  c.innerHTML = roomCfmData.map(function(rm, i) {
-    var calc = calcRoomCfm(rm);
-    totalCfm += calc.cfm;
-    totalSqft += calc.sqft;
-    totalVol += calc.vol;
-    
-    return '<div class="room-card">' +
-      '<div class="room-card-header">' +
-        '<button class="room-card-remove" data-room-rm="'+i+'">&times;</button>' +
-        '<input type="text" class="room-card-name" value="'+rm.name+'" data-room-name="'+i+'">' +
-        '<div class="room-card-cfm">'+calc.cfm+'<span class="room-card-cfm-unit"> CFM</span></div>' +
-      '</div>' +
-      '<div class="room-card-body">' +
-        '<div class="room-input-group">' +
-          '<span class="room-input-label">Length (ft)</span>' +
-          '<input type="number" class="room-input-field" value="'+rm.length+'" data-room-len="'+i+'" min="1" max="100" step="0.5">' +
+  if (needsRebuild) {
+    var typeOpts = ROOM_CFM_TYPES.map(function(t){return '<option value="'+t.id+'">'+t.label+'</option>';}).join('');
+    c.innerHTML = roomCfmData.map(function(rm, i) {
+      var calc = calcRoomCfm(rm);
+      totalCfm += calc.cfm;
+      totalSqft += calc.sqft;
+      totalVol += calc.vol;
+      return '<div class="room-card" data-room-idx="'+i+'">' +
+        '<div class="room-card-header">' +
+          '<button class="room-card-remove" data-room-rm="'+i+'">&times;</button>' +
+          '<input type="text" class="room-card-name" value="'+rm.name+'" data-room-name="'+i+'">' +
+          '<div class="room-card-cfm" data-room-cfm-out="'+i+'">'+calc.cfm+'<span class="room-card-cfm-unit"> CFM</span></div>' +
         '</div>' +
-        '<div class="room-input-group">' +
-          '<span class="room-input-label">Width (ft)</span>' +
-          '<input type="number" class="room-input-field" value="'+rm.width+'" data-room-wid="'+i+'" min="1" max="100" step="0.5">' +
+        '<div class="room-card-body">' +
+          '<div class="room-input-group">' +
+            '<span class="room-input-label">Length (ft)</span>' +
+            '<input type="number" class="room-input-field" value="'+rm.length+'" data-room-len="'+i+'" min="1" max="100" step="0.5">' +
+          '</div>' +
+          '<div class="room-input-group">' +
+            '<span class="room-input-label">Width (ft)</span>' +
+            '<input type="number" class="room-input-field" value="'+rm.width+'" data-room-wid="'+i+'" min="1" max="100" step="0.5">' +
+          '</div>' +
+          '<div class="room-input-group">' +
+            '<span class="room-input-label">Ceiling (ft)</span>' +
+            '<input type="number" class="room-input-field" value="'+(rm.ceilHt||8)+'" data-room-ht="'+i+'" min="6" max="20" step="0.5">' +
+          '</div>' +
+          '<div class="room-input-group">' +
+            '<span class="room-input-label">Type</span>' +
+            '<select class="room-type-select" data-room-type="'+i+'" style="grid-column:auto">'+typeOpts.replace('value="'+rm.type+'"','value="'+rm.type+'" selected')+'</select>' +
+          '</div>' +
         '</div>' +
-        '<div class="room-input-group">' +
-          '<span class="room-input-label">Ceiling (ft)</span>' +
-          '<input type="number" class="room-input-field" value="'+(rm.ceilHt||8)+'" data-room-ht="'+i+'" min="6" max="20" step="0.5">' +
+        '<div class="room-card-info" data-room-info-out="'+i+'">' +
+          '<span>'+calc.sqft+' ft\u00b2 \u00b7 '+calc.vol+' ft\u00b3</span>' +
+          '<span>'+calc.rt.achNote+'</span>' +
         '</div>' +
-        '<div class="room-input-group">' +
-          '<span class="room-input-label">Type</span>' +
-          '<select class="room-type-select" data-room-type="'+i+'" style="grid-column:auto">'+typeOpts.replace('value="'+rm.type+'"','value="'+rm.type+'" selected')+'</select>' +
-        '</div>' +
-      '</div>' +
-      '<div class="room-card-info">' +
-        '<span>'+calc.sqft+' ft\u00b2 \u00b7 '+calc.vol+' ft\u00b3</span>' +
-        '<span>'+calc.rt.achNote+'</span>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+      '</div>';
+    }).join('');
+    _roomCardCount = roomCfmData.length;
+  } else {
+    // In-place update: only update calculated outputs, NOT input elements
+    // This preserves focus and keyboard on iOS
+    roomCfmData.forEach(function(rm, i) {
+      var calc = calcRoomCfm(rm);
+      totalCfm += calc.cfm;
+      totalSqft += calc.sqft;
+      totalVol += calc.vol;
+      var cfmEl = document.querySelector('[data-room-cfm-out="'+i+'"]');
+      if (cfmEl) cfmEl.innerHTML = calc.cfm + '<span class="room-card-cfm-unit"> CFM</span>';
+      var infoEl = document.querySelector('[data-room-info-out="'+i+'"]');
+      if (infoEl) infoEl.innerHTML = '<span>'+calc.sqft+' ft\u00b2 \u00b7 '+calc.vol+' ft\u00b3</span><span>'+calc.rt.achNote+'</span>';
+    });
+  }
   
-  // Update totals
   var e = function(id){return document.getElementById(id);};
   if(e('roomTotalCfm')) e('roomTotalCfm').textContent = totalCfm;
   if(e('roomTotalTons')) e('roomTotalTons').textContent = (totalCfm / 400).toFixed(1);
   if(e('roomTotalSqft')) e('roomTotalSqft').textContent = totalSqft;
   if(e('roomTotalVol')) e('roomTotalVol').textContent = totalVol;
   
-  // Render tightness selector
   var ts = document.getElementById('roomTightnessSelect');
   if (ts) {
     ts.innerHTML = HOUSE_TIGHTNESS.map(function(h) {
@@ -6171,14 +6427,14 @@ function renderRoomCfm() {
 document.getElementById('page-roomcfm').addEventListener('click', function(ev) {
   var t = ev.target;
   var rm = t.closest('[data-room-rm]');
-  if (rm) { roomCfmData.splice(parseInt(rm.dataset.roomRm), 1); renderRoomCfm(); return; }
+  if (rm) { roomCfmData.splice(parseInt(rm.dataset.roomRm), 1); renderRoomCfm(true); return; }
   
   var tb = t.closest('[data-room-tightness]');
-  if (tb) { roomCfmTightness = tb.dataset.roomTightness; renderRoomCfm(); return; }
+  if (tb) { roomCfmTightness = tb.dataset.roomTightness; renderRoomCfm(true); return; }
   
   if (t.closest('#roomAddBtn')) {
     roomCfmData.push({name:'Room '+(roomCfmData.length+1), type:'bedroom', length:12, width:10, ceilHt:8});
-    renderRoomCfm();
+    renderRoomCfm(true);
     return;
   }
 });
@@ -6191,7 +6447,7 @@ document.getElementById('page-roomcfm').addEventListener('input', function(ev) {
 });
 document.getElementById('page-roomcfm').addEventListener('change', function(ev) {
   var t = ev.target;
-  if (t.dataset.roomType !== undefined) { roomCfmData[parseInt(t.dataset.roomType)].type = t.value; renderRoomCfm(); return; }
+  if (t.dataset.roomType !== undefined) { roomCfmData[parseInt(t.dataset.roomType)].type = t.value; renderRoomCfm(true); return; }
 });
 
 
