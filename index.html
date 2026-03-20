@@ -2354,6 +2354,116 @@ footer a:hover { color: var(--text-muted); }
 .slider-panel {
   margin-bottom: 10px;
 }
+
+/* ===== FILTER WARNING BANNERS ===== */
+.filter-warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255,152,0,0.1);
+  border: 1px solid rgba(255,152,0,0.3);
+  border-radius: 8px;
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--orange);
+}
+.filter-warning-banner svg { flex-shrink: 0; margin-top: 1px; }
+.filter-warning-banner.danger {
+  background: rgba(211,47,47,0.1);
+  border-color: rgba(211,47,47,0.3);
+  color: var(--red-glow);
+}
+.filter-inline-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+}
+.filter-inline-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.filter-inline-title svg { width: 14px; height: 14px; }
+.filter-inline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.filter-inline-stat {
+  background: var(--surface-3);
+  padding: 6px 8px;
+  border-radius: 6px;
+  text-align: center;
+}
+.filter-inline-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+}
+.filter-inline-stat-val.ok { color: var(--green); }
+.filter-inline-stat-val.warn { color: var(--yellow); }
+.filter-inline-stat-val.danger { color: var(--red-glow); }
+.filter-inline-stat-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.filter-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+.filter-toggle-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+.filter-select-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+.filter-select-row select, .filter-select-row input {
+  font-size: 12px;
+}
+.filter-impact-card {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+}
+.filter-impact-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--yellow);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.filter-impact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(51,51,51,0.5);
+}
+.filter-impact-row:last-child { border: none; }
+.filter-impact-label { color: var(--text-muted); }
+.filter-impact-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -2615,6 +2725,61 @@ footer a:hover { color: var(--text-muted); }
         <span>0.01</span><span>0.03</span><span style="color:var(--green);font-weight:600">0.05</span><span>0.06</span><span>0.08</span>
       </div>
     </div>
+    <!-- FILTER AT RETURN (shown when return path selected) -->
+    <div id="calcFilterSection" style="display:none">
+      <div class="filter-inline-panel">
+        <div class="filter-toggle-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          <span class="filter-toggle-label">Filter on this Return</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="calcFilterToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="calcFilterConfig" style="display:none">
+          <div class="filter-select-row">
+            <div>
+              <label class="config-label">Manufacturer</label>
+              <select class="input-field" id="calcFilterMfg" style="width:100%">
+                <option value="aprilaire">Aprilaire</option>
+                <option value="honeywell">Honeywell</option>
+                <option value="lennox">Lennox</option>
+                <option value="carrier">Carrier</option>
+                <option value="generic" selected>Generic</option>
+              </select>
+            </div>
+            <div>
+              <label class="config-label">Model / MERV</label>
+              <select class="input-field" id="calcFilterModel" style="width:100%"></select>
+            </div>
+          </div>
+          <div class="filter-select-row" style="margin-top:6px">
+            <div>
+              <label class="config-label">Filter Grille Size</label>
+              <select class="input-field" id="calcFilterGrille" style="width:100%">
+                <option value="12x24">12x24</option>
+                <option value="14x20">14x20</option>
+                <option value="14x25">14x25</option>
+                <option value="16x20">16x20</option>
+                <option value="16x25" selected>16x25</option>
+                <option value="20x20">20x20</option>
+                <option value="20x25">20x25</option>
+                <option value="20x30">20x30</option>
+                <option value="24x24">24x24</option>
+                <option value="24x30">24x30</option>
+                <option value="25x25">25x25</option>
+              </select>
+            </div>
+            <div>
+              <label class="config-label">System CFM</label>
+              <input type="number" class="input-field" id="calcFilterCFM" value="1200" min="200" max="5000" step="50" style="width:100%">
+            </div>
+          </div>
+          <div id="calcFilterResults" class="filter-inline-grid" style="margin-top:8px"></div>
+          <div id="calcFilterWarn" style="display:none"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- REVERSE MODE: Select duct size -> see capacity -->
@@ -2803,6 +2968,10 @@ footer a:hover { color: var(--text-muted); }
   <div class="info-note" style="margin-top:10px">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
     <span>ACCA Manual D Table 3-1 velocities. Rigid supply trunk: <strong>900 FPM</strong> max. Rigid return trunk: <strong>700 FPM</strong> max. Flex: <strong>700 FPM</strong> max. FR max <strong>0.08 IWC/100ft</strong>.</span>
+  </div>
+  <div class="filter-warning-banner" id="calcFilterDisclaimer" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><strong>Filter face velocity must not exceed 500 FPM</strong> per ASHRAE/ACCA guidelines. Velocities above 500 FPM at the filter grille cause excessive pressure drop, noise, and reduced filter life. All MERV ratings are tested per ASHRAE 52.2 at standard face velocities (typically 492 FPM). Actual installed face velocity depends on filter grille size and system CFM.</span>
   </div>
 
 </div>
@@ -3008,6 +3177,10 @@ footer a:hover { color: var(--text-muted); }
   <div class="info-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
     <span>Build each run step-by-step from plenum to register. FR = ASP/TEL&times;100. Critical path = longest TEL. Manual D Table 3-1 velocity limits apply. FR max <strong>0.08</strong>.</span>
+  </div>
+  <div class="filter-warning-banner" id="sysFilterDisclaimer" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><strong>Filter grille velocity: max 500 FPM.</strong> Return runs with filter grilles must keep face velocity under 500 FPM. A restrictive filter adds pressure drop that reduces available static for ductwork. Enable the filter option on return runs to see the impact.</span>
   </div>
 
 </div>
@@ -3615,6 +3788,7 @@ function setAirPath(val) {
   document.querySelectorAll('#airPathControl [data-airpath]').forEach(b => {
     b.classList.toggle('active', b.dataset.airpath === val);
   });
+  updateCalcFilterVisibility();
   calculate();
 }
 
@@ -3815,33 +3989,74 @@ function calcSystem() {
       return;
     }
 
-    const fr = (r.asp / r.totalTEL) * 100;
-    r.frictionRate = fr;
+    // If this return run has a filter, estimate filter PD first, then iterate
+    var effectiveASP = r.asp;
+    if (r.hasFilter) {
+      // Pre-estimate filter PD from rated values for initial pass
+      var fModels0 = FILTER_DB[r.filterMfg] || [];
+      var filt0 = fModels0.find(function(m){ return m.model === r.filterModel; });
+      if (filt0 && r.filterPD <= 0) {
+        // Use rated PD as first estimate (at rated CFM)
+        r.filterPD = filt0.ratedPD;
+      }
+      if (r.filterPD > 0) {
+        effectiveASP = Math.max(0.01, r.asp - r.filterPD);
+      }
+    }
+    var fr = (effectiveASP / r.totalTEL) * 100;
 
     const D_ft = r.ductSize/12;
     const A = Math.PI*Math.pow(D_ft/2,2);
-    const maxV = getMaxVelocity(r.airPath, r.material, i===0?'trunk':'branch');
+    const maxV = getMaxVelocity(r.airPath, r.material, ri===0?'trunk':'branch');
     const maxCFMv = maxV * A;
 
-    let lo=10, hi=maxCFMv, best=10;
-    for (let it=0;it<50;it++){
-      const mid=(lo+hi)/2;
-      let fl = frictionLoss(r.ductSize, mid);
-      if (r.material==='flex') fl *= sysFlexFactor(r.compression);
-      if (fl<=fr){best=mid;lo=mid;}else{hi=mid;}
-      if(hi-lo<0.5)break;
+    // Iterate twice to converge filter PD with actual CFM
+    var best = 10;
+    for (var pass = 0; pass < 2; pass++) {
+      var lo=10, hi=maxCFMv;
+      best=10;
+      for (var it=0;it<50;it++){
+        var mid=(lo+hi)/2;
+        var fl = frictionLoss(r.ductSize, mid);
+        if (r.material==='flex') fl *= sysFlexFactor(r.compression);
+        if (fl<=fr){best=mid;lo=mid;}else{hi=mid;}
+        if(hi-lo<0.5)break;
+      }
+      // After first pass, recalc filter PD with actual CFM and re-derive FR
+      if (pass === 0 && r.hasFilter && filt0 && best > 10) {
+        var ratio0 = best / filt0.ratedCfm;
+        r.filterPD = filt0.ratedPD * ratio0 * ratio0;
+        effectiveASP = Math.max(0.01, r.asp - r.filterPD);
+        fr = (effectiveASP / r.totalTEL) * 100;
+      }
     }
+    r.frictionRate = fr;
 
     r.velocity = best/A;
     r.cfm = best;
-    let af = frictionLoss(r.ductSize, best);
+    var af = frictionLoss(r.ductSize, best);
     if (r.material==='flex') af *= sysFlexFactor(r.compression);
     r.pressureDrop = af * r.totalTEL / 100;
+
+    // Calculate filter face velocity if filter present
+    if (r.hasFilter && r.filterGrille && best > 0) {
+      var gParts = r.filterGrille.split('x');
+      var gArea = (parseInt(gParts[0]) * parseInt(gParts[1])) / 144; // sq ft
+      r.filterFaceVel = best / gArea;
+      // Final filter PD with converged CFM
+      var fModels = FILTER_DB[r.filterMfg] || [];
+      var filt = fModels.find(function(m){ return m.model === r.filterModel; });
+      if (filt) {
+        var ratio = best / filt.ratedCfm;
+        r.filterPD = filt.ratedPD * ratio * ratio;
+      }
+    }
 
     totalCFM += best;
     if (r.totalTEL > longestTEL) { longestTEL = r.totalTEL; critIdx = ri; }
 
     if (r.velocity > maxV) warns.push(r.name+': '+Math.round(r.velocity)+' FPM > '+maxV+' max (Manual D)');
+    if (r.hasFilter && r.filterFaceVel > 500) warns.push(r.name+': Filter grille '+Math.round(r.filterFaceVel)+' FPM > 500 max');
     if (fr > MAX_FRICTION) warns.push(r.name+': FR '+fr.toFixed(3)+' > 0.08');
   });
 
@@ -3867,7 +4082,7 @@ function calcSystem() {
     e('arFR').className='run-summary-value';
     if (ar.totalTEL>0){
       cfmEl.classList.add('green');
-      const mv = getMaxVelocity(ar.airPath, ar.material || 'metal', activeRunIdx===0?'trunk':'branch');
+      const mv = getMaxVelocity(ar.airPath, ar.material || 'metal', SS.activeRun===0?'trunk':'branch');
       if(ar.velocity>mv)velEl.classList.add('red');
       else if(ar.velocity>mv*0.85)velEl.classList.add('yellow');
       else velEl.classList.add('green');
@@ -4131,6 +4346,13 @@ function mkRun(idx, parentIdx, branchLabel) {
     parentRun: parentIdx !== undefined ? parentIdx : null,
     branchLabel: branchLabel || '',
     collapsed: false,
+    // Filter at end of run (for returns with filter grille)
+    hasFilter: false,
+    filterMfg: 'generic',
+    filterModel: '4in-M11',
+    filterGrille: '20x25',
+    filterPD: 0,
+    filterFaceVel: 0,
     // calc
     totalStraight:0, fittingEL:0, totalTEL:0,
     frictionRate:0, velocity:0, cfm:0, pressureDrop:0,
@@ -4225,6 +4447,7 @@ function renderSystem() {
   renderRunTabs();
   renderRunArea();
   calcSystem();
+  updateSysFilterDisclaimer();
   // renderCfmEst moved to Rooms tab
 }
 
@@ -4334,12 +4557,24 @@ function renderRunArea() {
   }
 
   // Per-run results
-  const resHTML = '<div class="run-summary-grid" style="margin-top:10px"><div class="run-summary-card"><div class="run-summary-value" id="arTEL">'+(r.totalTEL||'--')+'</div><div class="run-summary-unit">ft</div><div class="run-summary-label">Total EQ Length</div></div><div class="run-summary-card"><div class="run-summary-value" id="arFR">'+(r.frictionRate?r.frictionRate.toFixed(3):'--')+'</div><div class="run-summary-unit">IWC/100ft</div><div class="run-summary-label">Friction Rate</div></div><div class="run-summary-card"><div class="run-summary-value" id="arVel">'+(r.velocity?Math.round(r.velocity):'--')+'</div><div class="run-summary-unit">FPM</div><div class="run-summary-label">Velocity</div></div><div class="run-summary-card"><div class="run-summary-value green" id="arCFM">'+(r.cfm?Math.round(r.cfm):'--')+'</div><div class="run-summary-unit">CFM</div><div class="run-summary-label">CFM Capacity</div></div></div>';
+  var filterResHTML = '';
+  if (r.hasFilter && r.cfm > 0) {
+    var fvClass = r.filterFaceVel > 500 ? 'danger' : (r.filterFaceVel > 400 ? 'warn' : 'ok');
+    filterResHTML = '<div class="filter-impact-card"><div class="filter-impact-title">\u2692 Filter Impact</div>'+
+      '<div class="filter-impact-row"><span class="filter-impact-label">Filter PD</span><span class="filter-impact-value" style="color:'+(r.filterPD>0.25?'var(--red-glow)':'var(--text)')+'">'+(r.filterPD?r.filterPD.toFixed(2):'--')+' IWC</span></div>'+
+      '<div class="filter-impact-row"><span class="filter-impact-label">Face Velocity</span><span class="filter-impact-value '+fvClass+'">'+(r.filterFaceVel?Math.round(r.filterFaceVel):'--')+' FPM</span></div>'+
+      '<div class="filter-impact-row"><span class="filter-impact-label">Effective ASP</span><span class="filter-impact-value">'+(r.filterPD?(r.asp - r.filterPD).toFixed(2):'--')+' IWC</span></div>'+
+      '<div class="filter-impact-row"><span class="filter-impact-label">ASP w/o Filter</span><span class="filter-impact-value" style="color:var(--text-muted)">'+r.asp.toFixed(2)+' IWC</span></div>'+
+      (r.filterFaceVel > 500 ? '<div class="filter-warning-banner danger" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Filter face velocity exceeds 500 FPM. Increase grille size or reduce CFM. ASHRAE 52.2 tests filters at 300-492 FPM.</span></div>' : '')+
+      '</div>';
+  }
+  const resHTML = '<div class="run-summary-grid" style="margin-top:10px"><div class="run-summary-card"><div class="run-summary-value" id="arTEL">'+(r.totalTEL||'--')+'</div><div class="run-summary-unit">ft</div><div class="run-summary-label">Total EQ Length</div></div><div class="run-summary-card"><div class="run-summary-value" id="arFR">'+(r.frictionRate?r.frictionRate.toFixed(3):'--')+'</div><div class="run-summary-unit">IWC/100ft</div><div class="run-summary-label">Friction Rate</div></div><div class="run-summary-card"><div class="run-summary-value" id="arVel">'+(r.velocity?Math.round(r.velocity):'--')+'</div><div class="run-summary-unit">FPM</div><div class="run-summary-label">Velocity</div></div><div class="run-summary-card"><div class="run-summary-value green" id="arCFM">'+(r.cfm?Math.round(r.cfm):'--')+'</div><div class="run-summary-unit">CFM</div><div class="run-summary-label">CFM Capacity</div></div></div>'+filterResHTML;
 
   c.innerHTML = '<div class="sys-run-header-bar"><div class="sys-run-title">'+(r.parentRun!==null?r.branchLabel:r.name)+'</div><div style="display:flex;gap:6px">'+(canRemove?'<button class="sys-remove-btn" data-rm-run="'+i+'">Remove</button>':'')+'<button class="sys-branch-btn" data-add-branch="'+i+'">+ Branch</button></div></div>'+
     branchCtx+
     '<div class="sys-config-grid"><div class="input-group"><label class="input-label">Air Path</label><div class="seg-control" id="sysAP"><button class="seg-btn'+(r.airPath==='supply'?' active':'')+'" data-sap="supply">Supply</button><button class="seg-btn'+(r.airPath==='return'?' active':'')+'" data-sap="return">Return</button></div></div><div class="input-group"><label class="input-label">Material</label><div class="seg-control" id="sysMat"><button class="seg-btn'+(r.material==='metal'?' active':'')+'" data-smat="metal">Metal</button><button class="seg-btn'+(r.material==='flex'?' active':'')+'" data-smat="flex">Flex</button></div></div><div class="input-group"><label class="input-label">Duct Size</label><select class="input-field" id="sysDSize">'+sizeOpts+'</select></div><div class="input-group"><label class="input-label">Avail Static (IWC)</label><input type="number" class="input-field" id="sysASP" value="'+r.asp+'" min="0.05" max="2.00" step="0.05"></div></div>'+
     compHTML+
+    buildSysFilterHTML(r, i)+
     '<div style="margin-top:12px"><div class="input-label" style="margin-bottom:6px">Duct Path (step-by-step)</div>'+pathHTML+'</div>'+
     '<div class="add-step-area"><div class="add-step-header">\u2795 Add to Run</div>'+
     '<div class="quick-add-section"><div class="quick-add-label">Quick Add</div><div class="quick-add-grid"><button class="quick-add-btn" data-qa-straight="1"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5"><line x1="4" y1="16" x2="28" y2="16"/><path d="M24 12 L28 16 L24 20" stroke-width="1"/></svg></div>Straight</button><button class="quick-add-btn" data-qa-fit="e1"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M8 6 L8 16 Q8 24 16 24 L26 24"/></svg></div>90\u00b0 Elbow</button><button class="quick-add-btn" data-qa-fit="e7"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 8 L6 18 Q6 24 12 24 L26 24"/></svg></div>45\u00b0 Elbow</button><button class="quick-add-btn" data-qa-fit="w1"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M8 6 L8 26"/><path d="M8 16 L24 26"/><circle cx="8" cy="16" r="2" fill="currentColor" stroke="none"/></svg></div>Wye</button><button class="quick-add-btn" data-qa-fit="rd1"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M6 8 L6 24 L26 20 L26 12 Z"/></svg></div>Reducer</button><button class="quick-add-btn" data-qa-fit="b2"><div class="quick-add-icon"><svg viewBox="0 0 32 32" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M14 6 L14 16 L6 16 L6 26 L26 26 L26 16 L18 16 L18 6 Z"/></svg></div>90\u00b0 Boot</button></div></div>'+
@@ -4549,7 +4784,7 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
   }
   // Air path
   const ap = t.closest('[data-sap]');
-  if (ap) { SS.runs[SS.activeRun].airPath=ap.dataset.sap; renderRunArea(); calcSystem(); return; }
+  if (ap) { SS.runs[SS.activeRun].airPath=ap.dataset.sap; renderRunArea(); calcSystem(); updateSysFilterDisclaimer(); return; }
   // Material
   const mat = t.closest('[data-smat]');
   if (mat) { const r=SS.runs[SS.activeRun]; r.material=mat.dataset.smat; if(r.material==='metal')r.compression=0; renderRunArea(); calcSystem(); return; }
@@ -4635,6 +4870,59 @@ function saveRunFromDOM() {
   if (ds) r.ductSize = parseInt(ds.value)||8;
   if (asp) r.asp = parseFloat(asp.value)||0.50;
 }
+
+// ===== SYSTEM FILTER EVENT DELEGATION =====
+(function() {
+  var sysPage = document.getElementById('page-system');
+  if (!sysPage) return;
+  
+  sysPage.addEventListener('change', function(ev) {
+    var t = ev.target;
+    // Filter toggle
+    if (t.dataset.sysFilterToggle !== undefined) {
+      var ri = parseInt(t.dataset.sysFilterToggle);
+      SS.runs[ri].hasFilter = t.checked;
+      var cfg = document.querySelector('[data-sys-filter-config="'+ri+'"]');
+      if (cfg) cfg.style.display = t.checked ? '' : 'none';
+      saveRunFromDOM();
+      calcSystem();
+      return;
+    }
+    // Filter manufacturer
+    if (t.dataset.sysFilterMfg !== undefined) {
+      var ri2 = parseInt(t.dataset.sysFilterMfg);
+      SS.runs[ri2].filterMfg = t.value;
+      // Repopulate model dropdown
+      var modelSel = document.querySelector('[data-sys-filter-model="'+ri2+'"]');
+      if (modelSel) {
+        var models = FILTER_DB[t.value] || [];
+        modelSel.innerHTML = models.map(function(m) {
+          return '<option value="' + m.model + '">' + m.name + '</option>';
+        }).join('');
+        if (models.length) SS.runs[ri2].filterModel = models[0].model;
+      }
+      saveRunFromDOM();
+      calcSystem();
+      return;
+    }
+    // Filter model
+    if (t.dataset.sysFilterModel !== undefined) {
+      var ri3 = parseInt(t.dataset.sysFilterModel);
+      SS.runs[ri3].filterModel = t.value;
+      saveRunFromDOM();
+      calcSystem();
+      return;
+    }
+    // Filter grille size
+    if (t.dataset.sysFilterGrille !== undefined) {
+      var ri4 = parseInt(t.dataset.sysFilterGrille);
+      SS.runs[ri4].filterGrille = t.value;
+      saveRunFromDOM();
+      calcSystem();
+      return;
+    }
+  });
+})();
 
 // ===== FRICTION RATE WORKSHEET =====
 function calcFrictionRate() {
@@ -4954,8 +5242,19 @@ document.querySelectorAll('.compression-presets [data-compression]').forEach(btn
   document.getElementById(id).addEventListener('input', calcFrictionRate);
 });
 
+// Calc tab filter events
+document.getElementById('calcFilterToggle').addEventListener('change', function() {
+  calcCalcFilter();
+  calculate();
+});
+document.getElementById('calcFilterMfg').addEventListener('change', updateCalcFilterModels);
+document.getElementById('calcFilterModel').addEventListener('change', calcCalcFilter);
+document.getElementById('calcFilterGrille').addEventListener('change', calcCalcFilter);
+document.getElementById('calcFilterCFM').addEventListener('input', calcCalcFilter);
+
 // ===== INIT =====
 calculate();
+updateCalcFilterVisibility();
 initSystem();
 renderCollars();
 
@@ -5467,6 +5766,135 @@ if (cfmSlider && cfmSliderVal) {
 
 
 
+
+// ===== FILTER INTEGRATION (Calc Tab + System Analyzer) =====
+
+// Build filter HTML for system analyzer runs
+function buildSysFilterHTML(r, runIdx) {
+  if (r.airPath !== 'return') return '';
+  var checked = r.hasFilter ? ' checked' : '';
+  var configDisplay = r.hasFilter ? '' : ' style="display:none"';
+  
+  // Build model options for current mfg
+  var models = FILTER_DB[r.filterMfg] || [];
+  var modelOpts = models.map(function(m) {
+    return '<option value="' + m.model + '"' + (m.model === r.filterModel ? ' selected' : '') + '>' + m.name + '</option>';
+  }).join('');
+  
+  var grilleSizes = ['12x24','14x20','14x25','16x20','16x25','20x20','20x25','20x30','24x24','24x30','25x25'];
+  var grilleOpts = grilleSizes.map(function(g) {
+    return '<option value="' + g + '"' + (g === r.filterGrille ? ' selected' : '') + '>' + g + '</option>';
+  }).join('');
+  
+  return '<div class="filter-inline-panel" style="margin-top:8px">' +
+    '<div class="filter-toggle-row">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>' +
+      '<span class="filter-toggle-label">Filter Grille on Return</span>' +
+      '<label class="toggle-switch"><input type="checkbox" data-sys-filter-toggle="' + runIdx + '"' + checked + '><span class="toggle-slider"></span></label>' +
+    '</div>' +
+    '<div data-sys-filter-config="' + runIdx + '"' + configDisplay + '>' +
+      '<div class="filter-select-row">' +
+        '<div><label class="config-label">Manufacturer</label><select class="input-field" data-sys-filter-mfg="' + runIdx + '" style="width:100%">' +
+          '<option value="aprilaire"' + (r.filterMfg==='aprilaire'?' selected':'') + '>Aprilaire</option>' +
+          '<option value="honeywell"' + (r.filterMfg==='honeywell'?' selected':'') + '>Honeywell</option>' +
+          '<option value="lennox"' + (r.filterMfg==='lennox'?' selected':'') + '>Lennox</option>' +
+          '<option value="carrier"' + (r.filterMfg==='carrier'?' selected':'') + '>Carrier</option>' +
+          '<option value="generic"' + (r.filterMfg==='generic'?' selected':'') + '>Generic</option>' +
+        '</select></div>' +
+        '<div><label class="config-label">Model / MERV</label><select class="input-field" data-sys-filter-model="' + runIdx + '" style="width:100%">' + modelOpts + '</select></div>' +
+      '</div>' +
+      '<div class="filter-select-row" style="margin-top:6px">' +
+        '<div><label class="config-label">Filter Grille Size</label><select class="input-field" data-sys-filter-grille="' + runIdx + '" style="width:100%">' + grilleOpts + '</select></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// Calc tab filter: show/hide based on airPath
+function updateCalcFilterVisibility() {
+  var sec = document.getElementById('calcFilterSection');
+  var disc = document.getElementById('calcFilterDisclaimer');
+  if (sec) sec.style.display = state.airPath === 'return' ? '' : 'none';
+  if (disc) disc.style.display = state.airPath === 'return' ? '' : 'none';
+}
+
+// Calc tab filter: populate models when mfg changes
+function updateCalcFilterModels() {
+  var mfgSel = document.getElementById('calcFilterMfg');
+  var modelSel = document.getElementById('calcFilterModel');
+  if (!mfgSel || !modelSel) return;
+  var models = FILTER_DB[mfgSel.value] || [];
+  modelSel.innerHTML = models.map(function(m) {
+    return '<option value="' + m.model + '">' + m.name + '</option>';
+  }).join('');
+  calcCalcFilter();
+}
+
+// Calc tab filter: calculate and display results
+function calcCalcFilter() {
+  var toggle = document.getElementById('calcFilterToggle');
+  var configDiv = document.getElementById('calcFilterConfig');
+  var resultsDiv = document.getElementById('calcFilterResults');
+  var warnDiv = document.getElementById('calcFilterWarn');
+  if (!toggle || !configDiv) return;
+  
+  configDiv.style.display = toggle.checked ? '' : 'none';
+  if (!toggle.checked) {
+    if (resultsDiv) resultsDiv.innerHTML = '';
+    if (warnDiv) { warnDiv.style.display = 'none'; warnDiv.innerHTML = ''; }
+    return;
+  }
+  
+  var mfg = document.getElementById('calcFilterMfg').value;
+  var modelId = document.getElementById('calcFilterModel').value;
+  var grille = document.getElementById('calcFilterGrille').value;
+  var sysCFM = parseFloat(document.getElementById('calcFilterCFM').value) || 1200;
+  
+  var models = FILTER_DB[mfg] || [];
+  var filt = models.find(function(m) { return m.model === modelId; });
+  if (!filt) return;
+  
+  // Face velocity
+  var gParts = grille.split('x');
+  var gArea = (parseInt(gParts[0]) * parseInt(gParts[1])) / 144;
+  var faceVel = sysCFM / gArea;
+  
+  // PD scaled by square law
+  var ratio = sysCFM / filt.ratedCfm;
+  var pd = filt.ratedPD * ratio * ratio;
+  
+  var fvClass = faceVel > 500 ? 'danger' : (faceVel > 400 ? 'warn' : 'ok');
+  var pdClass = pd > 0.25 ? 'danger' : (pd > 0.15 ? 'warn' : 'ok');
+  
+  resultsDiv.innerHTML = 
+    '<div class="filter-inline-stat"><div class="filter-inline-stat-val ' + fvClass + '">' + Math.round(faceVel) + '</div><div class="filter-inline-stat-label">Face Vel (FPM)</div></div>' +
+    '<div class="filter-inline-stat"><div class="filter-inline-stat-val ' + pdClass + '">' + pd.toFixed(2) + '</div><div class="filter-inline-stat-label">Filter PD (IWC)</div></div>' +
+    '<div class="filter-inline-stat"><div class="filter-inline-stat-val">' + filt.merv + '</div><div class="filter-inline-stat-label">MERV Rating</div></div>' +
+    '<div class="filter-inline-stat"><div class="filter-inline-stat-val">' + filt.depth + '"</div><div class="filter-inline-stat-label">Filter Depth</div></div>';
+  
+  // Warnings
+  var warns = [];
+  if (faceVel > 500) warns.push('<strong>\u26a0 Face velocity ' + Math.round(faceVel) + ' FPM exceeds 500 FPM max.</strong> ASHRAE 52.2 standard test velocity is 492 FPM. Increase grille size or use two return grilles.');
+  if (faceVel > 300 && faceVel <= 500) warns.push('Face velocity ' + Math.round(faceVel) + ' FPM is within ASHRAE test range (300\u2013492 FPM). Acceptable for filter grille applications.');
+  if (pd > 0.30) warns.push('Filter pressure drop of ' + pd.toFixed(2) + ' IWC is very high. Consider a lower MERV or deeper filter media to reduce restriction.');
+  
+  if (warns.length > 0) {
+    var warnClass = faceVel > 500 ? 'danger' : '';
+    warnDiv.style.display = '';
+    warnDiv.innerHTML = '<div class="filter-warning-banner ' + warnClass + '" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>' + warns.join('<br>') + '</span></div>';
+  } else {
+    warnDiv.style.display = 'none';
+  }
+}
+
+// Show/hide system analyzer filter disclaimer
+function updateSysFilterDisclaimer() {
+  var disc = document.getElementById('sysFilterDisclaimer');
+  if (!disc) return;
+  var hasReturn = SS.runs.some(function(r) { return r.airPath === 'return'; });
+  disc.style.display = hasReturn ? '' : 'none';
+}
+
 // ===== FILTER PRESSURE DROP DATABASE =====
 var FILTER_DB = {
   aprilaire: [
@@ -5619,6 +6047,9 @@ function applyFilterToFRWorksheet() {
   // Init
   populateFilterModels('aprilaire');
 })();
+
+// Init calc tab filter (must be after FILTER_DB)
+updateCalcFilterModels();
 
 // ===== ROOM CFM CALCULATOR =====
 const ROOM_CFM_TYPES = [
