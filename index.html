@@ -2643,7 +2643,7 @@ footer a:hover { color: var(--text-muted); }
           Flex Compression
         </div>
         <div class="compression-presets">
-          <button class="compression-preset-btn active" data-compression="0">0%</button>
+          <button class="compression-preset-btn active" data-compression="4">4%</button>
           <button class="compression-preset-btn" data-compression="5">5%</button>
           <button class="compression-preset-btn" data-compression="10">10%</button>
           <button class="compression-preset-btn" data-compression="15">15%</button>
@@ -2651,8 +2651,8 @@ footer a:hover { color: var(--text-muted); }
           <button class="compression-preset-btn" data-compression="25">25%</button>
           <button class="compression-preset-btn" data-compression="30">30%</button>
         </div>
-        <input type="range" class="compression-slider" id="compressionSlider" min="0" max="30" value="0" step="1">
-        <div class="compression-impact low" id="compressionImpact">Fully stretched — no friction penalty</div>
+        <input type="range" class="compression-slider" id="compressionSlider" min="4" max="30" value="4" step="1">
+        <div class="compression-impact low" id="compressionImpact">4% compressed — minimum realistic install</div>
       </div>
     </div>
 
@@ -2860,7 +2860,7 @@ footer a:hover { color: var(--text-muted); }
             Flex Compression
           </div>
           <div class="compression-presets" id="revCompPresets">
-            <button class="compression-preset-btn active" data-rev-comp="0">0%</button>
+            <button class="compression-preset-btn active" data-rev-comp="4">4%</button>
             <button class="compression-preset-btn" data-rev-comp="5">5%</button>
             <button class="compression-preset-btn" data-rev-comp="10">10%</button>
             <button class="compression-preset-btn" data-rev-comp="15">15%</button>
@@ -2868,8 +2868,8 @@ footer a:hover { color: var(--text-muted); }
             <button class="compression-preset-btn" data-rev-comp="25">25%</button>
             <button class="compression-preset-btn" data-rev-comp="30">30%</button>
           </div>
-          <input type="range" class="compression-slider" id="revCompSlider" min="0" max="30" value="0" step="1">
-          <div class="compression-impact low" id="revCompImpact">Fully stretched — no friction penalty</div>
+          <input type="range" class="compression-slider" id="revCompSlider" min="4" max="30" value="4" step="1">
+          <div class="compression-impact low" id="revCompImpact">4% compressed — minimum realistic install</div>
         </div>
       </div>
     </div>
@@ -3922,8 +3922,7 @@ function updateCompression() {
   const impact = document.getElementById('compressionImpact');
   if (impact) {
     const fct = flexFactor(c);
-    if (c === 0) { impact.textContent = 'Fully stretched \u2014 no friction penalty'; impact.className = 'compression-impact low'; }
-    else if (c <= 10) { impact.textContent = c + '% compressed \u2014 ' + fct.toFixed(1) + 'x friction'; impact.className = 'compression-impact low'; }
+    if (c <= 10) { impact.textContent = c + '% compressed \u2014 ' + fct.toFixed(1) + 'x friction'; impact.className = 'compression-impact low'; }
     else if (c <= 20) { impact.textContent = c + '% compressed \u2014 ' + fct.toFixed(1) + 'x friction'; impact.className = 'compression-impact medium'; }
     else { impact.textContent = c + '% compressed \u2014 ' + fct.toFixed(1) + 'x friction \u26a0 HIGH'; impact.className = 'compression-impact high'; }
   }
@@ -4432,7 +4431,7 @@ let cfmEstTightness = 'semi-tight';
 function mkRun(idx, parentIdx, branchLabel) {
   return {
     name: 'Run '+(idx+1),
-    airPath: 'supply', material: 'metal', compression: 0,
+    airPath: 'supply', material: 'metal', compression: 4,
     ductSize: 8, asp: 0.50,
     steps: [],
     parentRun: parentIdx !== undefined ? parentIdx : null,
@@ -4597,7 +4596,7 @@ function renderRunArea() {
   const sizeOpts = sizes.map(s=>'<option value="'+s+'"'+(r.ductSize===s?' selected':'')+'>'+s+'\"</option>').join('');
 
   // Compression
-  const compHTML = r.material==='flex' ? '<div style="margin-top:6px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span class="input-label">Flex Compression</span><span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+r.compression+'%</span></div><div style="display:flex;gap:4px;flex-wrap:wrap">'+[0,5,10,15,20,25,30].map(p=>'<button class="compression-preset-btn'+(r.compression===p?' active':'')+'" data-sc="'+p+'">'+p+'%</button>').join('')+'</div></div>' : '';
+  const compHTML = r.material==='flex' ? '<div style="margin-top:6px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span class="input-label">Flex Compression</span><span style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+r.compression+'%</span></div><div style="display:flex;gap:4px;flex-wrap:wrap">'+[4,5,10,15,20,25,30].map(p=>'<button class="compression-preset-btn'+(r.compression===p?' active':'')+'" data-sc="'+p+'">'+p+'%</button>').join('')+'</div></div>' : '';
 
   // Branch context info
   var branchCtx = '';
@@ -4879,7 +4878,7 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
   if (ap) { SS.runs[SS.activeRun].airPath=ap.dataset.sap; renderRunArea(); calcSystem(); updateSysFilterDisclaimer(); return; }
   // Material
   const mat = t.closest('[data-smat]');
-  if (mat) { const r=SS.runs[SS.activeRun]; r.material=mat.dataset.smat; if(r.material==='metal')r.compression=0; renderRunArea(); calcSystem(); return; }
+  if (mat) { const r=SS.runs[SS.activeRun]; r.material=mat.dataset.smat; if(r.material==='metal')r.compression=0; else if(r.material==='flex'&&r.compression<4)r.compression=4; renderRunArea(); calcSystem(); return; }
   // Compression
   const sc = t.closest('[data-sc]');
   if (sc) { SS.runs[SS.activeRun].compression=parseInt(sc.dataset.sc); renderRunArea(); calcSystem(); return; }
@@ -5735,7 +5734,7 @@ document.getElementById('page-psychro').addEventListener('input', function(ev) {
 
 
 // ===== ENHANCED REVERSE MODE =====
-var revState = {shape:'round', material:'metal', compression:0, insulated:false};
+var revState = {shape:'round', material:'metal', compression:4, insulated:false};
 
 function calcReverse() {
   var shape = revState.shape;

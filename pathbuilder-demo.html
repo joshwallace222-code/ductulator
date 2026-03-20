@@ -1,75 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>System Builder v2</title>
+<title>System Builder v3</title>
 <style>
+/* ========== RESET ========== */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:#1a1a1a;color:#e0e0e0;font-family:-apple-system,system-ui,sans-serif;padding:0;max-width:420px;margin:0 auto;min-height:100vh}
+html{scroll-behavior:smooth}
+body{
+  background:#1a1a1a;
+  color:#e0e0e0;
+  font-family:-apple-system,system-ui,sans-serif;
+  padding:0;
+  max-width:420px;
+  margin:0 auto;
+  min-height:100vh;
+  padding-bottom:72px;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size:20px 20px;
+}
 button,select,input{font-family:inherit;-webkit-appearance:none;appearance:none}
 
-/* Header */
-.hdr{background:#111;padding:12px 16px;border-bottom:1px solid #333;position:sticky;top:0;z-index:10}
+/* ========== MONO FONT ========== */
+.mono{font-family:'SF Mono','Menlo','Courier New',monospace}
+
+/* ========== HEADER ========== */
+.hdr{background:#111;padding:14px 16px;border-bottom:1px solid #333;position:sticky;top:0;z-index:20}
+.hdr-row{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:28px;height:28px;flex-shrink:0}
+.hdr-logo svg{width:100%;height:100%}
 .hdr-title{color:#d32f2f;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
 .hdr-sub{color:#888;font-size:11px;margin-top:2px}
 
-/* Step indicator */
-.steps{display:flex;gap:0;padding:12px 16px;background:#1a1a1a;border-bottom:1px solid #2a2a2a}
-.step-pill{flex:1;text-align:center;padding:8px 4px;font-size:11px;font-weight:600;color:#666;border-bottom:2px solid transparent;cursor:pointer}
-.step-pill.active{color:#d32f2f;border-bottom-color:#d32f2f}
-.step-pill.done{color:#4caf50;border-bottom-color:#4caf50}
+/* ========== PROGRESS BAR ========== */
+.progress-wrap{padding:0 16px;background:#111;border-bottom:1px solid #2a2a2a;padding-bottom:12px;padding-top:10px}
+.step-labels{display:flex;justify-content:space-between;margin-bottom:6px}
+.step-lbl{font-size:10px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;transition:color .3s;flex:1;text-align:center}
+.step-lbl.active{color:#d32f2f}
+.step-lbl.done{color:#4caf50}
+.progress-track{height:4px;background:#333;border-radius:2px;position:relative;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#d32f2f,#ff5252);transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.progress-fill::after{content:'';position:absolute;right:0;top:0;width:30px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
 
-/* Content area */
+/* Step dots on progress bar */
+.progress-dots{position:absolute;top:-3px;left:0;right:0;height:10px;display:flex;justify-content:space-between;pointer-events:none}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#333;border:2px solid #555;transition:all .3s}
+.progress-dot.active{background:#d32f2f;border-color:#d32f2f;box-shadow:0 0 8px rgba(211,47,47,.5)}
+.progress-dot.done{background:#4caf50;border-color:#4caf50}
+
+/* ========== CONTENT ========== */
 .content{padding:16px}
 
-/* Cards */
-.card{background:#222;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:12px}
-.card-title{font-size:13px;font-weight:700;color:#d32f2f;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+/* ========== STEP TRANSITIONS ========== */
+.wizard-page{display:none;opacity:0;transform:translateY(12px)}
+.wizard-page.active{display:block;animation:fadeSlideIn .35s ease forwards}
+@keyframes fadeSlideIn{to{opacity:1;transform:translateY(0)}}
+
+/* ========== CARDS ========== */
+.card{background:#222;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:12px;border-left:3px solid transparent;background-clip:padding-box;position:relative;transition:box-shadow .2s,border-color .2s}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.card-accent{border-image:linear-gradient(180deg,#d32f2f,#1a1a1a) 1;border-left-width:3px;border-left-style:solid}
+.card-title{font-size:13px;font-weight:700;color:#d32f2f;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card-title svg{width:16px;height:16px;flex-shrink:0}
 .card-desc{font-size:12px;color:#999;line-height:1.5;margin-bottom:10px}
 
-/* Guided prompt */
-.prompt{background:#2a2a2a;border-left:3px solid #d32f2f;padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
-.prompt-q{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:6px}
+/* ========== PROMPTS ========== */
+.prompt{background:#2a2a2a;border-left:3px solid;border-image:linear-gradient(180deg,#d32f2f,#3a1a1a) 1;padding:10px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
+.prompt-q{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.prompt-q svg{width:16px;height:16px;flex-shrink:0;color:#d32f2f}
 .prompt-help{font-size:11px;color:#888;line-height:1.4}
 
-/* Option buttons */
+/* ========== OPTION BUTTONS ========== */
 .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.opt-btn{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .12s}
+.opt-btn{
+  background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:12px 8px;
+  text-align:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+  min-height:44px;
+}
 .opt-btn:active{transform:scale(0.97)}
-.opt-btn.active{background:#d32f2f;border-color:#d32f2f}
-.opt-btn .opt-icon{font-size:20px;margin-bottom:3px}
+.opt-btn.active{background:#d32f2f;border-color:#d32f2f;box-shadow:0 0 16px rgba(211,47,47,.25)}
+.opt-btn.active::before{
+  content:'';position:absolute;inset:0;border-radius:7px;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.1);
+  animation:pulseGlow 2s infinite ease-in-out;
+}
+@keyframes pulseGlow{0%,100%{opacity:.3}50%{opacity:.7}}
+.opt-btn .opt-icon{margin-bottom:3px;display:flex;justify-content:center;align-items:center}
+.opt-btn .opt-icon svg{width:24px;height:24px}
 .opt-btn .opt-label{font-size:12px;font-weight:600;color:#ccc}
 .opt-btn.active .opt-label{color:#fff}
 .opt-btn .opt-note{font-size:9px;color:#888;margin-top:2px}
 .opt-btn.active .opt-note{color:rgba(255,255,255,.7)}
 
-/* Input rows */
+/* ========== RIPPLE EFFECT ========== */
+.ripple{position:relative;overflow:hidden}
+.ripple::after{
+  content:'';position:absolute;width:100%;height:100%;top:0;left:0;
+  pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.15) 10%,transparent 10%);
+  background-repeat:no-repeat;background-position:50%;
+  transform:scale(10,10);opacity:0;transition:transform .5s,opacity 1s;
+}
+.ripple:active::after{transform:scale(0,0);opacity:.3;transition:0s}
+
+/* ========== INPUTS ========== */
 .input-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}
 .input-group{flex:1}
 .input-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-weight:600}
-.input-field{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:10px;font-size:14px;width:100%}
-.input-field:focus{border-color:#d32f2f;outline:none}
-select.input-field{padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.input-field{background:#333;border:1px solid #555;color:#e0e0e0;border-radius:6px;padding:10px;font-size:14px;width:100%;min-height:44px}
+.input-field:focus{border-color:#d32f2f;outline:none;box-shadow:0 0 0 2px rgba(211,47,47,.2)}
+select.input-field{padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-color:#333}
 
-/* Trunk map */
-.trunk-map{position:relative;padding:20px 0}
-.trunk-center{width:40px;height:40px;background:#d32f2f;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;position:relative;z-index:2}
-.trunk-arms{display:flex;justify-content:center;align-items:flex-start;margin-top:-20px;padding-top:20px}
-.trunk-arm{flex:1;padding:12px 8px 0;position:relative}
-.trunk-arm::before{content:'';position:absolute;top:0;width:2px;height:12px;background:#d32f2f}
-.trunk-arm.left::before{right:0}
-.trunk-arm.right::before{left:0}
-.trunk-arm-label{font-size:10px;color:#d32f2f;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
-.trunk-arm.left{text-align:right;border-right:2px solid #d32f2f}
-.trunk-arm.right{border-left:2px solid #d32f2f}
-.trunk-arm.left .trunk-arm-label{padding-right:8px}
-.trunk-arm.right .trunk-arm-label{padding-left:8px}
+/* ========== SHAPE TOGGLE ========== */
+.shape-toggle{display:flex;gap:0;border:1px solid #555;border-radius:6px;overflow:hidden;margin-bottom:10px}
+.shape-btn{flex:1;padding:8px;text-align:center;font-size:11px;font-weight:600;color:#888;background:#333;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+.shape-btn.active{background:#d32f2f;color:#fff}
+.shape-btn svg{width:14px;height:14px}
 
-/* Branch list */
-.branch-item{background:#2a2a2a;border:1px solid #3a3a3a;border-radius:6px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;cursor:pointer}
+/* ========== TRUNK CARDS ========== */
+.trunk-card{position:relative}
+.trunk-remove{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#333;border:1px solid #555;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.trunk-remove:hover{background:#d32f2f;border-color:#d32f2f}
+.trunk-remove svg{width:14px;height:14px;color:#999}
+.trunk-remove:hover svg{color:#fff}
+
+/* ========== BRANCH LIST ========== */
+.branch-item{background:#2a2a2a;border:1px solid #3a3a3a;border-radius:6px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;min-height:44px}
 .branch-item:active{background:#333}
-.branch-num{width:22px;height:22px;background:#d32f2f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.branch-num{width:24px;height:24px;background:#d32f2f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
 .branch-info{flex:1;min-width:0}
 .branch-name{font-size:12px;font-weight:600;color:#e0e0e0}
 .branch-detail{font-size:10px;color:#888}
@@ -77,8 +155,31 @@ select.input-field{padding-right:28px;background-image:url("data:image/svg+xml,%
 .branch-status.pending{background:#333;color:#888}
 .branch-status.done{background:rgba(76,175,80,.15);color:#4caf50}
 .branch-status.active-run{background:rgba(211,47,47,.15);color:#d32f2f}
+.branch-remove{width:24px;height:24px;border-radius:50%;background:#333;border:1px solid #555;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.branch-remove:hover{background:#d32f2f;border-color:#d32f2f}
+.branch-remove svg{width:12px;height:12px;color:#888}
 
-/* Path steps */
+/* ========== FITTINGS ========== */
+.fittings-section{margin:10px 0}
+.fittings-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600}
+.fit-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.fit-btn{background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:11px;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:4px;min-height:36px;transition:all .12s}
+.fit-btn:active{background:#d32f2f;border-color:#d32f2f;color:#fff}
+.fit-btn svg{width:14px;height:14px;flex-shrink:0}
+.fit-list{margin-top:6px}
+.fit-item{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#1a1a1a;border-radius:4px;margin-bottom:4px;font-size:11px;color:#ccc}
+.fit-item-name{flex:1}
+.fit-item-eq{color:#ff9800;font-weight:600;font-family:'SF Mono','Menlo',monospace;font-size:11px}
+.fit-item-rm{width:20px;height:20px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.fit-item-rm:hover{background:#d32f2f}
+.fit-item-rm svg{width:10px;height:10px;color:#888}
+
+/* ========== COMPRESSION ========== */
+.compression-section{margin:10px 0;padding:10px;background:#1e1e1e;border-radius:6px;border:1px solid #333}
+.compression-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600}
+.compression-val{font-size:13px;font-weight:600;color:#ff9800;font-family:'SF Mono','Menlo',monospace}
+
+/* ========== PATH STEPS ========== */
 .path-step{display:flex;align-items:center;gap:8px;padding:6px 0;position:relative}
 .path-step-line{position:absolute;left:11px;top:30px;width:2px;height:calc(100% - 22px);background:#444;z-index:0}
 .path-step:last-child .path-step-line{display:none}
@@ -90,170 +191,294 @@ select.input-field{padding-right:28px;background-image:url("data:image/svg+xml,%
 .path-step-info{flex:1}
 .path-step-name{font-size:12px;font-weight:600}
 .path-step-detail{font-size:10px;color:#888}
-.path-step-eq{font-size:10px;color:#ff9800;font-weight:600;flex-shrink:0}
+.path-step-eq{font-size:10px;color:#ff9800;font-weight:600;flex-shrink:0;font-family:'SF Mono','Menlo',monospace}
 
-/* Primary button */
-.btn-primary{background:#d32f2f;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-top:8px}
+/* ========== BUTTONS ========== */
+.btn-primary{background:#d32f2f;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-top:8px;min-height:44px;position:relative;overflow:hidden;transition:background .15s}
 .btn-primary:active{background:#b71c1c}
 .btn-primary:disabled{background:#555;color:#888;cursor:default}
-.btn-secondary{background:transparent;color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;padding:10px;font-size:13px;font-weight:600;width:100%;cursor:pointer;margin-top:8px}
+.btn-secondary{background:transparent;color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;padding:10px;font-size:13px;font-weight:600;width:100%;cursor:pointer;margin-top:8px;min-height:44px;position:relative;overflow:hidden;transition:all .15s}
 .btn-secondary:active{background:rgba(211,47,47,.1)}
+.btn-add{background:#1a1a1a;border:1px dashed #555;border-radius:8px;padding:12px;font-size:13px;font-weight:600;color:#888;width:100%;cursor:pointer;margin-top:8px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.btn-add:hover{border-color:#d32f2f;color:#d32f2f}
+.btn-add svg{width:16px;height:16px}
 
-/* Results summary */
+/* ========== RESULTS ========== */
 .results-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.result-cell{background:#2a2a2a;border:1px solid #333;border-radius:8px;padding:8px;text-align:center}
-.result-val{font-size:16px;font-weight:700;font-family:'Courier New',monospace}
+.result-cell{background:#2a2a2a;border:1px solid #333;border-radius:8px;padding:10px;text-align:center}
+.result-val{font-size:18px;font-weight:700;font-family:'SF Mono','Menlo','Courier New',monospace}
 .result-val.ok{color:#4caf50}
 .result-val.warn{color:#ff9800}
 .result-val.bad{color:#d32f2f}
 .result-label{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.3px;margin-top:2px}
 
-/* Quick add fitting row */
-.quick-fit{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.quick-fit-btn{background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:11px;color:#ccc;cursor:pointer;display:flex;align-items:center;gap:4px}
-.quick-fit-btn:active{background:#d32f2f;border-color:#d32f2f;color:#fff}
-.quick-fit-btn svg{width:14px;height:14px;flex-shrink:0}
+/* ========== GAUGE BAR ========== */
+.gauge-wrap{margin:12px 0}
+.gauge-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;display:flex;justify-content:space-between}
+.gauge-track{height:16px;background:#333;border-radius:8px;overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.gauge-fill.green{background:linear-gradient(90deg,#2e7d32,#4caf50)}
+.gauge-fill.yellow{background:linear-gradient(90deg,#4caf50,#ff9800)}
+.gauge-fill.red{background:linear-gradient(90deg,#ff9800,#d32f2f)}
+.gauge-markers{display:flex;justify-content:space-between;margin-top:3px;font-size:9px;color:#666;font-family:'SF Mono','Menlo',monospace}
 
-/* Info banner */
-.info-banner{background:rgba(33,150,243,.1);border:1px solid rgba(33,150,243,.3);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+/* ========== TEL BAR ========== */
+.tel-bar-wrap{height:6px;background:#333;border-radius:3px;overflow:hidden;margin-top:4px;width:100%}
+.tel-bar{height:100%;border-radius:3px;transition:width .4s ease}
+
+/* ========== TRUNK GROUP ========== */
+.trunk-group{margin-bottom:16px}
+.trunk-group-header{display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:6px;border-bottom:1px solid #333}
+.trunk-group-header svg{width:16px;height:16px;color:#d32f2f}
+.trunk-group-label{font-size:12px;font-weight:700;color:#d32f2f;text-transform:uppercase;letter-spacing:0.5px}
+.trunk-group-tel{font-size:11px;color:#ff9800;font-family:'SF Mono','Menlo',monospace;margin-left:auto}
+
+/* ========== FLOATING SUMMARY BAR ========== */
+.float-bar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:420px;
+  background:linear-gradient(180deg,#111,#0a0a0a);
+  border-top:1px solid #333;
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-around;
+  z-index:20;
+  font-size:11px;
+}
+.float-stat{display:flex;flex-direction:column;align-items:center;gap:1px}
+.float-stat-val{font-size:14px;font-weight:700;font-family:'SF Mono','Menlo',monospace;color:#e0e0e0}
+.float-stat-label{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.3px}
+
+/* ========== INFO BANNER ========== */
+.info-banner{background:rgba(33,150,243,.08);border:1px solid rgba(33,150,243,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px}
+.info-banner svg{width:16px;height:16px;flex-shrink:0;color:#64b5f6;margin-top:1px}
 .info-banner p{font-size:11px;color:#90caf9;line-height:1.5}
 .info-banner strong{color:#64b5f6}
 
-/* Wizard flow */
-.wizard-page{display:none}
-.wizard-page.active{display:block}
+/* ========== FOOTER ========== */
+.site-footer{text-align:center;padding:24px 16px 80px;font-size:10px;color:#555}
+.site-footer a{color:#666;text-decoration:none}
+.site-footer a:hover{color:#999}
 </style>
 </head>
 <body>
 
+<!-- ========== HEADER ========== -->
 <div class="hdr">
-  <div class="hdr-title">System Builder</div>
-  <div class="hdr-sub">Walk through your system step by step</div>
+  <div class="hdr-row">
+    <div class="hdr-logo">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="8" width="24" height="12" rx="6" stroke="#d32f2f" stroke-width="2"/>
+        <line x1="8" y1="14" x2="20" y2="14" stroke="#d32f2f" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <circle cx="6" cy="14" r="2" fill="#d32f2f"/>
+        <path d="M20 9 L26 6 M20 19 L26 22 M20 14 L27 14" stroke="#d32f2f" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="hdr-title">System Builder</div>
+      <div class="hdr-sub">Duct layout wizard v3</div>
+    </div>
+  </div>
 </div>
 
-<div class="steps" id="stepBar">
-  <div class="step-pill active" data-step="1">1. Layout</div>
-  <div class="step-pill" data-step="2">2. Trunks</div>
-  <div class="step-pill" data-step="3">3. Branches</div>
-  <div class="step-pill" data-step="4">4. Results</div>
+<!-- ========== PROGRESS BAR ========== -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="step-labels">
+    <div class="step-lbl active" data-step="1">Layout</div>
+    <div class="step-lbl" data-step="2">Trunks</div>
+    <div class="step-lbl" data-step="3">Branches</div>
+    <div class="step-lbl" data-step="4">Results</div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+    <div class="progress-dots">
+      <div class="progress-dot active" data-step="1"></div>
+      <div class="progress-dot" data-step="2"></div>
+      <div class="progress-dot" data-step="3"></div>
+      <div class="progress-dot" data-step="4"></div>
+    </div>
+  </div>
 </div>
 
+<!-- ========== CONTENT ========== -->
 <div class="content">
 
 <!-- ==================== STEP 1: SYSTEM LAYOUT ==================== -->
 <div class="wizard-page active" id="page1">
-  
+
   <div class="prompt">
-    <div class="prompt-q">What does this system look like?</div>
+    <div class="prompt-q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      What does this system look like?
+    </div>
     <div class="prompt-help">Pick the layout that matches what you see. Most residential systems have a unit with trunks going out to branches that serve each room.</div>
   </div>
 
   <div class="opt-grid" id="layoutOpts">
-    <div class="opt-btn active" data-layout="LR" style="cursor:pointer">
-      <div class="opt-icon">↙️ ↘️</div>
+    <div class="opt-btn active ripple" data-layout="LR">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/></svg></div>
       <div class="opt-label">Left + Right</div>
       <div class="opt-note">Trunk each direction</div>
     </div>
-    <div class="opt-btn" data-layout="1SIDE" style="cursor:pointer">
-      <div class="opt-icon">➡️</div>
+    <div class="opt-btn ripple" data-layout="1SIDE">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="4" cy="12" r="2"/><line x1="6" y1="12" x2="22" y2="12"/><polyline points="18 8 22 12 18 16"/></svg></div>
       <div class="opt-label">One Direction</div>
       <div class="opt-note">Single trunk run</div>
     </div>
-    <div class="opt-btn" data-layout="RADIAL" style="cursor:pointer">
-      <div class="opt-icon">✳️</div>
+    <div class="opt-btn ripple" data-layout="RADIAL">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/><line x1="5.6" y1="5.6" x2="9" y2="9"/><line x1="15" y1="15" x2="18.4" y2="18.4"/></svg></div>
       <div class="opt-label">Radial / Homerun</div>
       <div class="opt-note">Branches from plenum</div>
     </div>
-    <div class="opt-btn" data-layout="CUSTOM" style="cursor:pointer">
-      <div class="opt-icon">🔧</div>
+    <div class="opt-btn ripple" data-layout="CUSTOM">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
       <div class="opt-label">Custom</div>
       <div class="opt-note">I'll set it up</div>
     </div>
   </div>
 
   <div class="prompt" style="margin-top:8px">
-    <div class="prompt-q">What's the air path?</div>
+    <div class="prompt-q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v6m0 4v2m0 4v4"/><path d="M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24"/><path d="M2 12h6m4 0h2m4 0h4"/></svg>
+      What's the air path?
+    </div>
   </div>
   <div class="opt-grid" id="airPathOpts">
-    <div class="opt-btn active" data-ap="supply" style="cursor:pointer">
+    <div class="opt-btn active ripple" data-ap="supply">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="5" x2="12" y2="19"/></svg></div>
       <div class="opt-label">Supply</div>
       <div class="opt-note">Air to rooms</div>
     </div>
-    <div class="opt-btn" data-ap="return" style="cursor:pointer">
+    <div class="opt-btn ripple" data-ap="return">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="5 12 12 19 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg></div>
       <div class="opt-label">Return</div>
       <div class="opt-note">Air back to unit</div>
     </div>
   </div>
 
   <div class="prompt" style="margin-top:8px">
-    <div class="prompt-q">What's the main duct material?</div>
+    <div class="prompt-q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/></svg>
+      What's the default duct material?
+    </div>
   </div>
   <div class="opt-grid" id="matOpts">
-    <div class="opt-btn active" data-mat="metal" style="cursor:pointer">
+    <div class="opt-btn active ripple" data-mat="metal">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="4"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg></div>
       <div class="opt-label">Hard Duct</div>
       <div class="opt-note">Sheet metal / round</div>
     </div>
-    <div class="opt-btn" data-mat="flex" style="cursor:pointer">
+    <div class="opt-btn ripple" data-mat="flex">
+      <div class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M3 8c2-3 4-3 6 0s4 3 6 0 4-3 6 0" opacity=".4"/><path d="M3 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0" opacity=".4"/></svg></div>
       <div class="opt-label">Flex Duct</div>
       <div class="opt-note">Insulated flex</div>
     </div>
   </div>
 
-  <button class="btn-primary" id="toStep2">Next: Set Up Trunks</button>
+  <button class="btn-primary ripple" id="toStep2">Next: Set Up Trunks</button>
 </div>
 
 <!-- ==================== STEP 2: TRUNKS ==================== -->
 <div class="wizard-page" id="page2">
-  
+
   <div class="info-banner">
-    <p><strong>You're mapping the trunks.</strong> A trunk is the main large duct coming off the plenum. Tell us the size and how far it runs before branches split off.</p>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <p><strong>You're mapping the trunks.</strong> A trunk is the main large duct coming off the plenum. Set the size, shape, and length for each trunk.</p>
   </div>
 
   <div id="trunkCards"></div>
+  <div id="addTrunkWrap"></div>
 
-  <button class="btn-primary" id="toStep3">Next: Add Branches</button>
-  <button class="btn-secondary" id="backTo1">Back to Layout</button>
+  <button class="btn-primary ripple" id="toStep3">Next: Add Branches</button>
+  <button class="btn-secondary ripple" id="backTo1">Back to Layout</button>
 </div>
 
 <!-- ==================== STEP 3: BRANCHES ==================== -->
 <div class="wizard-page" id="page3">
 
   <div class="info-banner">
-    <p><strong>Now add each branch.</strong> A branch is a smaller duct that splits off the trunk and runs to a room. Tap each one to enter its details — size, length, fittings, and where it ends (boot/register type).</p>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M6 9h12l-3-3"/><path d="M6 15h8l-3-3"/></svg>
+    <p><strong>Now add each branch.</strong> A branch splits off a trunk and runs to a room. Tap each one to enter size, length, fittings, CFM, and endpoint type.</p>
   </div>
 
   <div id="branchArea"></div>
 
-  <button class="btn-secondary" id="addBranch" style="margin-bottom:8px">+ Add Another Branch</button>
-  <button class="btn-primary" id="toStep4">Calculate Results</button>
-  <button class="btn-secondary" id="backTo2">Back to Trunks</button>
+  <button class="btn-add" id="addBranch">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Another Branch
+  </button>
+  <button class="btn-primary ripple" id="toStep4" style="margin-top:12px">Calculate Results</button>
+  <button class="btn-secondary ripple" id="backTo2">Back to Trunks</button>
 </div>
 
 <!-- ==================== STEP 4: RESULTS ==================== -->
 <div class="wizard-page" id="page4">
 
-  <div class="card">
-    <div class="card-title">System Summary</div>
+  <div class="card card-accent">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      System Summary
+    </div>
     <div id="systemSummary"></div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Critical Path (longest run)</div>
+  <div class="card card-accent">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      System Friction Rate
+    </div>
+    <div id="frictionGauge"></div>
+  </div>
+
+  <div class="card card-accent">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Critical Path (longest run)
+    </div>
     <div id="critPath"></div>
   </div>
 
-  <div class="card">
-    <div class="card-title">All Runs</div>
+  <div class="card card-accent">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      All Runs by Trunk
+    </div>
     <div id="allRuns"></div>
   </div>
 
-  <button class="btn-secondary" id="backTo3">Back to Branches</button>
+  <button class="btn-secondary ripple" id="backTo3">Back to Branches</button>
 </div>
 
 </div><!-- /content -->
 
+<!-- ========== FLOATING SUMMARY BAR ========== -->
+<div class="float-bar" id="floatBar">
+  <div class="float-stat">
+    <div class="float-stat-val mono" id="fbTrunks">0</div>
+    <div class="float-stat-label">Trunks</div>
+  </div>
+  <div class="float-stat">
+    <div class="float-stat-val mono" id="fbBranches">0</div>
+    <div class="float-stat-label">Branches</div>
+  </div>
+  <div class="float-stat">
+    <div class="float-stat-val mono" id="fbTEL">--</div>
+    <div class="float-stat-label">Max TEL</div>
+  </div>
+  <div class="float-stat">
+    <div class="float-stat-val mono" id="fbFR">--</div>
+    <div class="float-stat-label">FR</div>
+  </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="site-footer">
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</footer>
+
 <script>
-// ============ STATE ============
+// ================================================================
+// STATE
+// ================================================================
 var SYS = {
   layout: 'LR',
   airPath: 'supply',
@@ -263,51 +488,141 @@ var SYS = {
   activeBranch: -1
 };
 
-// ============ OPTION GRID HELPER ============
-function setupOptGrid(containerId, stateKey, stateObj) {
+var ROUND_SIZES = [4,5,6,7,8,9,10,12,14,16,18,20,22,24];
+var RECT_WIDTHS = [4,6,8,10,12,14,16,18,20,22,24];
+var RECT_HEIGHTS = [4,6,8,10,12,14,16,18,20,22,24];
+var COMPRESSION_OPTIONS = [4,5,10,15,20,25,30];
+
+var BOOT_EQ = {
+  '90boot':       {name:'90\u00B0 Boot',           eq:55},
+  'straightboot': {name:'Straight Boot',        eq:35},
+  'ceilTop':      {name:'Ceiling Diff (top)',   eq:10},
+  'ceilSide':     {name:'Ceiling Diff (side)',  eq:40},
+  'floorReg':     {name:'Floor Register',       eq:35},
+  'wallReg':      {name:'Wall Register',        eq:40}
+};
+
+var FITTING_TYPES = [
+  {id:'elbow90',  name:'90\u00B0 Elbow',  icon:'elbow90',  eqFn: function(sz){return sz<=6?10:sz<=8?15:sz<=10?20:25;}},
+  {id:'elbow45',  name:'45\u00B0 Elbow',  icon:'elbow45',  eqFn: function(){return 5;}},
+  {id:'tee',      name:'Tee',             icon:'tee',      eqFn: function(){return 35;}},
+  {id:'wye',      name:'Wye',             icon:'wye',      eqFn: function(){return 15;}},
+  {id:'reducer',  name:'Reducer',         icon:'reducer',  eqFn: function(){return 5;}}
+];
+
+// ================================================================
+// SVG ICON HELPER
+// ================================================================
+function svgIcon(type) {
+  var icons = {
+    elbow90:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10a6 6 0 0 1 6-6h10"/></svg>',
+    elbow45:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L12 8h10"/></svg>',
+    tee:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="12" y1="8" x2="12" y2="20"/></svg>',
+    wye:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="20" x2="12" y2="12"/><line x1="12" y1="12" x2="6" y2="4"/><line x1="12" y1="12" x2="18" y2="4"/></svg>',
+    reducer:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h6l4 4h6"/><path d="M4 18h6l4-4h6"/></svg>',
+    remove:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    plus:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    round:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>',
+    rect:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>',
+    trunk:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>'
+  };
+  return icons[type] || '';
+}
+
+// ================================================================
+// EQUIVALENT DIAMETER
+// ================================================================
+function equivDiameter(w, h) {
+  return 1.3 * Math.pow(w * h, 0.625) / Math.pow(w + h, 0.25);
+}
+
+function getEffectiveDiameter(obj) {
+  if (obj.shape === 'rect') {
+    return equivDiameter(parseFloat(obj.width) || 8, parseFloat(obj.height) || 8);
+  }
+  return parseFloat(obj.size) || 6;
+}
+
+// ================================================================
+// FLEX COMPRESSION FACTOR
+// ================================================================
+function flexFactor(c) {
+  c = parseFloat(c) || 4;
+  if (c <= 15) return 1 + (c / 15);
+  return 2 + ((c - 15) / 15) * 2;
+}
+
+// ================================================================
+// OPTION GRID SETUP (STATIC)
+// ================================================================
+function setupOptGrid(containerId) {
   var el = document.getElementById(containerId);
   if (!el) return;
-  var btns = el.querySelectorAll('.opt-btn');
-  btns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      btns.forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      var val = btn.dataset.layout || btn.dataset.ap || btn.dataset.mat;
-      if (btn.dataset.layout) stateObj.layout = val;
-      if (btn.dataset.ap) stateObj.airPath = val;
-      if (btn.dataset.mat) stateObj.material = val;
-    });
+  el.addEventListener('click', function(e) {
+    var btn = e.target.closest('.opt-btn');
+    if (!btn) return;
+    var btns = el.querySelectorAll('.opt-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    if (btn.dataset.layout) SYS.layout = btn.dataset.layout;
+    if (btn.dataset.ap) SYS.airPath = btn.dataset.ap;
+    if (btn.dataset.mat) SYS.material = btn.dataset.mat;
   });
 }
 
-setupOptGrid('layoutOpts', 'layout', SYS);
-setupOptGrid('airPathOpts', 'airPath', SYS);
-setupOptGrid('matOpts', 'material', SYS);
+setupOptGrid('layoutOpts');
+setupOptGrid('airPathOpts');
+setupOptGrid('matOpts');
 
-// ============ STEP NAVIGATION ============
+// ================================================================
+// STEP NAVIGATION
+// ================================================================
 var currentStep = 1;
 
 function goToStep(n) {
   currentStep = n;
   for (var i = 1; i <= 4; i++) {
     var pg = document.getElementById('page' + i);
-    pg.classList.toggle('active', i === n);
-    var pill = document.querySelector('.step-pill[data-step="' + i + '"]');
-    pill.classList.remove('active', 'done');
-    if (i < n) pill.classList.add('done');
-    if (i === n) pill.classList.add('active');
+    pg.classList.remove('active');
+    if (i === n) {
+      // Small delay to trigger animation
+      setTimeout((function(page) {
+        return function() { page.classList.add('active'); };
+      })(pg), 20);
+    }
   }
-  window.scrollTo(0, 0);
+  // Update step labels
+  var lbls = document.querySelectorAll('.step-lbl');
+  lbls.forEach(function(lbl) {
+    var s = parseInt(lbl.dataset.step);
+    lbl.classList.remove('active', 'done');
+    if (s < n) lbl.classList.add('done');
+    if (s === n) lbl.classList.add('active');
+  });
+  // Update progress dots
+  var dots = document.querySelectorAll('.progress-dot');
+  dots.forEach(function(d) {
+    var s = parseInt(d.dataset.step);
+    d.classList.remove('active', 'done');
+    if (s < n) d.classList.add('done');
+    if (s === n) d.classList.add('active');
+  });
+  // Update progress bar fill
+  var pct = ((n - 1) / 3) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  window.scrollTo({top: 0, behavior: 'smooth'});
   if (n === 2) renderTrunks();
   if (n === 3) renderBranches();
   if (n === 4) renderResults();
+  updateFloatBar();
 }
 
-// Step bar taps
-document.getElementById('stepBar').addEventListener('click', function(e) {
-  var pill = e.target.closest('.step-pill');
-  if (!pill) return;
-  var s = parseInt(pill.dataset.step);
+// Step label taps
+document.getElementById('progressWrap').addEventListener('click', function(e) {
+  var lbl = e.target.closest('.step-lbl');
+  if (!lbl) return;
+  var s = parseInt(lbl.dataset.step);
   if (s <= currentStep) goToStep(s);
 });
 
@@ -321,93 +636,194 @@ document.getElementById('toStep3').addEventListener('click', function() {
   initBranches();
   goToStep(3);
 });
-document.getElementById('toStep4').addEventListener('click', function() { goToStep(4); });
+document.getElementById('toStep4').addEventListener('click', function() {
+  if (SYS.activeBranch >= 0) {
+    saveBranchForm(SYS.activeBranch);
+    SYS.activeBranch = -1;
+  }
+  goToStep(4);
+});
 document.getElementById('backTo1').addEventListener('click', function() { goToStep(1); });
 document.getElementById('backTo2').addEventListener('click', function() { goToStep(2); });
 document.getElementById('backTo3').addEventListener('click', function() { goToStep(3); });
 
-// ============ STEP 2: TRUNKS ============
+// ================================================================
+// STEP 2: TRUNKS
+// ================================================================
 function initTrunks() {
-  if (SYS.trunks.length > 0) return; // already set up
+  if (SYS.trunks.length > 0) return;
   if (SYS.layout === 'LR') {
     SYS.trunks = [
-      {label:'Left Trunk', size:'10', length:'15', elbows:0},
-      {label:'Right Trunk', size:'10', length:'15', elbows:0}
+      {label:'Left Trunk', shape:'round', size:'10', width:'10', height:'8', length:'15', elbows90:0, elbows45:0, fittings:[]},
+      {label:'Right Trunk', shape:'round', size:'10', width:'10', height:'8', length:'15', elbows90:0, elbows45:0, fittings:[]}
     ];
   } else if (SYS.layout === '1SIDE') {
-    SYS.trunks = [{label:'Main Trunk', size:'10', length:'25', elbows:0}];
+    SYS.trunks = [{label:'Main Trunk', shape:'round', size:'10', width:'10', height:'8', length:'25', elbows90:0, elbows45:0, fittings:[]}];
   } else if (SYS.layout === 'RADIAL') {
-    SYS.trunks = [{label:'Plenum (direct branches)', size:'--', length:'0', elbows:0}];
+    SYS.trunks = [{label:'Plenum (direct)', shape:'round', size:'--', width:'--', height:'--', length:'0', elbows90:0, elbows45:0, fittings:[], isRadial:true}];
   } else {
-    SYS.trunks = [{label:'Trunk 1', size:'10', length:'15', elbows:0}];
+    SYS.trunks = [{label:'Trunk 1', shape:'round', size:'10', width:'10', height:'8', length:'15', elbows90:0, elbows45:0, fittings:[]}];
   }
 }
 
 function renderTrunks() {
   var html = '';
   SYS.trunks.forEach(function(t, i) {
-    var isRadial = SYS.layout === 'RADIAL';
-    html += '<div class="card">';
-    html += '<div class="card-title">' + t.label + '</div>';
+    var isRadial = t.isRadial;
+    html += '<div class="card card-accent trunk-card">';
+    html += '<div class="card-title">' + svgIcon('trunk') + ' ' + t.label + '</div>';
+    if (SYS.trunks.length > 1) {
+      html += '<div class="trunk-remove" data-remove-trunk="' + i + '">' + svgIcon('remove') + '</div>';
+    }
     if (!isRadial) {
-      html += '<div class="input-row">';
-      html += '<div class="input-group"><div class="input-label">Duct Size</div><select class="input-field" data-trunk-size="' + i + '">';
-      var sizes = [6,7,8,9,10,12,14,16,18,20,22,24];
-      sizes.forEach(function(s) {
-        html += '<option value="' + s + '"' + (t.size == s ? ' selected' : '') + '>' + s + '"</option>';
-      });
-      html += '</select></div>';
-      html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + t.length + '" data-trunk-len="' + i + '" min="1" max="200" step="1"></div>';
+      // Shape toggle
+      html += '<div class="shape-toggle">';
+      html += '<div class="shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-trunk-shape="' + i + '" data-shape="round">' + svgIcon('round') + ' Round</div>';
+      html += '<div class="shape-btn' + (t.shape === 'rect' ? ' active' : '') + '" data-trunk-shape="' + i + '" data-shape="rect">' + svgIcon('rect') + ' Rect</div>';
       html += '</div>';
+
+      if (t.shape === 'rect') {
+        html += '<div class="input-row">';
+        html += '<div class="input-group"><div class="input-label">Width (in)</div><select class="input-field" data-trunk-width="' + i + '">';
+        RECT_WIDTHS.forEach(function(w) {
+          html += '<option value="' + w + '"' + (t.width == w ? ' selected' : '') + '>' + w + '"</option>';
+        });
+        html += '</select></div>';
+        html += '<div class="input-group"><div class="input-label">Height (in)</div><select class="input-field" data-trunk-height="' + i + '">';
+        RECT_HEIGHTS.forEach(function(h) {
+          html += '<option value="' + h + '"' + (t.height == h ? ' selected' : '') + '>' + h + '"</option>';
+        });
+        html += '</select></div>';
+        html += '</div>';
+        var deq = equivDiameter(parseFloat(t.width) || 8, parseFloat(t.height) || 8);
+        html += '<div style="font-size:10px;color:#888;margin-bottom:8px">Equiv. diameter: <span class="mono" style="color:#ff9800">' + deq.toFixed(1) + '"</span></div>';
+      } else {
+        html += '<div class="input-row">';
+        html += '<div class="input-group"><div class="input-label">Duct Size</div><select class="input-field" data-trunk-size="' + i + '">';
+        ROUND_SIZES.forEach(function(s) {
+          html += '<option value="' + s + '"' + (t.size == s ? ' selected' : '') + '>' + s + '"</option>';
+        });
+        html += '</select></div>';
+        html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + t.length + '" data-trunk-len="' + i + '" min="1" max="200" step="1"></div>';
+        html += '</div>';
+      }
+
+      if (t.shape === 'rect') {
+        html += '<div class="input-row">';
+        html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + t.length + '" data-trunk-len="' + i + '" min="1" max="200" step="1"></div>';
+        html += '<div class="input-group"></div>';
+        html += '</div>';
+      }
+
       html += '<div class="input-row">';
-      html += '<div class="input-group"><div class="input-label">90° Elbows in trunk</div><select class="input-field" data-trunk-elbow="' + i + '">';
+      html += '<div class="input-group"><div class="input-label">90\u00B0 Elbows</div><select class="input-field" data-trunk-elbow90="' + i + '">';
       for (var e = 0; e <= 6; e++) {
-        html += '<option value="' + e + '"' + (t.elbows == e ? ' selected' : '') + '>' + e + '</option>';
+        html += '<option value="' + e + '"' + (t.elbows90 == e ? ' selected' : '') + '>' + e + '</option>';
       }
       html += '</select></div>';
-      html += '<div class="input-group"></div>';
+      html += '<div class="input-group"><div class="input-label">45\u00B0 Elbows</div><select class="input-field" data-trunk-elbow45="' + i + '">';
+      for (var e2 = 0; e2 <= 6; e2++) {
+        html += '<option value="' + e2 + '"' + (t.elbows45 == e2 ? ' selected' : '') + '>' + e2 + '</option>';
+      }
+      html += '</select></div>';
       html += '</div>';
-      html += '<div class="prompt-help" style="margin-top:4px">Measure the trunk from the plenum start collar to where the first branch splits off. Include any 90° turns the trunk makes.</div>';
+      html += '<div class="prompt-help" style="margin-top:4px">Measure the trunk from the plenum start collar to where branches split off.</div>';
     } else {
-      html += '<div class="card-desc">Radial / homerun systems have branches going directly from the plenum to each room. Skip trunk setup and go straight to branches.</div>';
+      html += '<div class="card-desc">Radial / homerun systems have branches going directly from the plenum to each room. No trunk to configure.</div>';
     }
     html += '</div>';
   });
   document.getElementById('trunkCards').innerHTML = html;
+
+  // Add trunk button (not for radial)
+  if (SYS.layout !== 'RADIAL') {
+    document.getElementById('addTrunkWrap').innerHTML = '<button class="btn-add" id="addTrunkBtn">' + svgIcon('plus') + ' Add Trunk</button>';
+  } else {
+    document.getElementById('addTrunkWrap').innerHTML = '';
+  }
+  updateFloatBar();
 }
 
 function saveTrunks() {
   SYS.trunks.forEach(function(t, i) {
+    if (t.isRadial) return;
     var sizeEl = document.querySelector('[data-trunk-size="' + i + '"]');
     var lenEl = document.querySelector('[data-trunk-len="' + i + '"]');
-    var elbEl = document.querySelector('[data-trunk-elbow="' + i + '"]');
+    var elb90El = document.querySelector('[data-trunk-elbow90="' + i + '"]');
+    var elb45El = document.querySelector('[data-trunk-elbow45="' + i + '"]');
+    var widthEl = document.querySelector('[data-trunk-width="' + i + '"]');
+    var heightEl = document.querySelector('[data-trunk-height="' + i + '"]');
     if (sizeEl) t.size = sizeEl.value;
     if (lenEl) t.length = lenEl.value;
-    if (elbEl) t.elbows = parseInt(elbEl.value) || 0;
+    if (elb90El) t.elbows90 = parseInt(elb90El.value) || 0;
+    if (elb45El) t.elbows45 = parseInt(elb45El.value) || 0;
+    if (widthEl) t.width = widthEl.value;
+    if (heightEl) t.height = heightEl.value;
   });
 }
 
-// ============ STEP 3: BRANCHES ============
+// Trunk card event delegation
+document.getElementById('trunkCards').addEventListener('click', function(e) {
+  // Shape toggle
+  var shapeBtn = e.target.closest('[data-trunk-shape]');
+  if (shapeBtn) {
+    var idx = parseInt(shapeBtn.dataset.trunkShape);
+    var shape = shapeBtn.dataset.shape;
+    saveTrunks();
+    SYS.trunks[idx].shape = shape;
+    renderTrunks();
+    return;
+  }
+  // Remove trunk
+  var rmBtn = e.target.closest('[data-remove-trunk]');
+  if (rmBtn && SYS.trunks.length > 1) {
+    var ri = parseInt(rmBtn.dataset.removeTrunk);
+    saveTrunks();
+    SYS.trunks.splice(ri, 1);
+    // Re-label
+    SYS.trunks.forEach(function(t, i) { if (!t.isRadial) t.label = 'Trunk ' + (i + 1); });
+    renderTrunks();
+  }
+});
+
+// Add trunk button
+document.getElementById('addTrunkWrap').addEventListener('click', function(e) {
+  var btn = e.target.closest('#addTrunkBtn');
+  if (!btn) return;
+  saveTrunks();
+  var n = SYS.trunks.length + 1;
+  SYS.trunks.push({label:'Trunk ' + n, shape:'round', size:'10', width:'10', height:'8', length:'15', elbows90:0, elbows45:0, fittings:[]});
+  renderTrunks();
+});
+
+// ================================================================
+// STEP 3: BRANCHES
+// ================================================================
 function initBranches() {
   if (SYS.branches.length > 0) return;
-  // Pre-populate based on layout
-  var branchCount = SYS.layout === 'LR' ? 8 : (SYS.layout === '1SIDE' ? 4 : 4);
+  var branchCount = SYS.layout === 'LR' ? 8 : 4;
   var perTrunk = SYS.trunks.length > 1 ? Math.ceil(branchCount / SYS.trunks.length) : branchCount;
-  
+
   SYS.branches = [];
   var num = 1;
   SYS.trunks.forEach(function(trunk, ti) {
-    var count = ti === 0 ? perTrunk : branchCount - perTrunk;
+    var count = (ti === 0) ? perTrunk : branchCount - perTrunk;
+    if (count < 1) count = 1;
     for (var b = 0; b < count; b++) {
       SYS.branches.push({
         trunkIdx: ti,
         num: num,
         room: 'Room ' + num,
+        cfm: '',
+        shape: 'round',
         size: '6',
+        width: '8',
+        height: '8',
+        material: SYS.material,
+        compression: 4,
         length: '12',
-        elbows: 1,
+        fittings: [],
         bootType: '90boot',
-        reducerFrom: trunk.size,
         done: false
       });
       num++;
@@ -418,69 +834,170 @@ function initBranches() {
 function renderBranches() {
   var html = '';
   var lastTrunk = -1;
-  
+
   SYS.branches.forEach(function(br, i) {
     if (br.trunkIdx !== lastTrunk) {
-      if (lastTrunk >= 0) html += '</div>'; // close prev group
+      if (lastTrunk >= 0) html += '</div>';
       var trunk = SYS.trunks[br.trunkIdx];
-      html += '<div class="card-title" style="margin:12px 0 8px;font-size:12px;color:#d32f2f">';
-      html += '↳ Off ' + trunk.label + ' (' + trunk.size + '″)';
-      html += '</div><div>';
+      if (trunk) {
+        var sizeLabel = trunk.isRadial ? 'Plenum' : (trunk.shape === 'rect' ? trunk.width + '\u00D7' + trunk.height + '"' : trunk.size + '\u2033');
+        html += '<div class="trunk-group-header">' + svgIcon('trunk') + '<span class="trunk-group-label">Off ' + trunk.label + ' (' + sizeLabel + ')</span></div><div>';
+      }
       lastTrunk = br.trunkIdx;
     }
-    
+
     var statusClass = br.done ? 'done' : (SYS.activeBranch === i ? 'active-run' : 'pending');
     var statusText = br.done ? 'Done' : (SYS.activeBranch === i ? 'Editing' : 'Tap to edit');
-    
+    var matLabel = br.material === 'flex' ? ' flex' : '';
+    var cfmLabel = br.cfm ? ' \u00B7 ' + br.cfm + ' CFM' : '';
+    var shapeLabel = br.shape === 'rect' ? br.width + '\u00D7' + br.height + '"' : br.size + '\u2033';
+    var fitCount = br.fittings.length;
+
     html += '<div class="branch-item" data-branch="' + i + '">';
     html += '<div class="branch-num">' + br.num + '</div>';
     html += '<div class="branch-info">';
     html += '<div class="branch-name">' + br.room + '</div>';
-    html += '<div class="branch-detail">' + br.size + '″ · ' + br.length + ' ft · ' + br.elbows + ' elbow' + (br.elbows !== 1 ? 's' : '') + '</div>';
+    html += '<div class="branch-detail">' + shapeLabel + matLabel + ' \u00B7 ' + br.length + ' ft' + (fitCount ? ' \u00B7 ' + fitCount + ' fittings' : '') + cfmLabel + '</div>';
     html += '</div>';
     html += '<div class="branch-status ' + statusClass + '">' + statusText + '</div>';
     html += '</div>';
-    
+
     // Expanded edit form
     if (SYS.activeBranch === i) {
-      html += '<div class="card" style="margin:6px 0 10px;border-color:#d32f2f">';
-      html += '<div class="input-row">';
-      html += '<div class="input-group"><div class="input-label">Room Name</div><input type="text" class="input-field" value="' + br.room + '" data-br-room="' + i + '"></div>';
-      html += '</div>';
-      html += '<div class="input-row">';
-      html += '<div class="input-group"><div class="input-label">Branch Size</div><select class="input-field" data-br-size="' + i + '">';
-      [5,6,7,8,9,10,12,14].forEach(function(s) {
-        html += '<option value="' + s + '"' + (br.size == s ? ' selected' : '') + '>' + s + '″</option>';
-      });
-      html += '</select></div>';
-      html += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + br.length + '" data-br-len="' + i + '" min="1" max="200"></div>';
-      html += '</div>';
-      html += '<div class="input-row">';
-      html += '<div class="input-group"><div class="input-label">90° Elbows</div><select class="input-field" data-br-elbow="' + i + '">';
-      for (var e = 0; e <= 6; e++) {
-        html += '<option value="' + e + '"' + (br.elbows == e ? ' selected' : '') + '>' + e + '</option>';
-      }
-      html += '</select></div>';
-      html += '<div class="input-group"><div class="input-label">Ends At</div><select class="input-field" data-br-boot="' + i + '">';
-      html += '<option value="90boot"' + (br.bootType === '90boot' ? ' selected' : '') + '>90° Boot (common)</option>';
-      html += '<option value="straightboot"' + (br.bootType === 'straightboot' ? ' selected' : '') + '>Straight Boot</option>';
-      html += '<option value="ceilTop"' + (br.bootType === 'ceilTop' ? ' selected' : '') + '>Ceiling Diff (top)</option>';
-      html += '<option value="ceilSide"' + (br.bootType === 'ceilSide' ? ' selected' : '') + '>Ceiling Diff (side)</option>';
-      html += '<option value="floorReg"' + (br.bootType === 'floorReg' ? ' selected' : '') + '>Floor Register</option>';
-      html += '<option value="wallReg"' + (br.bootType === 'wallReg' ? ' selected' : '') + '>Wall Register</option>';
-      html += '</select></div>';
-      html += '</div>';
-      html += '<button class="btn-primary" data-br-save="' + i + '">Save Branch ' + br.num + '</button>';
-      html += '</div>';
+      html += renderBranchForm(br, i);
     }
   });
   if (lastTrunk >= 0) html += '</div>';
-  
+
   document.getElementById('branchArea').innerHTML = html;
+  updateFloatBar();
 }
 
-// Branch interactions
+function renderBranchForm(br, i) {
+  var h = '';
+  h += '<div class="card" style="margin:6px 0 10px;border-color:#d32f2f">';
+
+  // Room name + CFM
+  h += '<div class="input-row">';
+  h += '<div class="input-group"><div class="input-label">Room Name</div><input type="text" class="input-field" value="' + br.room + '" data-br-room="' + i + '"></div>';
+  h += '<div class="input-group" style="max-width:100px"><div class="input-label">CFM</div><input type="number" class="input-field mono" value="' + (br.cfm || '') + '" placeholder="CFM" data-br-cfm="' + i + '" min="0" max="9999"></div>';
+  h += '</div>';
+
+  // Material toggle
+  h += '<div class="input-label">Material</div>';
+  h += '<div class="shape-toggle" style="margin-bottom:8px">';
+  h += '<div class="shape-btn' + (br.material !== 'flex' ? ' active' : '') + '" data-br-mat="' + i + '" data-matval="metal">' + svgIcon('rect') + ' Metal</div>';
+  h += '<div class="shape-btn' + (br.material === 'flex' ? ' active' : '') + '" data-br-mat="' + i + '" data-matval="flex">' + svgIcon('round') + ' Flex</div>';
+  h += '</div>';
+
+  // Compression (only if flex)
+  if (br.material === 'flex') {
+    var ff = flexFactor(br.compression);
+    h += '<div class="compression-section">';
+    h += '<div class="compression-label">Flex Compression Ratio</div>';
+    h += '<div class="input-row" style="margin-bottom:4px">';
+    h += '<div class="input-group"><select class="input-field" data-br-compress="' + i + '">';
+    COMPRESSION_OPTIONS.forEach(function(c) {
+      h += '<option value="' + c + '"' + (br.compression == c ? ' selected' : '') + '>' + c + '%</option>';
+    });
+    h += '</select></div>';
+    h += '<div class="input-group" style="display:flex;align-items:center;padding-left:8px"><div class="compression-val">Friction \u00D7' + ff.toFixed(2) + '</div></div>';
+    h += '</div>';
+    h += '</div>';
+  }
+
+  // Shape toggle
+  h += '<div class="input-label">Duct Shape</div>';
+  h += '<div class="shape-toggle">';
+  h += '<div class="shape-btn' + (br.shape !== 'rect' ? ' active' : '') + '" data-br-shape="' + i + '" data-shape="round">' + svgIcon('round') + ' Round</div>';
+  h += '<div class="shape-btn' + (br.shape === 'rect' ? ' active' : '') + '" data-br-shape="' + i + '" data-shape="rect">' + svgIcon('rect') + ' Rect</div>';
+  h += '</div>';
+
+  // Size fields
+  if (br.shape === 'rect') {
+    h += '<div class="input-row">';
+    h += '<div class="input-group"><div class="input-label">Width (in)</div><select class="input-field" data-br-width="' + i + '">';
+    RECT_WIDTHS.forEach(function(w) {
+      h += '<option value="' + w + '"' + (br.width == w ? ' selected' : '') + '>' + w + '"</option>';
+    });
+    h += '</select></div>';
+    h += '<div class="input-group"><div class="input-label">Height (in)</div><select class="input-field" data-br-height="' + i + '">';
+    RECT_HEIGHTS.forEach(function(hv) {
+      h += '<option value="' + hv + '"' + (br.height == hv ? ' selected' : '') + '>' + hv + '"</option>';
+    });
+    h += '</select></div>';
+    h += '</div>';
+    var deq = equivDiameter(parseFloat(br.width) || 8, parseFloat(br.height) || 8);
+    h += '<div style="font-size:10px;color:#888;margin-bottom:8px">Equiv. diameter: <span class="mono" style="color:#ff9800">' + deq.toFixed(1) + '"</span></div>';
+  } else {
+    h += '<div class="input-row">';
+    h += '<div class="input-group"><div class="input-label">Branch Size</div><select class="input-field" data-br-size="' + i + '">';
+    [4,5,6,7,8,9,10,12,14,16].forEach(function(s) {
+      h += '<option value="' + s + '"' + (br.size == s ? ' selected' : '') + '>' + s + '\u2033</option>';
+    });
+    h += '</select></div>';
+    h += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + br.length + '" data-br-len="' + i + '" min="1" max="200"></div>';
+    h += '</div>';
+  }
+
+  if (br.shape === 'rect') {
+    h += '<div class="input-row">';
+    h += '<div class="input-group"><div class="input-label">Length (ft)</div><input type="number" class="input-field" value="' + br.length + '" data-br-len="' + i + '" min="1" max="200"></div>';
+    h += '<div class="input-group"></div>';
+    h += '</div>';
+  }
+
+  // Boot type
+  h += '<div class="input-row">';
+  h += '<div class="input-group"><div class="input-label">Ends At</div><select class="input-field" data-br-boot="' + i + '">';
+  h += '<option value="90boot"' + (br.bootType === '90boot' ? ' selected' : '') + '>90\u00B0 Boot</option>';
+  h += '<option value="straightboot"' + (br.bootType === 'straightboot' ? ' selected' : '') + '>Straight Boot</option>';
+  h += '<option value="ceilTop"' + (br.bootType === 'ceilTop' ? ' selected' : '') + '>Ceiling Diff (top)</option>';
+  h += '<option value="ceilSide"' + (br.bootType === 'ceilSide' ? ' selected' : '') + '>Ceiling Diff (side)</option>';
+  h += '<option value="floorReg"' + (br.bootType === 'floorReg' ? ' selected' : '') + '>Floor Register</option>';
+  h += '<option value="wallReg"' + (br.bootType === 'wallReg' ? ' selected' : '') + '>Wall Register</option>';
+  h += '</select></div>';
+  h += '</div>';
+
+  // Fittings section
+  h += '<div class="fittings-section">';
+  h += '<div class="fittings-label">Fittings (tap to add)</div>';
+  h += '<div class="fit-btns">';
+  FITTING_TYPES.forEach(function(ft) {
+    h += '<div class="fit-btn" data-add-fit="' + i + '" data-fit-type="' + ft.id + '">' + svgIcon(ft.icon) + ' ' + ft.name + '</div>';
+  });
+  h += '</div>';
+
+  // List of added fittings
+  if (br.fittings.length > 0) {
+    h += '<div class="fit-list">';
+    br.fittings.forEach(function(f, fi) {
+      var ft = FITTING_TYPES.find(function(t) { return t.id === f.type; });
+      var brSize = getEffectiveDiameter(br);
+      var eq = ft ? ft.eqFn(brSize) : 0;
+      h += '<div class="fit-item">';
+      h += '<span class="fit-item-name">' + (ft ? ft.name : f.type) + '</span>';
+      h += '<span class="fit-item-eq">+' + eq + ' ft</span>';
+      h += '<span class="fit-item-rm" data-rm-fit="' + i + '" data-fit-idx="' + fi + '">' + svgIcon('remove') + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>'; // /fittings-section
+
+  // Save + Remove buttons
+  h += '<div style="display:flex;gap:8px">';
+  h += '<button class="btn-primary ripple" data-br-save="' + i + '" style="flex:1">Save Branch ' + br.num + '</button>';
+  h += '<button class="btn-secondary" data-br-remove="' + i + '" style="flex:0 0 auto;width:44px;display:flex;align-items:center;justify-content:center">' + svgIcon('remove') + '</button>';
+  h += '</div>';
+
+  h += '</div>'; // /card
+  return h;
+}
+
+// Branch area event delegation
 document.getElementById('branchArea').addEventListener('click', function(e) {
+  // Save button
   var saveBtn = e.target.closest('[data-br-save]');
   if (saveBtn) {
     var idx = parseInt(saveBtn.dataset.brSave);
@@ -490,76 +1007,201 @@ document.getElementById('branchArea').addEventListener('click', function(e) {
     renderBranches();
     return;
   }
+
+  // Remove branch
+  var rmBtn = e.target.closest('[data-br-remove]');
+  if (rmBtn) {
+    var ri = parseInt(rmBtn.dataset.brRemove);
+    if (SYS.branches.length > 1) {
+      SYS.branches.splice(ri, 1);
+      // Renumber
+      SYS.branches.forEach(function(b, i2) { b.num = i2 + 1; });
+      SYS.activeBranch = -1;
+      renderBranches();
+    }
+    return;
+  }
+
+  // Add fitting
+  var addFit = e.target.closest('[data-add-fit]');
+  if (addFit) {
+    var bi = parseInt(addFit.dataset.addFit);
+    var fitType = addFit.dataset.fitType;
+    saveBranchForm(bi);
+    SYS.branches[bi].fittings.push({type: fitType});
+    renderBranches();
+    return;
+  }
+
+  // Remove fitting
+  var rmFit = e.target.closest('[data-rm-fit]');
+  if (rmFit) {
+    var bri = parseInt(rmFit.dataset.rmFit);
+    var fi = parseInt(rmFit.dataset.fitIdx);
+    saveBranchForm(bri);
+    SYS.branches[bri].fittings.splice(fi, 1);
+    renderBranches();
+    return;
+  }
+
+  // Material toggle
+  var matBtn = e.target.closest('[data-br-mat]');
+  if (matBtn) {
+    var mi = parseInt(matBtn.dataset.brMat);
+    var mv = matBtn.dataset.matval;
+    saveBranchForm(mi);
+    SYS.branches[mi].material = mv;
+    if (mv === 'flex' && !SYS.branches[mi].compression) SYS.branches[mi].compression = 4;
+    renderBranches();
+    return;
+  }
+
+  // Shape toggle
+  var shapeBtn = e.target.closest('[data-br-shape]');
+  if (shapeBtn) {
+    var si = parseInt(shapeBtn.dataset.brShape);
+    var sv = shapeBtn.dataset.shape;
+    saveBranchForm(si);
+    SYS.branches[si].shape = sv;
+    renderBranches();
+    return;
+  }
+
+  // Branch item tap to expand
   var item = e.target.closest('.branch-item');
   if (item) {
     var idx2 = parseInt(item.dataset.branch);
-    // Save current if open
     if (SYS.activeBranch >= 0 && SYS.activeBranch !== idx2) saveBranchForm(SYS.activeBranch);
     SYS.activeBranch = SYS.activeBranch === idx2 ? -1 : idx2;
     renderBranches();
   }
 });
 
+// Change events for branch form inputs
+document.getElementById('branchArea').addEventListener('change', function(e) {
+  var el = e.target;
+  // Compression change
+  if (el.dataset.brCompress !== undefined) {
+    var ci = parseInt(el.dataset.brCompress);
+    SYS.branches[ci].compression = parseInt(el.value) || 4;
+    // Just update the display inline
+    saveBranchForm(ci);
+    renderBranches();
+  }
+});
+
 function saveBranchForm(idx) {
   var br = SYS.branches[idx];
+  if (!br) return;
   var roomEl = document.querySelector('[data-br-room="' + idx + '"]');
+  var cfmEl = document.querySelector('[data-br-cfm="' + idx + '"]');
   var sizeEl = document.querySelector('[data-br-size="' + idx + '"]');
   var lenEl = document.querySelector('[data-br-len="' + idx + '"]');
-  var elbEl = document.querySelector('[data-br-elbow="' + idx + '"]');
   var bootEl = document.querySelector('[data-br-boot="' + idx + '"]');
+  var widthEl = document.querySelector('[data-br-width="' + idx + '"]');
+  var heightEl = document.querySelector('[data-br-height="' + idx + '"]');
+  var compressEl = document.querySelector('[data-br-compress="' + idx + '"]');
   if (roomEl) br.room = roomEl.value;
+  if (cfmEl) br.cfm = cfmEl.value;
   if (sizeEl) br.size = sizeEl.value;
   if (lenEl) br.length = lenEl.value;
-  if (elbEl) br.elbows = parseInt(elbEl.value) || 0;
   if (bootEl) br.bootType = bootEl.value;
+  if (widthEl) br.width = widthEl.value;
+  if (heightEl) br.height = heightEl.value;
+  if (compressEl) br.compression = parseInt(compressEl.value) || 4;
 }
 
 // Add branch
 document.getElementById('addBranch').addEventListener('click', function() {
+  if (SYS.activeBranch >= 0) saveBranchForm(SYS.activeBranch);
   var lastTrunk = SYS.branches.length > 0 ? SYS.branches[SYS.branches.length - 1].trunkIdx : 0;
   var num = SYS.branches.length + 1;
   SYS.branches.push({
     trunkIdx: lastTrunk,
     num: num,
     room: 'Room ' + num,
+    cfm: '',
+    shape: 'round',
     size: '6',
+    width: '8',
+    height: '8',
+    material: SYS.material,
+    compression: 4,
     length: '12',
-    elbows: 1,
+    fittings: [],
     bootType: '90boot',
-    reducerFrom: SYS.trunks[lastTrunk] ? SYS.trunks[lastTrunk].size : '10',
     done: false
   });
   SYS.activeBranch = SYS.branches.length - 1;
   renderBranches();
 });
 
-// ============ STEP 4: RESULTS ============
-var BOOT_EQ = {
-  '90boot': {name: '90° Boot', eq: 55},
-  'straightboot': {name: 'Straight Boot', eq: 35},
-  'ceilTop': {name: 'Ceiling Diffuser (top)', eq: 10},
-  'ceilSide': {name: 'Ceiling Diffuser (side)', eq: 40},
-  'floorReg': {name: 'Floor Register', eq: 35},
-  'wallReg': {name: 'Wall Register', eq: 40}
-};
-
-function calcBranch(br, trunk) {
+// ================================================================
+// STEP 4: RESULTS
+// ================================================================
+function calcRun(br) {
+  var trunk = SYS.trunks[br.trunkIdx] || SYS.trunks[0];
   var tel = 0;
-  // Starting collar
+  var breakdown = [];
+
+  // Start collar
   tel += 10;
-  // Trunk: straight + elbows
-  var tLen = parseFloat(trunk.length) || 0;
-  var tElb = trunk.elbows || 0;
-  tel += tLen + (tElb * 10);
-  // Reducer from trunk to branch
-  if (trunk.size !== br.size && trunk.size !== '--') tel += 5;
-  // Branch: straight + elbows
-  tel += (parseFloat(br.length) || 0) + (br.elbows * 10);
+  breakdown.push({name:'Start Collar', eq:10, type:'start'});
+
+  // Trunk
+  if (!trunk.isRadial) {
+    var tLen = parseFloat(trunk.length) || 0;
+    var tDiam = getEffectiveDiameter(trunk);
+    var t90 = trunk.elbows90 || 0;
+    var t45 = trunk.elbows45 || 0;
+    var t90eq = t90 * (tDiam <= 6 ? 10 : tDiam <= 8 ? 15 : tDiam <= 10 ? 20 : 25);
+    var t45eq = t45 * 5;
+    var trunkTotal = tLen + t90eq + t45eq;
+    tel += trunkTotal;
+    breakdown.push({name:trunk.label + ' (' + tLen + ' ft straight)', eq:tLen, type:'duct'});
+    if (t90 > 0) breakdown.push({name:t90 + '\u00D7 90\u00B0 elbow (trunk)', eq:t90eq, type:'fitting'});
+    if (t45 > 0) breakdown.push({name:t45 + '\u00D7 45\u00B0 elbow (trunk)', eq:t45eq, type:'fitting'});
+  }
+
+  // Reducer from trunk to branch (if sizes differ)
+  var trunkDiam = trunk.isRadial ? 0 : getEffectiveDiameter(trunk);
+  var brDiam = getEffectiveDiameter(br);
+  if (!trunk.isRadial && Math.abs(trunkDiam - brDiam) > 0.1) {
+    tel += 5;
+    breakdown.push({name:'Reducer (' + Math.round(trunkDiam) + '\u2033 \u2192 ' + Math.round(brDiam) + '\u2033)', eq:5, type:'fitting'});
+  }
+
+  // Branch straight length
+  var bLen = parseFloat(br.length) || 0;
+  var branchMaterial = br.material || SYS.material;
+  var isFlex = branchMaterial === 'flex';
+  var compression = br.compression || 4;
+  var ff = isFlex ? flexFactor(compression) : 1;
+
+  var effectiveBrLen = bLen * ff;
+  tel += effectiveBrLen;
+  if (isFlex) {
+    breakdown.push({name:'Branch (' + bLen + ' ft flex \u00D7' + ff.toFixed(2) + ')', eq:Math.round(effectiveBrLen), type:'duct'});
+  } else {
+    breakdown.push({name:'Branch (' + bLen + ' ft straight)', eq:bLen, type:'duct'});
+  }
+
+  // Branch fittings
+  br.fittings.forEach(function(f) {
+    var ft = FITTING_TYPES.find(function(t) { return t.id === f.type; });
+    if (ft) {
+      var eq = ft.eqFn(brDiam);
+      tel += eq;
+      breakdown.push({name:ft.name, eq:eq, type:'fitting'});
+    }
+  });
+
   // Boot/register
-  var boot = BOOT_EQ[br.bootType] || {eq: 35};
+  var boot = BOOT_EQ[br.bootType] || {name:'End', eq:35};
   tel += boot.eq;
-  
-  return {tel: tel, boot: boot};
+  breakdown.push({name:boot.name, eq:boot.eq, type:'end'});
+
+  return {tel:tel, breakdown:breakdown, trunk:trunk, branch:br, boot:boot};
 }
 
 function renderResults() {
@@ -568,61 +1210,146 @@ function renderResults() {
   var critIdx = -1;
 
   SYS.branches.forEach(function(br, i) {
-    var trunk = SYS.trunks[br.trunkIdx] || SYS.trunks[0];
-    var result = calcBranch(br, trunk);
-    runs.push({branch: br, trunk: trunk, tel: result.tel, boot: result.boot});
+    var result = calcRun(br);
+    runs.push(result);
     if (result.tel > maxTEL) { maxTEL = result.tel; critIdx = i; }
   });
 
   // System summary
-  var asp = 0.5; // placeholder
+  var asp = 0.5;
   var critFR = maxTEL > 0 ? (asp / maxTEL * 100) : 0;
   var totalBranches = SYS.branches.length;
 
+  var frClass = critFR <= 0.05 ? 'ok' : critFR <= 0.08 ? 'warn' : 'bad';
+
   var sumHTML = '<div class="results-grid">';
-  sumHTML += '<div class="result-cell"><div class="result-val">' + totalBranches + '</div><div class="result-label">Branches</div></div>';
-  sumHTML += '<div class="result-cell"><div class="result-val">' + SYS.trunks.length + '</div><div class="result-label">Trunks</div></div>';
-  sumHTML += '<div class="result-cell"><div class="result-val ' + (critFR <= 0.06 ? 'ok' : critFR <= 0.08 ? 'warn' : 'bad') + '">' + critFR.toFixed(3) + '</div><div class="result-label">Friction Rate</div></div>';
-  sumHTML += '<div class="result-cell"><div class="result-val ' + (maxTEL > 200 ? 'bad' : 'ok') + '">' + Math.round(maxTEL) + ' ft</div><div class="result-label">Longest TEL</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val mono">' + totalBranches + '</div><div class="result-label">Branches</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val mono">' + SYS.trunks.length + '</div><div class="result-label">Trunks</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val mono ' + frClass + '">' + critFR.toFixed(3) + '</div><div class="result-label">Friction Rate (IWC/100ft)</div></div>';
+  sumHTML += '<div class="result-cell"><div class="result-val mono ' + (maxTEL > 200 ? 'bad' : 'ok') + '">' + Math.round(maxTEL) + ' ft</div><div class="result-label">Longest TEL</div></div>';
   sumHTML += '</div>';
   document.getElementById('systemSummary').innerHTML = sumHTML;
+
+  // Friction rate gauge
+  var gaugeHTML = '';
+  var gaugePct = Math.min(critFR / 0.12 * 100, 100);
+  var gaugeColor = critFR <= 0.05 ? 'green' : critFR <= 0.08 ? 'yellow' : 'red';
+  gaugeHTML += '<div class="gauge-wrap">';
+  gaugeHTML += '<div class="gauge-label"><span>System Friction Rate</span><span class="mono" style="color:' + (critFR <= 0.05 ? '#4caf50' : critFR <= 0.08 ? '#ff9800' : '#d32f2f') + '">' + critFR.toFixed(3) + ' IWC/100ft</span></div>';
+  gaugeHTML += '<div class="gauge-track"><div class="gauge-fill ' + gaugeColor + '" style="width:' + gaugePct + '%"></div></div>';
+  gaugeHTML += '<div class="gauge-markers"><span>0.00</span><span style="color:#4caf50">0.05</span><span style="color:#ff9800">0.08</span><span style="color:#d32f2f">0.12</span></div>';
+  gaugeHTML += '</div>';
+  document.getElementById('frictionGauge').innerHTML = gaugeHTML;
 
   // Critical path detail
   if (critIdx >= 0) {
     var cr = runs[critIdx];
-    var cpHTML = '<div style="margin-bottom:8px;font-size:12px;color:#ff9800;font-weight:600">';
-    cpHTML += 'Branch ' + cr.branch.num + ' — ' + cr.branch.room + ' (' + Math.round(cr.tel) + ' ft TEL)';
+    var cpHTML = '<div style="margin-bottom:8px;font-size:12px;color:#ff9800;font-weight:600;display:flex;align-items:center;gap:6px">';
+    cpHTML += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+    cpHTML += 'Branch ' + cr.branch.num + ' \u2014 ' + cr.branch.room;
+    if (cr.branch.cfm) cpHTML += ' (' + cr.branch.cfm + ' CFM)';
+    cpHTML += ' \u2014 <span class="mono">' + Math.round(cr.tel) + ' ft TEL</span>';
     cpHTML += '</div>';
-    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot start">P</div><div class="path-step-info"><div class="path-step-name">Start Collar</div><div class="path-step-detail">Plenum to ' + cr.trunk.size + '″ trunk</div></div><div class="path-step-eq">+10 ft</div></div>';
-    var trunkTEL = parseFloat(cr.trunk.length) + (cr.trunk.elbows * 10);
-    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot duct">—</div><div class="path-step-info"><div class="path-step-name">' + cr.trunk.label + '</div><div class="path-step-detail">' + cr.trunk.length + ' ft + ' + cr.trunk.elbows + ' elbows</div></div><div class="path-step-eq">+' + Math.round(trunkTEL) + ' ft</div></div>';
-    if (cr.trunk.size !== cr.branch.size) {
-      cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot fitting">R</div><div class="path-step-info"><div class="path-step-name">Reducer</div><div class="path-step-detail">' + cr.trunk.size + '″ → ' + cr.branch.size + '″</div></div><div class="path-step-eq">+5 ft</div></div>';
-    }
-    var brTEL = parseFloat(cr.branch.length) + (cr.branch.elbows * 10);
-    cpHTML += '<div class="path-step"><div class="path-step-line"></div><div class="path-step-dot duct">—</div><div class="path-step-info"><div class="path-step-name">Branch to ' + cr.branch.room + '</div><div class="path-step-detail">' + cr.branch.length + ' ft + ' + cr.branch.elbows + ' elbow(s)</div></div><div class="path-step-eq">+' + Math.round(brTEL) + ' ft</div></div>';
-    cpHTML += '<div class="path-step"><div class="path-step-dot end">E</div><div class="path-step-info"><div class="path-step-name">' + cr.boot.name + '</div><div class="path-step-detail">End of run</div></div><div class="path-step-eq">+' + cr.boot.eq + ' ft</div></div>';
+
+    cr.breakdown.forEach(function(step, si) {
+      var dotClass = step.type === 'start' ? 'start' : step.type === 'end' ? 'end' : step.type === 'fitting' ? 'fitting' : 'duct';
+      var dotChar = step.type === 'start' ? 'P' : step.type === 'end' ? 'E' : step.type === 'fitting' ? 'F' : '\u2014';
+      cpHTML += '<div class="path-step">';
+      if (si < cr.breakdown.length - 1) cpHTML += '<div class="path-step-line"></div>';
+      cpHTML += '<div class="path-step-dot ' + dotClass + '">' + dotChar + '</div>';
+      cpHTML += '<div class="path-step-info"><div class="path-step-name">' + step.name + '</div></div>';
+      cpHTML += '<div class="path-step-eq mono">+' + Math.round(step.eq) + ' ft</div>';
+      cpHTML += '</div>';
+    });
     document.getElementById('critPath').innerHTML = cpHTML;
   }
 
-  // All runs table
+  // All runs grouped by trunk
   var arHTML = '';
-  runs.forEach(function(r) {
-    var isCrit = r.tel === maxTEL;
-    arHTML += '<div class="branch-item" style="cursor:default' + (isCrit ? ';border-color:#ff9800' : '') + '">';
-    arHTML += '<div class="branch-num" style="' + (isCrit ? 'background:#ff9800' : '') + '">' + r.branch.num + '</div>';
-    arHTML += '<div class="branch-info">';
-    arHTML += '<div class="branch-name">' + r.branch.room + '</div>';
-    arHTML += '<div class="branch-detail">' + r.branch.size + '″ · ' + Math.round(r.tel) + ' ft TEL' + (isCrit ? ' · CRITICAL' : '') + '</div>';
+  SYS.trunks.forEach(function(trunk, ti) {
+    var trunkRuns = [];
+    var trunkMaxTEL = 0;
+    runs.forEach(function(r, ri) {
+      if (r.branch.trunkIdx === ti) {
+        trunkRuns.push({run:r, idx:ri});
+        if (r.tel > trunkMaxTEL) trunkMaxTEL = r.tel;
+      }
+    });
+    if (trunkRuns.length === 0) return;
+
+    arHTML += '<div class="trunk-group">';
+    arHTML += '<div class="trunk-group-header">' + svgIcon('trunk');
+    arHTML += '<span class="trunk-group-label">' + trunk.label + '</span>';
+    arHTML += '<span class="trunk-group-tel">Max TEL: ' + Math.round(trunkMaxTEL) + ' ft</span>';
     arHTML += '</div>';
-    var fr = r.tel > 0 ? (asp / r.tel * 100) : 0;
-    var frClass = fr <= 0.06 ? 'ok' : fr <= 0.08 ? 'warn' : 'bad';
-    arHTML += '<div class="result-val ' + frClass + '" style="font-size:13px">' + fr.toFixed(3) + '</div>';
+
+    trunkRuns.forEach(function(tr) {
+      var r = tr.run;
+      var isCrit = tr.idx === critIdx;
+      var telPct = maxTEL > 0 ? (r.tel / maxTEL * 100) : 0;
+      var telColor = r.tel === maxTEL ? '#d32f2f' : r.tel > maxTEL * 0.8 ? '#ff9800' : '#4caf50';
+      var fr = r.tel > 0 ? (asp / r.tel * 100) : 0;
+      var frClass2 = fr <= 0.05 ? 'ok' : fr <= 0.08 ? 'warn' : 'bad';
+
+      arHTML += '<div class="branch-item" style="cursor:default;flex-wrap:wrap' + (isCrit ? ';border-color:#ff9800' : '') + '">';
+      arHTML += '<div class="branch-num" style="' + (isCrit ? 'background:#ff9800' : '') + '">' + r.branch.num + '</div>';
+      arHTML += '<div class="branch-info" style="min-width:0">';
+      arHTML += '<div class="branch-name">' + r.branch.room + (r.branch.cfm ? ' <span style="color:#888;font-weight:400">(' + r.branch.cfm + ' CFM)</span>' : '') + '</div>';
+      arHTML += '<div class="branch-detail">';
+      var shapeL = r.branch.shape === 'rect' ? r.branch.width + '\u00D7' + r.branch.height + '"' : r.branch.size + '\u2033';
+      arHTML += shapeL + ' \u00B7 <span class="mono">' + Math.round(r.tel) + ' ft TEL</span>';
+      if (isCrit) arHTML += ' \u00B7 <span style="color:#ff9800;font-weight:600">CRITICAL</span>';
+      arHTML += '</div>';
+      // TEL bar
+      arHTML += '<div class="tel-bar-wrap"><div class="tel-bar" style="width:' + telPct + '%;background:' + telColor + '"></div></div>';
+      arHTML += '</div>';
+      arHTML += '<div class="result-val ' + frClass2 + ' mono" style="font-size:12px">' + fr.toFixed(3) + '</div>';
+      arHTML += '</div>';
+    });
     arHTML += '</div>';
   });
   document.getElementById('allRuns').innerHTML = arHTML;
+
+  updateFloatBar();
 }
 
+// ================================================================
+// FLOATING BAR UPDATE
+// ================================================================
+function updateFloatBar() {
+  document.getElementById('fbTrunks').textContent = SYS.trunks.length || 0;
+  document.getElementById('fbBranches').textContent = SYS.branches.length || 0;
+
+  // Calculate max TEL if we have branches
+  if (SYS.branches.length > 0 && SYS.trunks.length > 0) {
+    var maxT = 0;
+    SYS.branches.forEach(function(br) {
+      try {
+        var r = calcRun(br);
+        if (r.tel > maxT) maxT = r.tel;
+      } catch(e) {}
+    });
+    if (maxT > 0) {
+      document.getElementById('fbTEL').textContent = Math.round(maxT) + ' ft';
+      var asp = 0.5;
+      var fr = (asp / maxT * 100);
+      var frEl = document.getElementById('fbFR');
+      frEl.textContent = fr.toFixed(3);
+      frEl.style.color = fr <= 0.05 ? '#4caf50' : fr <= 0.08 ? '#ff9800' : '#d32f2f';
+    } else {
+      document.getElementById('fbTEL').textContent = '--';
+      document.getElementById('fbFR').textContent = '--';
+      document.getElementById('fbFR').style.color = '';
+    }
+  } else {
+    document.getElementById('fbTEL').textContent = '--';
+    document.getElementById('fbFR').textContent = '--';
+    document.getElementById('fbFR').style.color = '';
+  }
+}
+
+// Initial
+updateFloatBar();
 </script>
 </body>
 </html>
