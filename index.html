@@ -3492,6 +3492,32 @@ footer a:hover { color: var(--text-muted); }
     </div>
   </div>
 
+  <div id="wizReturnPosSection" style="display:none">
+    <div class="wiz-prompt" style="margin-top:8px">
+      <div class="wiz-prompt-q">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Return Air Entry
+      </div>
+      <div class="wiz-prompt-help">Where does return air enter the furnace?</div>
+    </div>
+    <div class="opt-grid" id="wizRetPosOpts">
+      <div class="opt-btn active" data-wiz-retpos="bottom">
+        <div class="opt-label">Bottom</div>
+        <div class="opt-note">Standard upflow</div>
+      </div>
+      <div class="opt-btn" data-wiz-retpos="side_left">
+        <div class="opt-label">Left Side</div>
+        <div class="opt-note">Side return</div>
+      </div>
+      <div class="opt-btn" data-wiz-retpos="side_right">
+        <div class="opt-label">Right Side</div>
+        <div class="opt-note">Side return</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wizUnitConfigSVG" class="wiz-fitting-svg" style="margin:12px 0"></div>
+
   <div class="wiz-prompt" style="margin-top:8px">
     <div class="wiz-prompt-q">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -6723,6 +6749,7 @@ var WIZ = {
   supPlenumR: 'R6',
   retPlenumMaterial: 'sheet_metal',
   retPlenumR: 'R6',
+  returnPosition: 'bottom',
   trunks: [],
   branches: [],
   activeBranch: -1
@@ -7122,58 +7149,65 @@ function wizPlenumSVG(type, isReturn) {
     }
     s += '<text x="120" y="100" text-anchor="middle" font-size="7" fill="' + lc + '">Extended Plenum \u2014 15ft EQ</text>';
   } else if (type === '90_vanes') {
-    // SUPPLY: 90deg turn with turning vanes, collars exit top
+    // 90deg turn with turning vanes
     s += '<rect x="5" y="50" width="40" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
     s += '<text x="25" y="78" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
     s += '<rect x="45" y="40" width="50" height="60" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
     s += '<rect x="55" y="5" width="30" height="35" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Turning vanes
+    // Turning vanes (same shape either direction)
     s += '<path d="M55 85 Q55 65 75 55" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
     s += '<path d="M60 90 Q60 60 75 48" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
     s += '<path d="M65 95 Q65 55 80 42" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
-    // Side collar on upper section
     s += '<rect x="85" y="12" width="30" height="16" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow
-    s += '<path d="M48 75 L60 75 Q70 75 70 55 L70 12" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
-    s += '<polygon points="66,12 70,4 74,12" fill="' + ac + '"/>';
-    s += '<line x1="85" y1="20" x2="110" y2="20" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="110,16 118,20 110,24" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes IN from collar, through vanes, toward AHU
+      s += '<line x1="110" y1="20" x2="87" y2="20" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="89,24 83,20 89,16" fill="' + ac + '"/>';
+      s += '<path d="M70 12 L70 55 Q70 75 60 75 L48 75" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+      s += '<polygon points="50,79 42,75 50,71" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air from AHU, through vanes, out collar
+      s += '<path d="M48 75 L60 75 Q70 75 70 55 L70 12" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+      s += '<polygon points="66,12 70,4 74,12" fill="' + ac + '"/>';
+      s += '<line x1="85" y1="20" x2="110" y2="20" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="110,16 118,20 110,24" fill="' + ac + '"/>';
+    }
     s += '<text x="140" y="75" font-size="7" fill="' + lc + '">20ft EQ</text>';
   } else if (type === '90_radius') {
-    // SUPPLY: Smooth radiused 90deg bend, collars on sides
+    // 90deg radius bend
     s += '<rect x="5" y="50" width="40" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
     s += '<text x="25" y="78" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
-    // Curved plenum body
     s += '<path d="M45 50 L45 100 Q45 100 50 100 L80 100 Q110 100 110 70 L110 30" stroke="' + wc + '" stroke-width="2" fill="none"/>';
     s += '<path d="M45 50 L55 50 Q90 50 90 30 L90 10" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Side collar
     s += '<rect x="110" y="10" width="30" height="16" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Closed top
     s += '<line x1="90" y1="10" x2="110" y2="10" stroke="' + wc + '" stroke-width="2"/>';
-    // Airflow
-    s += '<path d="M48 75 L65 75 Q85 75 95 50 L100 25" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
-    s += '<polygon points="96,25 100,16 104,25" fill="' + ac + '"/>';
-    s += '<line x1="110" y1="18" x2="135" y2="18" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="135,14 143,18 135,22" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes IN from collar, curves down toward AHU
+      s += '<line x1="135" y1="18" x2="112" y2="18" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="114,22 108,18 114,14" fill="' + ac + '"/>';
+      s += '<path d="M100 25 Q95 50 85 75 L65 75 L48 75" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+      s += '<polygon points="50,79 42,75 50,71" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air from AHU, curves up and out collar
+      s += '<path d="M48 75 L65 75 Q85 75 95 50 L100 25" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+      s += '<polygon points="96,25 100,16 104,25" fill="' + ac + '"/>';
+      s += '<line x1="110" y1="18" x2="135" y2="18" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="135,14 143,18 135,22" fill="' + ac + '"/>';
+    }
     s += '<text x="140" y="75" font-size="7" fill="' + lc + '">45ft EQ</text>';
-  } else if (type === '90_square') {
-    // SUPPLY: Sharp square 90deg — WARNING, high loss
+  } else if (type === '90_square' && !isReturn) {
+    // SUPPLY ONLY: Sharp square 90deg — WARNING, high loss
     s += '<rect x="5" y="50" width="40" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
     s += '<text x="25" y="78" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
     s += '<rect x="45" y="40" width="55" height="60" rx="0" stroke="' + wc + '" stroke-width="2" fill="none"/>';
     s += '<rect x="55" y="5" width="35" height="35" rx="0" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Sharp corner
     s += '<line x1="55" y1="40" x2="90" y2="40" stroke="#d32f2f" stroke-width="3"/>';
-    // Turbulence
     s += '<path d="M65 70 Q75 60 78 48" stroke="#d32f2f" stroke-width="1" fill="none" stroke-dasharray="2 2"/>';
     s += '<circle cx="82" cy="50" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".5"/>';
     s += '<circle cx="70" cy="45" r="2.5" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".5"/>';
-    // Side collar
     s += '<rect x="90" y="12" width="30" height="16" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow
     s += '<path d="M48 75 L60 75 Q70 75 70 55 L70 15" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
     s += '<polygon points="66,15 70,7 74,15" fill="' + ac + '"/>';
-    // Warning badge
     s += '<rect x="130" y="55" width="60" height="18" rx="4" fill="#d32f2f" opacity=".15" stroke="#d32f2f" stroke-width="1"/>';
     s += '<text x="160" y="67" text-anchor="middle" font-size="8" font-weight="bold" fill="#d32f2f">\u26A0 120ft EQ</text>';
   } else if (type === 'bullhead') {
@@ -7192,20 +7226,28 @@ function wizPlenumSVG(type, isReturn) {
     s += '<rect x="55" y="10" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
     s += '<rect x="130" y="10" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
     s += '<rect x="160" y="10" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow: up from AHU
-    s += '<line x1="100" y1="80" x2="100" y2="55" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    // Airflow: splits left and right inside plenum
-    s += '<line x1="100" y1="42" x2="40" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<line x1="100" y1="42" x2="160" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    // Airflow: out collars
-    s += '<line x1="32" y1="30" x2="32" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="28,14 32,6 36,14" fill="' + ac + '"/>';
-    s += '<line x1="62" y1="30" x2="62" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="58,14 62,6 66,14" fill="' + ac + '"/>';
-    s += '<line x1="137" y1="30" x2="137" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="133,14 137,6 141,14" fill="' + ac + '"/>';
-    s += '<line x1="167" y1="30" x2="167" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="163,14 167,6 171,14" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes IN from collars, merges, flows DOWN to AHU
+      var bCols = [32,62,137,167];
+      for (var bci=0; bci<bCols.length; bci++) {
+        s += '<line x1="'+bCols[bci]+'" y1="14" x2="'+bCols[bci]+'" y2="28" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+        s += '<polygon points="'+(bCols[bci]-4)+',26 '+bCols[bci]+',34 '+(bCols[bci]+4)+',26" fill="' + ac + '"/>';
+      }
+      s += '<line x1="40" y1="42" x2="100" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<line x1="160" y1="42" x2="100" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<line x1="100" y1="55" x2="100" y2="80" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="96,76 100,84 104,76" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air goes UP from AHU, splits left/right, out collars
+      s += '<line x1="100" y1="80" x2="100" y2="55" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<line x1="100" y1="42" x2="40" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<line x1="100" y1="42" x2="160" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      var bCols = [32,62,137,167];
+      for (var bci=0; bci<bCols.length; bci++) {
+        s += '<line x1="'+bCols[bci]+'" y1="30" x2="'+bCols[bci]+'" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+        s += '<polygon points="'+(bCols[bci]-4)+',14 '+bCols[bci]+',6 '+(bCols[bci]+4)+',14" fill="' + ac + '"/>';
+      }
+    }
     // Warning
     s += '<rect x="65" y="63" width="70" height="16" rx="4" fill="#d32f2f" opacity=".15" stroke="#d32f2f" stroke-width="1"/>';
     s += '<text x="100" y="74" text-anchor="middle" font-size="7" font-weight="bold" fill="#d32f2f">\u26A0 120ft EQ \u2014 Worst</text>';
@@ -7330,6 +7372,184 @@ function wizUpdatePlenumSVGs() {
   var retEl = document.getElementById('retPlenumSVG');
   var retPlTypeEl = document.getElementById('retPlType');
   if (retEl && retPlTypeEl) retEl.innerHTML = wizPlenumSVG(retPlTypeEl.value, true);
+}
+
+// ---- Unit Configuration SVG ----
+// Shows complete equipment + plenum layout based on equipType, airflowDir, returnPosition
+function wizUnitConfigSVG() {
+  var sc = '#d32f2f'; // supply color
+  var rc = '#ff9800'; // return color
+  var ac = '#4caf50'; // airflow arrows
+  var bg = '#333';    // equipment box
+  var lc = '#888';    // label color
+  var dir = WIZ.airflowDir || 'upflow';
+  var equip = WIZ.equipType || 'air_handler';
+  var retPos = WIZ.returnPosition || 'bottom';
+  var equipLabel = equip === 'gas_furnace' ? 'Gas Furnace' : 'Air Handler';
+  var s = '';
+
+  if (dir === 'upflow') {
+    s += '<svg viewBox="0 0 240 200" width="100%" style="max-width:280px" xmlns="http://www.w3.org/2000/svg">';
+    // Supply plenum at top
+    s += '<rect x="70" y="8" width="100" height="24" rx="3" fill="none" stroke="' + sc + '" stroke-width="2"/>';
+    s += '<text x="120" y="23" text-anchor="middle" fill="' + lc + '" font-size="9">Supply Plenum</text>';
+    // Supply collars exiting sides
+    s += '<rect x="42" y="14" width="28" height="12" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<rect x="170" y="14" width="28" height="12" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<line x1="42" y1="20" x2="26" y2="20" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="26,17 20,20 26,23" fill="' + ac + '"/>';
+    s += '<line x1="198" y1="20" x2="214" y2="20" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="214,17 220,20 214,23" fill="' + ac + '"/>';
+    // Upward arrow from equipment to supply
+    s += '<line x1="120" y1="60" x2="120" y2="36" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="116,38 120,30 124,38" fill="' + ac + '"/>';
+    // Equipment box
+    s += '<rect x="60" y="60" width="120" height="60" rx="4" fill="' + bg + '"/>';
+    s += '<text x="120" y="88" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">' + equipLabel + '</text>';
+    s += '<text x="120" y="100" text-anchor="middle" fill="#aaa" font-size="8">▲ UPFLOW</text>';
+
+    if (retPos === 'bottom' || equip === 'air_handler') {
+      // Return plenum at bottom
+      s += '<line x1="120" y1="120" x2="120" y2="146" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+      s += '<polygon points="116,142 120,150 124,142" fill="' + ac + '" transform="rotate(180 120 142)"/>';
+      s += '<rect x="70" y="152" width="100" height="24" rx="3" fill="none" stroke="' + rc + '" stroke-width="2"/>';
+      s += '<text x="120" y="167" text-anchor="middle" fill="' + lc + '" font-size="9">Return Plenum</text>';
+      // Return collars entering sides
+      s += '<rect x="42" y="158" width="28" height="12" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+      s += '<rect x="170" y="158" width="28" height="12" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+      s += '<line x1="20" y1="164" x2="42" y2="164" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+      s += '<polygon points="38,161 44,164 38,167" fill="' + ac + '"/>';
+      s += '<line x1="220" y1="164" x2="198" y2="164" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+      s += '<polygon points="202,161 196,164 202,167" fill="' + ac + '"/>';
+    } else {
+      // Side return (gas furnace)
+      var sideX = retPos === 'side_left' ? 60 : 180;
+      var arrDir = retPos === 'side_left' ? -1 : 1;
+      var startX = retPos === 'side_left' ? 26 : 214;
+      var endX = sideX;
+      s += '<line x1="' + startX + '" y1="90" x2="' + endX + '" y2="90" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+      if (retPos === 'side_left') {
+        s += '<polygon points="' + (endX - 4) + ',87 ' + (endX + 2) + ',90 ' + (endX - 4) + ',93" fill="' + ac + '"/>';
+      } else {
+        s += '<polygon points="' + (endX + 4) + ',87 ' + (endX - 2) + ',90 ' + (endX + 4) + ',93" fill="' + ac + '"/>';
+      }
+      // Return duct label
+      var lblX = retPos === 'side_left' ? 10 : 210;
+      s += '<text x="' + lblX + '" y="82" text-anchor="' + (retPos === 'side_left' ? 'start' : 'end') + '" fill="' + rc + '" font-size="8">Return</text>';
+      // "No bottom plenum" note
+      s += '<text x="120" y="142" text-anchor="middle" fill="' + lc + '" font-size="8" font-style="italic">Side return — no bottom plenum</text>';
+    }
+    s += '</svg>';
+
+  } else if (dir === 'downflow') {
+    s += '<svg viewBox="0 0 240 200" width="100%" style="max-width:280px" xmlns="http://www.w3.org/2000/svg">';
+    // Return plenum at top (air enters from top in downflow)
+    s += '<rect x="70" y="8" width="100" height="24" rx="3" fill="none" stroke="' + rc + '" stroke-width="2"/>';
+    s += '<text x="120" y="23" text-anchor="middle" fill="' + lc + '" font-size="9">Return Plenum</text>';
+    // Return collars entering sides
+    s += '<rect x="42" y="14" width="28" height="12" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<rect x="170" y="14" width="28" height="12" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<line x1="20" y1="20" x2="42" y2="20" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="38,17 44,20 38,23" fill="' + ac + '"/>';
+    s += '<line x1="220" y1="20" x2="198" y2="20" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="202,17 196,20 202,23" fill="' + ac + '"/>';
+    // Downward arrow from return plenum into equipment
+    s += '<line x1="120" y1="32" x2="120" y2="56" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="116,52 120,60 124,52" fill="' + ac + '"/>';
+    // Equipment box
+    s += '<rect x="60" y="60" width="120" height="60" rx="4" fill="' + bg + '"/>';
+    s += '<text x="120" y="88" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">' + equipLabel + '</text>';
+    s += '<text x="120" y="100" text-anchor="middle" fill="#aaa" font-size="8">▼ DOWNFLOW</text>';
+    // Downward arrow from equipment to supply
+    s += '<line x1="120" y1="120" x2="120" y2="148" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="116,144 120,152 124,144" fill="' + ac + '"/>';
+    // Supply plenum at bottom
+    s += '<rect x="70" y="152" width="100" height="24" rx="3" fill="none" stroke="' + sc + '" stroke-width="2"/>';
+    s += '<text x="120" y="167" text-anchor="middle" fill="' + lc + '" font-size="9">Supply Plenum</text>';
+    // Supply collars exiting sides
+    s += '<rect x="42" y="158" width="28" height="12" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<rect x="170" y="158" width="28" height="12" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<line x1="42" y1="164" x2="26" y2="164" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="26,161 20,164 26,167" fill="' + ac + '"/>';
+    s += '<line x1="198" y1="164" x2="214" y2="164" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="214,161 220,164 214,167" fill="' + ac + '"/>';
+    s += '</svg>';
+
+  } else if (dir === 'horizontal_left') {
+    s += '<svg viewBox="0 0 280 160" width="100%" style="max-width:320px" xmlns="http://www.w3.org/2000/svg">';
+    // Return side (right) — air enters from right
+    s += '<rect x="210" y="40" width="24" height="80" rx="3" fill="none" stroke="' + rc + '" stroke-width="2"/>';
+    s += '<text x="222" y="135" text-anchor="middle" fill="' + lc + '" font-size="8">Return</text>';
+    // Return collars top/bottom
+    s += '<rect x="216" y="22" width="12" height="18" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<rect x="216" y="120" width="12" height="18" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<line x1="222" y1="10" x2="222" y2="22" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="219,22 222,28 225,22" fill="' + ac + '"/>';
+    s += '<line x1="222" y1="150" x2="222" y2="138" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="219,138 222,132 225,138" fill="' + ac + '"/>';
+    // Arrow: return plenum → equipment
+    s += '<line x1="210" y1="80" x2="188" y2="80" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="192,77 186,80 192,83" fill="' + ac + '"/>';
+    // Equipment box
+    s += '<rect x="80" y="40" width="108" height="80" rx="4" fill="' + bg + '"/>';
+    s += '<text x="134" y="76" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">' + equipLabel + '</text>';
+    s += '<text x="134" y="90" text-anchor="middle" fill="#aaa" font-size="8">◀ HORIZONTAL LEFT</text>';
+    // Arrow: equipment → supply
+    s += '<line x1="80" y1="80" x2="58" y2="80" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="62,77 56,80 62,83" fill="' + ac + '"/>';
+    // Supply side (left)
+    s += '<rect x="34" y="40" width="24" height="80" rx="3" fill="none" stroke="' + sc + '" stroke-width="2"/>';
+    s += '<text x="46" y="135" text-anchor="middle" fill="' + lc + '" font-size="8">Supply</text>';
+    // Supply collars top/bottom
+    s += '<rect x="40" y="22" width="12" height="18" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<rect x="40" y="120" width="12" height="18" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<line x1="46" y1="22" x2="46" y2="10" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="43,14 46,8 49,14" fill="' + ac + '"/>';
+    s += '<line x1="46" y1="138" x2="46" y2="150" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="43,146 46,152 49,146" fill="' + ac + '"/>';
+    s += '</svg>';
+
+  } else if (dir === 'horizontal_right') {
+    s += '<svg viewBox="0 0 280 160" width="100%" style="max-width:320px" xmlns="http://www.w3.org/2000/svg">';
+    // Return side (left) — air enters from left
+    s += '<rect x="34" y="40" width="24" height="80" rx="3" fill="none" stroke="' + rc + '" stroke-width="2"/>';
+    s += '<text x="46" y="135" text-anchor="middle" fill="' + lc + '" font-size="8">Return</text>';
+    // Return collars top/bottom
+    s += '<rect x="40" y="22" width="12" height="18" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<rect x="40" y="120" width="12" height="18" rx="6" fill="none" stroke="' + rc + '" stroke-width="1.5"/>';
+    s += '<line x1="46" y1="10" x2="46" y2="22" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="43,22 46,28 49,22" fill="' + ac + '"/>';
+    s += '<line x1="46" y1="150" x2="46" y2="138" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="43,138 46,132 49,138" fill="' + ac + '"/>';
+    // Arrow: return plenum → equipment
+    s += '<line x1="58" y1="80" x2="78" y2="80" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="74,77 80,80 74,83" fill="' + ac + '"/>';
+    // Equipment box
+    s += '<rect x="80" y="40" width="108" height="80" rx="4" fill="' + bg + '"/>';
+    s += '<text x="134" y="76" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">' + equipLabel + '</text>';
+    s += '<text x="134" y="90" text-anchor="middle" fill="#aaa" font-size="8">HORIZONTAL RIGHT ▶</text>';
+    // Arrow: equipment → supply
+    s += '<line x1="188" y1="80" x2="208" y2="80" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="204,77 210,80 204,83" fill="' + ac + '"/>';
+    // Supply side (right)
+    s += '<rect x="210" y="40" width="24" height="80" rx="3" fill="none" stroke="' + sc + '" stroke-width="2"/>';
+    s += '<text x="222" y="135" text-anchor="middle" fill="' + lc + '" font-size="8">Supply</text>';
+    // Supply collars top/bottom
+    s += '<rect x="216" y="22" width="12" height="18" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<rect x="216" y="120" width="12" height="18" rx="6" fill="none" stroke="' + sc + '" stroke-width="1.5"/>';
+    s += '<line x1="222" y1="22" x2="222" y2="10" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="219,14 222,8 225,14" fill="' + ac + '"/>';
+    s += '<line x1="222" y1="138" x2="222" y2="150" stroke="' + ac + '" stroke-width="2" class="plenum-flow"/>';
+    s += '<polygon points="219,146 222,152 225,146" fill="' + ac + '"/>';
+    s += '</svg>';
+  }
+
+  return s;
+}
+
+function wizUpdateUnitConfigSVG() {
+  var el = document.getElementById('wizUnitConfigSVG');
+  if (el) el.innerHTML = wizUnitConfigSVG();
 }
 
 // ---- navigation ----
@@ -8717,7 +8937,7 @@ function wizExportPDF() {
   var roomsCFM = getRoomsTotalCFM();
   var locAdj = WIZ_LOC_CFM_ADJ[WIZ.ductLocation] || 0;
   var adjCFM = roomsCFM > 0 ? Math.round(roomsCFM * (1 + locAdj)) : 0;
-  doc.text('Equipment: ' + (WIZ.equipType === 'gas_furnace' ? 'Gas Furnace' : 'Air Handler') + '  |  Airflow: ' + (WIZ.airflowDir || 'upflow').replace(/_/g, ' '), lm, y); y += 5;
+  doc.text('Equipment: ' + (WIZ.equipType === 'gas_furnace' ? 'Gas Furnace' : 'Air Handler') + '  |  Airflow: ' + (WIZ.airflowDir || 'upflow').replace(/_/g, ' ') + (WIZ.returnPosition !== 'bottom' ? ' (return: ' + WIZ.returnPosition.replace(/_/g, ' ') + ')' : ''), lm, y); y += 5;
   doc.text('Total System CFM: ' + (adjCFM || roomsCFM || '--') + (locAdj > 0 ? ' (+' + Math.round(locAdj*100) + '% for ' + WIZ.ductLocation.replace(/_/g,' ') + ')' : ''), lm, y); y += 5;
   doc.text('Duct Location: ' + (WIZ.ductLocation||'conditioned').replace(/_/g,' ') + '  |  Insulation: ' + ((WIZ_R_VALUES[WIZ.insulation]||{}).label || 'R-6'), lm, y); y += 5;
   var supPlMatLabel = WIZ.supPlenumMaterial === 'ductboard' ? 'Ductboard (' + (WIZ.supPlenumR || 'R6') + ')' : 'Sheet Metal';
@@ -8897,6 +9117,28 @@ function wizHandleClick(ev) {
     WIZ.equipType = equipBtn.getAttribute('data-wiz-equip');
     document.querySelectorAll('#wizEquipOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
     equipBtn.classList.add('active');
+    // Show/hide return position section for gas furnaces
+    var retPosSection = document.getElementById('wizReturnPosSection');
+    if (retPosSection) {
+      retPosSection.style.display = WIZ.equipType === 'gas_furnace' ? '' : 'none';
+      if (WIZ.equipType !== 'gas_furnace') {
+        WIZ.returnPosition = 'bottom';
+        document.querySelectorAll('#wizRetPosOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
+        var defBtn = document.querySelector('#wizRetPosOpts [data-wiz-retpos="bottom"]');
+        if (defBtn) defBtn.classList.add('active');
+      }
+    }
+    wizUpdateUnitConfigSVG();
+    return true;
+  }
+
+  // --- Return position (gas furnace) ---
+  var retPosBtn = t.closest('[data-wiz-retpos]');
+  if (retPosBtn) {
+    WIZ.returnPosition = retPosBtn.getAttribute('data-wiz-retpos');
+    document.querySelectorAll('#wizRetPosOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
+    retPosBtn.classList.add('active');
+    wizUpdateUnitConfigSVG();
     return true;
   }
 
@@ -8908,6 +9150,7 @@ function wizHandleClick(ev) {
     flowBtn.classList.add('active');
     // Update plenum SVGs to reflect orientation
     wizUpdatePlenumSVGs();
+    wizUpdateUnitConfigSVG();
     return true;
   }
 
@@ -9374,6 +9617,11 @@ wizGoTo = function(step) {
   }
   // Render plenum SVGs on load
   wizUpdatePlenumSVGs();
+  // Render unit config SVG on load
+  wizUpdateUnitConfigSVG();
+  // Show return position section if gas furnace was restored
+  var retPosSection = document.getElementById('wizReturnPosSection');
+  if (retPosSection) retPosSection.style.display = WIZ.equipType === 'gas_furnace' ? '' : 'none';
 })();
 
 
