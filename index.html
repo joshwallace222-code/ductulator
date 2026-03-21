@@ -6858,6 +6858,7 @@ function wizSaveTrunks() {
     if (w) t.width = w.value;
     if (h) t.height = h.value;
   });
+  if (typeof wizAutoSave === 'function') wizAutoSave();
 }
 
 // ---- STEP 3: BRANCHES ----
@@ -7231,6 +7232,8 @@ function wizSaveBranch(idx) {
       if (roComp) ro.compression = parseInt(roComp.value) || 0;
     });
   }
+  // Auto-save after branch edit
+  if (typeof wizAutoSave === 'function') wizAutoSave();
 }
 
 // ---- STEP 4: RESULTS ----
@@ -7506,51 +7509,49 @@ function wizRenderResults() {
 
 // ---- Send to FR Worksheet ----
 function wizSendToFR() {
-  // Build runs and send to FR tab
+  // Build runs and find the critical (longest) supply and return paths
   var runs = [];
-  var maxTEL = 0;
+  var maxSupplyTEL = 0;
+  var maxReturnTEL = 0;
   WIZ.branches.forEach(function(br){
     var r = wizCalcRun(br);
     runs.push(r);
-    if (r.tel > maxTEL) maxTEL = r.tel;
+    var trunk = WIZ.trunks[br.trunkIdx];
+    if (trunk && trunk.airPath === 'return') {
+      if (r.tel > maxReturnTEL) maxReturnTEL = r.tel;
+    } else {
+      if (r.tel > maxSupplyTEL) maxSupplyTEL = r.tel;
+    }
   });
 
-  // Try to populate FR worksheet if the function exists
-  if (typeof populateFRWorksheet === 'function') {
-    populateFRWorksheet(runs, maxTEL, WIZ);
-    return;
-  }
+  // Get ESP from wizard budget or default
+  var wizESPel = document.getElementById('wizESP');
+  var esp = wizESPel ? parseFloat(wizESPel.value) || 0.50 : 0.50;
+  var roomsCFM = getRoomsTotalCFM();
 
-  // Fallback: try to switch tab and populate FR table rows if present
-  var frTab = document.querySelector('[data-tab="fr"]') || document.querySelector('#tab-fr') || document.querySelector('[href="#fr"]');
-  if (frTab) { frTab.click(); }
+  // Populate FR Worksheet fields
+  var frESP = document.getElementById('frESP');
+  var frCFM = document.getElementById('frCFM');
+  var frTELsup = document.getElementById('frTEL_supply');
+  var frTELret = document.getElementById('frTEL_return');
 
-  // Try to fill a standard FR table
-  var tbody = document.querySelector('#frRunsTable tbody') || document.querySelector('#frTable tbody');
-  if (tbody) {
-    var asp = (typeof SS !== 'undefined' && SS.avsp) ? parseFloat(SS.avsp) || 0.5 : 0.5;
-    tbody.innerHTML = '';
-    runs.forEach(function(r){
-      var fr = r.tel > 0 ? asp / r.tel * 100 : 0;
-      var frCls = fr <= 0.05 ? 'ok' : fr <= 0.08 ? 'warn' : 'bad';
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + r.branch.num + '</td>' +
-        '<td>' + r.branch.room + '</td>' +
-        '<td>' + (r.branch.cfm || '--') + '</td>' +
-        '<td>' + wizSizeLabel(r.branch) + '</td>' +
-        '<td>' + r.branch.length + '</td>' +
-        '<td>' + Math.round(r.tel) + '</td>' +
-        '<td class="' + frCls + '">' + fr.toFixed(3) + '</td>';
-      tbody.appendChild(tr);
-    });
-  }
+  if (frESP) frESP.value = esp.toFixed(2);
+  if (frCFM) frCFM.value = roomsCFM || 1200;
+  if (frTELsup) frTELsup.value = Math.round(maxSupplyTEL);
+  if (frTELret) frTELret.value = Math.round(maxReturnTEL);
+
+  // Recalculate the FR worksheet
+  if (typeof calcFrictionRate === 'function') calcFrictionRate();
+
+  // Switch to FR Worksheet tab
+  if (typeof showPage === 'function') showPage('frworksheet');
 
   // Store on SS for other parts of the app
   if (typeof SS !== 'undefined') {
     SS.wizard = SS.wizard || {};
     SS.wizard.runs = runs;
-    SS.wizard.maxTEL = maxTEL;
+    SS.wizard.maxSupplyTEL = maxSupplyTEL;
+    SS.wizard.maxReturnTEL = maxReturnTEL;
   }
 }
 
@@ -8088,12 +8089,58 @@ function wizHandleChange(ev) {
 }
 
 // ---- Init on page load ----
+// Auto-save wizard state to sessionStorage
+function wizAutoSave() {
+  try {
+    var data = JSON.stringify(WIZ);
+    sessionStorage.setItem('ductulator_wiz', data);
+  } catch(e) { /* sessionStorage may be blocked in some contexts */ }
+}
+
+// Auto-restore wizard state from sessionStorage
+function wizAutoRestore() {
+  try {
+    var data = sessionStorage.getItem('ductulator_wiz');
+    if (data) {
+      var saved = JSON.parse(data);
+      // Restore all properties
+      Object.keys(saved).forEach(function(k) { WIZ[k] = saved[k]; });
+      return true;
+    }
+  } catch(e) { /* ignore */ }
+  return false;
+}
+
+// Hook auto-save into wizard navigation
+var _origWizGoTo = wizGoTo;
+wizGoTo = function(step) {
+  _origWizGoTo(step);
+  wizAutoSave();
+};
+
 (function wizInit() {
+  // Try to restore saved state
+  var restored = wizAutoRestore();
+  
   // Store wizard on SS if available
   if (typeof SS !== 'undefined') {
     SS.wizard = WIZ;
   }
-  wizUpdateBar();
+  
+  // If restored, re-render the current step
+  if (restored && WIZ.step > 1) {
+    wizUpdateBar();
+    if (WIZ.step === 2 && WIZ.trunks.length > 0) wizRenderTrunks();
+    if (WIZ.step === 3 && WIZ.branches.length > 0) wizRenderBranches();
+    if (WIZ.step === 4) wizRenderResults();
+    // Show the right step page
+    for (var si = 1; si <= 4; si++) {
+      var pg = document.getElementById('wizStep' + si);
+      if (pg) pg.classList.toggle('active', si === WIZ.step);
+    }
+  } else {
+    wizUpdateBar();
+  }
 })();
 
 
