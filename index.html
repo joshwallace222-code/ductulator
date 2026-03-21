@@ -3095,10 +3095,19 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysPlBody">
-      <div class="plenum-grid" style="margin-top:8px">
+      <!-- Plenum Shape Toggle -->
+      <div style="display:flex;gap:4px;margin-top:8px;margin-bottom:8px">
+        <button class="material-btn active" data-pl-shape="rect" id="plShapeRect" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:var(--red);color:#fff">Rectangular</button>
+        <button class="material-btn" data-pl-shape="round" id="plShapeRound" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:#2a2a2a;color:#ccc">Round</button>
+      </div>
+      <div id="plRectFields" class="plenum-grid">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="plLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="plWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="plHt" value="8" min="4" max="24" step="1"></div>
+      </div>
+      <div id="plRoundFields" class="plenum-grid" style="display:none">
+        <div class="input-group"><label class="input-label">Diameter (in)</label><input type="number" class="input-field" id="plDia" value="18" min="4" max="48" step="1"></div>
+        <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="plRndLen" value="48" min="6" max="120" step="1"></div>
       </div>
       <div style="margin-top:8px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -3145,10 +3154,53 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysRetPlBody">
-      <div class="plenum-grid" style="margin-top:8px">
+      <!-- Return Plenum Shape Toggle -->
+      <div style="display:flex;gap:4px;margin-top:8px;margin-bottom:8px">
+        <button class="material-btn active" data-retpl-shape="rect" id="retPlShapeRect" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:var(--red);color:#fff">Rectangular</button>
+        <button class="material-btn" data-retpl-shape="round" id="retPlShapeRound" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:#2a2a2a;color:#ccc">Round</button>
+      </div>
+      <div id="retPlRectFields" class="plenum-grid">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="retPlWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="retPlHt" value="8" min="4" max="24" step="1"></div>
+      </div>
+      <div id="retPlRoundFields" class="plenum-grid" style="display:none">
+        <div class="input-group"><label class="input-label">Diameter (in)</label><input type="number" class="input-field" id="retPlDia" value="18" min="4" max="48" step="1"></div>
+        <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlRndLen" value="48" min="6" max="120" step="1"></div>
+      </div>
+
+      <!-- Return Plenum Start Collars -->
+      <div style="margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span class="input-label">Return Start Collars</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)" id="retCollarCt">0</span>
+        </div>
+        <div class="info-note" style="margin-bottom:8px;padding:6px 10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span style="font-size:10px">Add start collars on the return plenum. Each collar is where a return duct connects back to the unit.</span>
+        </div>
+        <div class="config-row" style="margin-bottom:6px">
+          <div class="config-group" style="flex:1">
+            <label class="config-label">Collar Type</label>
+            <select class="input-field" id="retCollarTypeSel" style="width:100%;font-size:11px">
+              <option value="sq-to-round">Square-to-Round</option>
+              <option value="tab" selected>Sticky Tab</option>
+              <option value="finger-saver">Finger Saver (Ductboard)</option>
+              <option value="spin-in">Spin-In Collar</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <select class="input-field" id="retCollarSizeSel" style="flex:1">
+            <option value="4">4"</option><option value="5">5"</option><option value="6">6"</option>
+            <option value="7">7"</option><option value="8" selected>8"</option><option value="9">9"</option>
+            <option value="10">10"</option><option value="12">12"</option><option value="14">14"</option>
+            <option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
+            <option value="22">22"</option><option value="24">24"</option>
+          </select>
+          <button class="add-fitting-btn" id="addRetCollarBtn" style="padding:8px 12px">+ Collar</button>
+        </div>
+        <div class="collar-chips" id="retCollarChips"><span style="font-size:10px;color:var(--text-dim)">No collars</span></div>
       </div>
 
       <!-- System-level Filter Selection -->
@@ -4406,6 +4458,7 @@ const FITTINGS = [
 // System state
 let SS = {
   collars: [],
+  retCollars: [],
   runs: [],
   activeRun: 0,
   addMode: null, // null, 'straight', 'fitting'
@@ -4530,6 +4583,7 @@ function initSystem() {
   SS.runs = [mkRun(0)];
   SS.activeRun = 0;
   SS.collars = [];
+  SS.retCollars = [];
   renderSystem();
 }
 
@@ -4550,6 +4604,19 @@ function renderCollars() {
   el.innerHTML = SS.collars.map((c,i)=>{
     const lbl = typeLabels[c.type] || c.type;
     return '<div class="collar-chip">'+c.size+'\u2033 '+lbl+'<button class="collar-chip-x" data-col-rm="'+i+'">\u00d7</button></div>';
+  }).join('');
+}
+
+function renderRetCollars() {
+  const el = document.getElementById('retCollarChips');
+  if (!el) return;
+  var ct = document.getElementById('retCollarCt');
+  if (ct) ct.textContent = SS.retCollars.length;
+  if (!SS.retCollars.length) { el.innerHTML='<span style="font-size:10px;color:var(--text-dim)">No collars</span>'; return; }
+  const typeLabels = {'sq-to-round':'Sq\u2192Rnd','tab':'Tab','finger-saver':'Finger','spin-in':'Spin'};
+  el.innerHTML = SS.retCollars.map((c,i)=>{
+    const lbl = typeLabels[c.type] || c.type;
+    return '<div class="collar-chip">'+c.size+'\u2033 '+lbl+'<button class="collar-chip-x" data-ret-col-rm="'+i+'">\u00d7</button></div>';
   }).join('');
 }
 
@@ -4907,6 +4974,35 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
   // Collar remove
   const crm = t.closest('[data-col-rm]');
   if (crm) { SS.collars.splice(parseInt(crm.dataset.colRm),1); renderCollars(); return; }
+  // Supply plenum shape toggle
+  var plShape = t.closest('[data-pl-shape]');
+  if (plShape) {
+    var shape = plShape.dataset.plShape;
+    document.getElementById('plRectFields').style.display = shape==='rect'?'':'none';
+    document.getElementById('plRoundFields').style.display = shape==='round'?'':'none';
+    document.getElementById('plShapeRect').style.background = shape==='rect'?'var(--red)':'#2a2a2a';
+    document.getElementById('plShapeRect').style.color = shape==='rect'?'#fff':'#ccc';
+    document.getElementById('plShapeRound').style.background = shape==='round'?'var(--red)':'#2a2a2a';
+    document.getElementById('plShapeRound').style.color = shape==='round'?'#fff':'#ccc';
+    return;
+  }
+  // Return plenum shape toggle
+  var retPlShape = t.closest('[data-retpl-shape]');
+  if (retPlShape) {
+    var rshape = retPlShape.dataset.retplShape;
+    document.getElementById('retPlRectFields').style.display = rshape==='rect'?'':'none';
+    document.getElementById('retPlRoundFields').style.display = rshape==='round'?'':'none';
+    document.getElementById('retPlShapeRect').style.background = rshape==='rect'?'var(--red)':'#2a2a2a';
+    document.getElementById('retPlShapeRect').style.color = rshape==='rect'?'#fff':'#ccc';
+    document.getElementById('retPlShapeRound').style.background = rshape==='round'?'var(--red)':'#2a2a2a';
+    document.getElementById('retPlShapeRound').style.color = rshape==='round'?'#fff':'#ccc';
+    return;
+  }
+  // Return collar add
+  if (t.closest('#addRetCollarBtn')) { const sz=document.getElementById('retCollarSizeSel').value; const tp=document.getElementById('retCollarTypeSel')?document.getElementById('retCollarTypeSel').value:'tab'; SS.retCollars.push({size:sz,type:tp}); renderRetCollars(); return; }
+  // Return collar remove
+  const rcrm = t.closest('[data-ret-col-rm]');
+  if (rcrm) { SS.retCollars.splice(parseInt(rcrm.dataset.retColRm),1); renderRetCollars(); return; }
   // Section toggle
   const tog = t.closest('[data-sys-toggle]');
   if (tog) { const key=tog.dataset.sysToggle; const bodies={plenum:'sysPlBody',retplenum:'sysRetPlBody',cfmest:'cfmEstBody',branchtree:'branchTreeBody'}; const b=document.getElementById(bodies[key]); if(b){b.classList.toggle('collapsed');tog.classList.toggle('collapsed');} return; }
@@ -5473,6 +5569,7 @@ calculate();
 updateCalcFilterVisibility();
 initSystem();
 renderCollars();
+renderRetCollars();
 
 // ===== PSYCHROMETRIC ENGINE (ASHRAE Fundamentals) =====
 function psychSatPress(T) {
