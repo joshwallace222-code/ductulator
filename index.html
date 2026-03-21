@@ -6539,20 +6539,20 @@ function wizInitTrunks() {
   WIZ.trunks = [];
 
   if (layout === 'RADIAL') {
-    WIZ.trunks.push({ label:'Plenum', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Plenum', airPath:'supply', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0 });
     return;
   }
   if (layout === 'LR') {
-    WIZ.trunks.push({ label:'Left Trunk',  isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
-    WIZ.trunks.push({ label:'Right Trunk', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Left Trunk',  airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Right Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
     return;
   }
   if (layout === '1SIDE') {
-    WIZ.trunks.push({ label:'Main Trunk', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Main Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0 });
     return;
   }
   // CUSTOM — start with one trunk
-  WIZ.trunks.push({ label:'Trunk A', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+  WIZ.trunks.push({ label:'Trunk A', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
 }
 
 function wizRenderTrunks() {
@@ -6567,6 +6567,15 @@ function wizRenderTrunks() {
     html += '</div>';
 
     if (!t.isRadial) {
+      // Air path toggle (Supply / Return)
+      var ap = t.airPath || 'supply';
+      html += '<div class="wiz-shape-toggle" style="margin-bottom:8px">';
+      html += '<div class="wiz-shape-btn' + (ap === 'supply' ? ' active' : '') + '" data-wiz-trunk-ap="' + i + '" data-ap="supply" style="' + (ap === 'supply' ? 'background:#d32f2f;border-color:#d32f2f' : '') + '">';
+      html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg> Supply</div>';
+      html += '<div class="wiz-shape-btn' + (ap === 'return' ? ' active' : '') + '" data-wiz-trunk-ap="' + i + '" data-ap="return" style="' + (ap === 'return' ? 'background:#ff9800;border-color:#ff9800' : '') + '">';
+      html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg> Return</div>';
+      html += '</div>';
+
       // Shape toggle
       html += '<div class="wiz-shape-toggle">';
       html += '<div class="wiz-shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
@@ -6686,7 +6695,8 @@ function wizRenderBranches() {
       var tSize = trunk ? wizSizeLabel(trunk) : '';
       html += '<div class="wiz-trunk-group">';
       html += '<div class="wiz-trunk-group-hdr">' + wizSvg('trunk');
-      html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + tLabel + (tSize && !trunk.isRadial ? ' (' + tSize + ')' : '') + '</span></div>';
+      var apTag = trunk && trunk.airPath === 'return' ? '<span style="color:#ff9800;font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border:1px solid #ff9800;border-radius:3px">RTN</span>' : '<span style="color:#d32f2f;font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border:1px solid #d32f2f;border-radius:3px">SUP</span>';
+      html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + tLabel + (tSize && !trunk.isRadial ? ' (' + tSize + ')' : '') + apTag + '</span></div>';
       html += '<div class="wiz-trunk-branches" data-wiz-trunk-branches="' + br.trunkIdx + '">';
       lastTrunk = br.trunkIdx;
     }
@@ -7079,7 +7089,8 @@ function wizRenderResults() {
 
     arH += '<div style="margin-bottom:16px">';
     arH += '<div class="wiz-trunk-result-hdr">' + wizSvg('trunk');
-    arH += '<span class="wiz-trunk-result-lbl">' + trunk.label + '</span>';
+    var rApTag = trunk.airPath === 'return' ? ' <span style="color:#ff9800;font-size:9px;font-weight:700;padding:1px 4px;border:1px solid #ff9800;border-radius:3px">RTN</span>' : ' <span style="color:#d32f2f;font-size:9px;font-weight:700;padding:1px 4px;border:1px solid #d32f2f;border-radius:3px">SUP</span>';
+    arH += '<span class="wiz-trunk-result-lbl">' + trunk.label + rApTag + '</span>';
     arH += '<span class="wiz-trunk-result-maxtel">Max TEL: ' + Math.round(tMaxTEL) + ' ft</span>';
     arH += '</div>';
 
@@ -7248,7 +7259,7 @@ function wizHandleClick(ev) {
   if (t.closest('#wizAddTrunk')) {
     wizSaveTrunks();
     var idx = WIZ.trunks.length;
-    WIZ.trunks.push({ label:'Trunk ' + String.fromCharCode(65 + idx), isRadial:false, shape:'round', size:'10', width:'10', height:'8', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Trunk ' + String.fromCharCode(65 + idx), airPath:'supply', isRadial:false, shape:'round', size:'10', width:'10', height:'8', length:'20', elbows90:0, elbows45:0 });
     WIZ.branches = []; // reset branches when trunks change
     WIZ.activeBranch = -1;
     wizRenderTrunks();
@@ -7273,6 +7284,17 @@ function wizHandleClick(ev) {
   }
 
   // --- Trunk shape toggle ---
+  // --- Trunk air path toggle ---
+  var trunkAP = t.closest('[data-wiz-trunk-ap]');
+  if (trunkAP) {
+    wizSaveTrunks();
+    var tai = parseInt(trunkAP.getAttribute('data-wiz-trunk-ap'));
+    var apv = trunkAP.getAttribute('data-ap');
+    WIZ.trunks[tai].airPath = apv;
+    wizRenderTrunks();
+    return true;
+  }
+
   var trunkShape = t.closest('[data-wiz-trunk-shape]');
   if (trunkShape) {
     wizSaveTrunks();
