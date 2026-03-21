@@ -2651,7 +2651,11 @@ footer a:hover { color: var(--text-muted); }
           <button class="compression-preset-btn" data-compression="25">25%</button>
           <button class="compression-preset-btn" data-compression="30">30%</button>
         </div>
-        <input type="range" class="compression-slider" id="compressionSlider" min="4" max="30" value="4" step="1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <input type="range" class="compression-slider" id="compressionSlider" min="4" max="30" value="4" step="1" style="flex:1">
+          <input type="number" class="slider-value-input" id="compressionInput" value="4" min="4" max="30" step="1" style="width:52px;text-align:center">
+          <span style="font-size:11px;color:#888">%</span>
+        </div>
         <div class="compression-impact low" id="compressionImpact">4% compressed — minimum realistic install</div>
       </div>
     </div>
@@ -2868,7 +2872,11 @@ footer a:hover { color: var(--text-muted); }
             <button class="compression-preset-btn" data-rev-comp="25">25%</button>
             <button class="compression-preset-btn" data-rev-comp="30">30%</button>
           </div>
-          <input type="range" class="compression-slider" id="revCompSlider" min="4" max="30" value="4" step="1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <input type="range" class="compression-slider" id="revCompSlider" min="4" max="30" value="4" step="1" style="flex:1">
+            <input type="number" class="slider-value-input" id="revCompInput" value="4" min="4" max="30" step="1" style="width:52px;text-align:center">
+            <span style="font-size:11px;color:#888">%</span>
+          </div>
           <div class="compression-impact low" id="revCompImpact">4% compressed — minimum realistic install</div>
         </div>
       </div>
@@ -4804,9 +4812,11 @@ function setDuctSegment(val) {
 function updateCompression() {
   const slider = document.getElementById('compressionSlider');
   if (!slider) return;
-  const c = parseInt(slider.value) || 0;
+  const c = parseInt(slider.value) || 4;
   const valEl = document.getElementById('compressionValue');
   if (valEl) valEl.textContent = c + '%';
+  const compInput = document.getElementById('compressionInput');
+  if (compInput && compInput !== document.activeElement) compInput.value = c;
   document.querySelectorAll('.compression-presets [data-compression]').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.compression) === c);
   });
@@ -6288,6 +6298,23 @@ document.getElementById('frictionInput').addEventListener('input', function() {
 });
 document.getElementById('insulatedToggle').addEventListener('change', calculate);
 document.getElementById('compressionSlider').addEventListener('input', updateCompression);
+// Compression number input -> sync to slider
+document.getElementById('compressionInput').addEventListener('input', function() {
+  var v = Math.max(4, Math.min(30, parseInt(this.value) || 4));
+  document.getElementById('compressionSlider').value = v;
+  updateCompression();
+});
+// Return compression input -> sync to slider
+var revCompInputEl = document.getElementById('revCompInput');
+if (revCompInputEl) {
+  revCompInputEl.addEventListener('input', function() {
+    var v = Math.max(4, Math.min(30, parseInt(this.value) || 4));
+    document.getElementById('revCompSlider').value = v;
+    // Trigger reverse compression update
+    var evt = new Event('input', {bubbles:true});
+    document.getElementById('revCompSlider').dispatchEvent(evt);
+  });
+}
 
 // Segment control
 document.querySelectorAll('#segmentControl [data-segment]').forEach(function(btn) {
@@ -7908,8 +7935,9 @@ function updateRevCompImpact() {
   var el = document.getElementById('revCompImpact');
   if (!el) return;
   var c = revState.compression;
-  if (c === 0) { el.textContent = 'Fully stretched \u2014 no friction penalty'; el.className = 'compression-impact low'; }
-  else if (c <= 10) { el.textContent = c+'% compressed \u2014 '+Math.round(flexFactor(c)*100)/100+'x friction'; el.className = 'compression-impact low'; }
+  var revCompIn = document.getElementById('revCompInput');
+  if (revCompIn && revCompIn !== document.activeElement) revCompIn.value = c;
+  if (c <= 10) { el.textContent = c+'% compressed \u2014 '+Math.round(flexFactor(c)*100)/100+'x friction'; el.className = 'compression-impact low'; }
   else if (c <= 20) { el.textContent = c+'% compressed \u2014 '+Math.round(flexFactor(c)*100)/100+'x friction'; el.className = 'compression-impact medium'; }
   else { el.textContent = c+'% compressed \u2014 '+Math.round(flexFactor(c)*100)/100+'x friction \u26a0'; el.className = 'compression-impact high'; }
 }
@@ -8393,20 +8421,20 @@ document.getElementById('sysRetFilterCFM').addEventListener('input', function() 
 
 // ===== ROOM CFM CALCULATOR =====
 const ROOM_CFM_TYPES = [
-  {id:'master_bed', label:'Master Bedroom', cfmPerSqft:0.75, minCfm:100, maxCfm:200, achNote:'0.7-0.8 CFM/ft²'},
-  {id:'bedroom', label:'Bedroom', cfmPerSqft:0.75, minCfm:80, maxCfm:150, achNote:'0.7-0.8 CFM/ft²'},
-  {id:'living', label:'Living Room', cfmPerSqft:1.0, minCfm:200, maxCfm:400, achNote:'1.0 CFM/ft², 6-8 ACH'},
-  {id:'great_room', label:'Great Room', cfmPerSqft:1.0, minCfm:250, maxCfm:500, achNote:'1.0 CFM/ft², 6-8 ACH'},
-  {id:'kitchen', label:'Kitchen', cfmPerSqft:1.2, minCfm:150, maxCfm:300, achNote:'1.2 CFM/ft², 7-9 ACH'},
-  {id:'dining', label:'Dining Room', cfmPerSqft:0.9, minCfm:100, maxCfm:250, achNote:'0.9 CFM/ft²'},
-  {id:'master_bath', label:'Master Bathroom', cfmPerSqft:1.0, minCfm:50, maxCfm:80, achNote:'50-80 CFM'},
-  {id:'bathroom', label:'Bathroom', cfmPerSqft:1.0, minCfm:50, maxCfm:80, achNote:'50-80 CFM'},
-  {id:'laundry', label:'Laundry Room', cfmPerSqft:1.0, minCfm:80, maxCfm:150, achNote:'Higher load'},
-  {id:'office', label:'Office/Study', cfmPerSqft:0.8, minCfm:80, maxCfm:150, achNote:'0.8 CFM/ft²'},
-  {id:'hallway', label:'Hallway', cfmPerSqft:0.5, minCfm:25, maxCfm:80, achNote:'0.5 CFM/ft²'},
-  {id:'garage', label:'Garage (conditioned)', cfmPerSqft:0.5, minCfm:0, maxCfm:200, achNote:'If conditioned'},
-  {id:'bonus', label:'Bonus Room', cfmPerSqft:0.9, minCfm:100, maxCfm:250, achNote:'0.9 CFM/ft²'},
-  {id:'closet', label:'Walk-in Closet', cfmPerSqft:0.5, minCfm:15, maxCfm:50, achNote:'Minimal'},
+  {id:'master_bed', label:'Master Bedroom', cfmPerSqft:0.75, minCfm:100, maxCfm:400, achNote:'0.7-0.8 CFM/ft²'},
+  {id:'bedroom', label:'Bedroom', cfmPerSqft:0.75, minCfm:80, maxCfm:300, achNote:'0.7-0.8 CFM/ft²'},
+  {id:'living', label:'Living Room', cfmPerSqft:1.0, minCfm:200, maxCfm:600, achNote:'1.0 CFM/ft², 6-8 ACH'},
+  {id:'great_room', label:'Great Room', cfmPerSqft:1.0, minCfm:250, maxCfm:800, achNote:'1.0 CFM/ft², 6-8 ACH'},
+  {id:'kitchen', label:'Kitchen', cfmPerSqft:1.2, minCfm:150, maxCfm:500, achNote:'1.2 CFM/ft², higher load'},
+  {id:'dining', label:'Dining Room', cfmPerSqft:0.9, minCfm:100, maxCfm:400, achNote:'0.9 CFM/ft²'},
+  {id:'master_bath', label:'Master Bathroom', cfmPerSqft:1.0, minCfm:50, maxCfm:200, achNote:'50-80 CFM typical'},
+  {id:'bathroom', label:'Bathroom', cfmPerSqft:1.0, minCfm:50, maxCfm:150, achNote:'50-80 CFM typical'},
+  {id:'laundry', label:'Laundry Room', cfmPerSqft:1.0, minCfm:80, maxCfm:250, achNote:'Higher load'},
+  {id:'office', label:'Office/Study', cfmPerSqft:0.8, minCfm:80, maxCfm:300, achNote:'0.8 CFM/ft²'},
+  {id:'hallway', label:'Hallway', cfmPerSqft:0.5, minCfm:25, maxCfm:150, achNote:'0.5 CFM/ft²'},
+  {id:'garage', label:'Garage (conditioned)', cfmPerSqft:0.5, minCfm:0, maxCfm:400, achNote:'If conditioned'},
+  {id:'bonus', label:'Bonus Room', cfmPerSqft:0.9, minCfm:100, maxCfm:500, achNote:'0.9 CFM/ft²'},
+  {id:'closet', label:'Walk-in Closet', cfmPerSqft:0.5, minCfm:15, maxCfm:100, achNote:'Minimal'},
 ];
 
 let roomCfmData = [
@@ -8431,15 +8459,10 @@ function calcRoomCfm(room) {
   var tightMult = {'tight':0.85, 'semi-tight':1.0, 'average':1.15, 'semi-loose':1.3, 'loose':1.5};
   var mult = tightMult[roomCfmTightness] || 1.0;
   
-  // For bathrooms, use fixed range based on size
-  var cfm;
-  if (room.type === 'bathroom' || room.type === 'master_bath') {
-    cfm = Math.max(50, Math.min(80, sqft * 1.0 * mult));
-  } else {
-    cfm = sqft * rt.cfmPerSqft * mult;
-    // Clamp to min/max for room type
-    cfm = Math.max(rt.minCfm * mult, Math.min(rt.maxCfm * mult, cfm));
-  }
+  // Calculate CFM based on sqft and room type rate
+  var cfm = sqft * rt.cfmPerSqft * mult;
+  // Clamp to min/max for room type (max scales with tightness for oversized rooms)
+  cfm = Math.max(rt.minCfm, Math.min(rt.maxCfm * mult, cfm));
   
   return {cfm: Math.round(cfm), sqft: sqft, vol: vol, rt: rt};
 }
