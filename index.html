@@ -3463,6 +3463,20 @@ footer a:hover { color: var(--text-muted); }
     <div id="wizAllRuns"></div>
   </div>
 
+  <!-- Static Pressure Budget -->
+  <div class="panel" style="border-left:3px solid #4caf50;background:var(--bg-card,#222)">
+    <div class="wiz-card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Static Pressure Budget
+    </div>
+    <div style="font-size:11px;color:#888;margin-bottom:8px">Total system must stay under equipment rated external static pressure. Most residential units: 0.5 IWC.</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1"><label class="input-label">Equipment ESP (IWC)</label><input type="number" class="input-field" id="wizESP" value="0.50" min="0.1" max="1.5" step="0.05" style="font-family:'SF Mono',monospace;font-size:14px"></div>
+      <div style="flex:1"><label class="input-label">Coil PD (IWC)</label><input type="number" class="input-field" id="wizCoilPD" value="0.07" min="0" max="0.5" step="0.01" style="font-family:'SF Mono',monospace;font-size:14px"></div>
+    </div>
+    <div id="wizBudgetBreakdown"></div>
+  </div>
+
   <button class="wiz-btn-primary" id="wizSendToFR">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     Send to FR Worksheet
@@ -6933,6 +6947,31 @@ function wizCalcResults() {
   // Results calculated lazily inside wizRenderResults
 }
 
+function getRoomsTotalCFM() {
+  // Pull total CFM from Rooms tab
+  var el = document.getElementById('roomTotalCfm');
+  if (el) {
+    var val = parseInt(el.textContent);
+    if (val > 0) return val;
+  }
+  // Fallback: sum from roomCfmData if available
+  if (typeof roomCfmData !== 'undefined' && typeof calcRoomCfm === 'function') {
+    var total = 0;
+    roomCfmData.forEach(function(rm) { total += calcRoomCfm(rm).cfm; });
+    return total;
+  }
+  return 0;
+}
+
+function getRoomsList() {
+  // Get individual room CFMs for branch mapping
+  if (typeof roomCfmData === 'undefined' || typeof calcRoomCfm !== 'function') return [];
+  return roomCfmData.map(function(rm) {
+    var c = calcRoomCfm(rm);
+    return { name: rm.name, cfm: c.cfm };
+  });
+}
+
 function wizRenderResults() {
   var runs = [];
   var maxTEL = 0;
@@ -6944,16 +6983,48 @@ function wizRenderResults() {
     if (r.tel > maxTEL) { maxTEL = r.tel; critIdx = i; }
   });
 
-  // Available Static Pressure — use SS.avsp if defined, else default 0.5 IWC
-  var asp = (typeof SS !== 'undefined' && SS.avsp) ? parseFloat(SS.avsp) || 0.5 : 0.5;
+  // Get system CFM from Rooms tab
+  var roomsCFM = getRoomsTotalCFM();
+
+  // Get ESP and coil PD from inputs
+  var espEl = document.getElementById('wizESP');
+  var coilEl = document.getElementById('wizCoilPD');
+  var equipESP = espEl ? parseFloat(espEl.value) || 0.50 : 0.50;
+  var coilPD = coilEl ? parseFloat(coilEl.value) || 0.07 : 0.07;
+
+  // Get filter PD from return plenum filter if enabled
+  var filterPD = 0;
+  var filterToggle = document.getElementById('sysRetFilterToggle');
+  if (filterToggle && filterToggle.checked) {
+    var filterResults = document.getElementById('sysRetFilterResults');
+    if (filterResults) {
+      var pdEl = filterResults.querySelector('[id*="FiltPD"]') || filterResults.querySelector('.filter-inline-value');
+      if (pdEl) filterPD = parseFloat(pdEl.textContent) || 0;
+    }
+    // Fallback: check sysRetFilterState
+    if (filterPD === 0 && typeof sysRetFilterState !== 'undefined' && sysRetFilterState.pd) {
+      filterPD = sysRetFilterState.pd;
+    }
+  }
+
+  // Available static for ductwork
+  var availableStatic = equipESP - coilPD - filterPD;
+  if (availableStatic < 0) availableStatic = 0;
+
+  // Use available static for friction rate calculation
+  var asp = availableStatic > 0 ? availableStatic : 0.5;
   var sysFR = maxTEL > 0 ? asp / maxTEL * 100 : 0;
   var frClass = sysFR <= 0.05 ? 'ok' : sysFR <= 0.08 ? 'warn' : 'bad';
   var frColor = sysFR <= 0.05 ? '#4caf50' : sysFR <= 0.08 ? '#ff9800' : '#d32f2f';
 
   // -- Summary cards --
+  // Add Rooms CFM to summary
+  var cfmDisplay = roomsCFM > 0 ? roomsCFM : '--';
+  var cfmNote = roomsCFM > 0 ? '' : ' <span style="font-size:9px;color:#888">(set in Rooms tab)</span>';
+
   var sumH = '<div class="wiz-results-grid">';
+  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono" style="color:#4caf50">' + cfmDisplay + '</div><div class="wiz-result-lbl">System CFM' + cfmNote + '</div></div>';
   sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono">' + WIZ.branches.length + '</div><div class="wiz-result-lbl">Branches</div></div>';
-  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono">' + WIZ.trunks.length + '</div><div class="wiz-result-lbl">Trunks</div></div>';
   sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono ' + frClass + '">' + sysFR.toFixed(3) + '</div><div class="wiz-result-lbl">FR (IWC/100ft)</div></div>';
   sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono ' + (maxTEL > 300 ? 'bad' : maxTEL > 200 ? 'warn' : 'ok') + '">' + Math.round(maxTEL) + ' ft</div><div class="wiz-result-lbl">Longest TEL</div></div>';
   sumH += '</div>';
@@ -7037,6 +7108,32 @@ function wizRenderResults() {
   if (!arH) arH = '<div style="font-size:12px;color:#666;padding:8px 0">No runs to display.</div>';
   var arEl = document.getElementById('wizAllRuns');
   if (arEl) arEl.innerHTML = arH;
+
+  // -- Static Pressure Budget --
+  var budgetEl = document.getElementById('wizBudgetBreakdown');
+  if (budgetEl) {
+    var ductPD = maxTEL > 0 ? (sysFR * maxTEL / 100) : 0; // actual duct PD for critical path
+    var totalUsed = ductPD + filterPD + coilPD;
+    var remaining = equipESP - totalUsed;
+    var budgetOk = remaining >= 0;
+    var budgetColor = remaining >= 0.05 ? '#4caf50' : remaining >= 0 ? '#ff9800' : '#d32f2f';
+    var budgetStatus = remaining >= 0.05 ? 'PASS — Good margin' : remaining >= 0 ? 'TIGHT — Very little margin' : 'OVER BUDGET — Reduce duct lengths or use larger sizes';
+
+    var bH = '<div style="background:#1a1a1a;border-radius:8px;padding:10px;font-size:12px">';
+    bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">Equipment ESP</span><span style="font-family:\'SF Mono\',monospace;color:#4caf50">' + equipESP.toFixed(2) + ' IWC</span></div>';
+    bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Coil pressure drop</span><span style="font-family:\'SF Mono\',monospace;color:#ff9800">-' + coilPD.toFixed(2) + '</span></div>';
+    if (filterPD > 0) {
+      bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Filter pressure drop</span><span style="font-family:\'SF Mono\',monospace;color:#ff9800">-' + filterPD.toFixed(2) + '</span></div>';
+    } else {
+      bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#666">\u2212 Filter (none selected)</span><span style="font-family:\'SF Mono\',monospace;color:#666">-0.00</span></div>';
+    }
+    bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333;font-weight:600"><span style="color:#e0e0e0">= Available for ductwork</span><span style="font-family:\'SF Mono\',monospace;color:#4caf50">' + availableStatic.toFixed(2) + ' IWC</span></div>';
+    bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Duct PD (critical path)</span><span style="font-family:\'SF Mono\',monospace;color:' + (ductPD > availableStatic ? '#d32f2f' : '#ccc') + '">-' + ductPD.toFixed(3) + '</span></div>';
+    bH += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:700;font-size:13px"><span style="color:#e0e0e0">Remaining</span><span style="font-family:\'SF Mono\',monospace;color:' + budgetColor + '">' + (remaining >= 0 ? '+' : '') + remaining.toFixed(3) + ' IWC</span></div>';
+    bH += '<div style="margin-top:6px;padding:6px 8px;border-radius:6px;font-size:11px;font-weight:600;text-align:center;background:' + budgetColor + '22;color:' + budgetColor + ';border:1px solid ' + budgetColor + '44">' + budgetStatus + '</div>';
+    bH += '</div>';
+    budgetEl.innerHTML = bH;
+  }
 }
 
 // ---- Send to FR Worksheet ----
@@ -7321,6 +7418,12 @@ function wizHandleChange(ev) {
   if (t.hasAttribute('data-wiz-trunk-w') || t.hasAttribute('data-wiz-trunk-h')) {
     wizSaveTrunks();
     wizRenderTrunks();
+    return true;
+  }
+
+  // ESP / Coil PD change -> re-render results budget
+  if (t.id === 'wizESP' || t.id === 'wizCoilPD') {
+    if (WIZ.step === 4) wizRenderResults();
     return true;
   }
 
