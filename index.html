@@ -6726,7 +6726,7 @@ function wizInitBranches() {
           trunkIdx: ti, num: num, room: rm.name,
           cfm: rm.cfm || '', shape: 'round',
           size: recSize, width: '8', height: '8',
-          material: WIZ.material, compression: 4,
+          material: WIZ.material, compression: 0,
           length: '12', fittings: [], bootType: '90boot',
           done: false, recommended: recSize
         });
@@ -6744,7 +6744,7 @@ function wizInitBranches() {
         trunkIdx: ti, num: num, room: 'Return ' + (num - rooms.length),
         cfm: retCfm || '', shape: 'round',
         size: recSize, width: '14', height: '10',
-        material: WIZ.material, compression: 4,
+        material: WIZ.material, compression: 0,
         length: '10', fittings: [], bootType: 'wallReg',
         done: false, recommended: recSize
       });
@@ -6760,7 +6760,7 @@ function wizInitBranches() {
           trunkIdx: ti, num: num, room: 'Room ' + num,
           cfm: '', shape: 'round', size: '6',
           width: '8', height: '8', material: WIZ.material,
-          compression: 4, length: '12', fittings: [],
+          compression: 0, length: '12', fittings: [],
           bootType: '90boot', done: false
         });
         num++;
@@ -6865,17 +6865,25 @@ function wizRenderBranchForm(br, i) {
   h += '<div class="wiz-shape-btn' + (br.material === 'flex' ? ' active' : '') + '" data-wiz-br-mat="' + i + '" data-matval="flex">' + wizSvg('round') + ' Flex</div>';
   h += '</div>';
 
-  // Compression (flex only)
+  // Compression (flex only) — user MUST set this, no assumptions
   if (br.material === 'flex') {
-    var ff = wizFlexFactor(br.compression);
-    h += '<div class="wiz-compression-box">';
-    h += '<div class="wiz-input-label">Flex Compression</div>';
-    h += '<select class="input-field" data-wiz-br-compress="' + i + '" style="margin-top:4px">';
+    var compVal = br.compression || '';
+    var ff = compVal ? wizFlexFactor(compVal) : 1;
+    var ffText = compVal ? 'Friction \u00D7' + ff.toFixed(2) : '<span style="color:#d32f2f">Set compression \u2014 measure the installed flex</span>';
+    h += '<div class="wiz-compression-box" style="background:#1a1a1a;border:1px solid ' + (compVal ? '#444' : '#d32f2f') + ';border-radius:8px;padding:10px;margin:8px 0">';
+    h += '<div class="wiz-input-label" style="margin-bottom:6px">Flex Compression Ratio</div>';
+    h += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">';
     WIZ_COMPRESS.forEach(function(c){
-      h += '<option value="' + c + '"' + (br.compression == c ? ' selected':'') + '>' + c + '%</option>';
+      var isActive = compVal == c;
+      h += '<div class="compression-preset-btn' + (isActive ? ' active' : '') + '" data-wiz-comp-preset="' + i + '" data-wiz-comp-val="' + c + '" style="cursor:pointer;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid ' + (isActive ? '#d32f2f' : '#555') + ';background:' + (isActive ? '#d32f2f' : '#2a2a2a') + ';color:' + (isActive ? '#fff' : '#ccc') + '">' + c + '%</div>';
     });
-    h += '</select>';
-    h += '<div class="wiz-compression-val">Friction \u00D7' + ff.toFixed(2) + '</div>';
+    h += '</div>';
+    h += '<div style="display:flex;align-items:center;gap:8px">';
+    h += '<input type="range" style="flex:1" min="4" max="30" step="1" value="' + (compVal || 4) + '" data-wiz-br-compress="' + i + '">';
+    h += '<input type="number" class="slider-value-input" style="width:52px;text-align:center" min="4" max="30" step="1" value="' + (compVal || '') + '" placeholder="%" data-wiz-br-comp-input="' + i + '">';
+    h += '<span style="font-size:11px;color:#888">%</span>';
+    h += '</div>';
+    h += '<div class="wiz-compression-val" style="margin-top:6px">' + ffText + '</div>';
     h += '</div>';
   }
 
@@ -7459,7 +7467,16 @@ function wizHandleClick(ev) {
     var mv = brMat.getAttribute('data-matval');
     wizSaveBranch(bmi);
     WIZ.branches[bmi].material = mv;
-    if (mv === 'flex' && !WIZ.branches[bmi].compression) WIZ.branches[bmi].compression = 4;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Compression preset button ---
+  var compPreset = t.closest('[data-wiz-comp-preset]');
+  if (compPreset) {
+    var cpi = parseInt(compPreset.getAttribute('data-wiz-comp-preset'));
+    var cpv = parseInt(compPreset.getAttribute('data-wiz-comp-val'));
+    WIZ.branches[cpi].compression = cpv;
     wizRenderBranches();
     return true;
   }
@@ -7491,7 +7508,7 @@ function wizHandleClick(ev) {
       width:       '8',
       height:      '8',
       material:    WIZ.material,
-      compression: 4,
+      compression: 0,
       length:      '12',
       fittings:    [],
       bootType:    '90boot',
@@ -7514,11 +7531,25 @@ function wizHandleClick(ev) {
 function wizHandleChange(ev) {
   var t = ev.target;
 
-  // Branch compression change re-render
+  // Branch compression slider change
   if (t.hasAttribute('data-wiz-br-compress')) {
     var ci = parseInt(t.getAttribute('data-wiz-br-compress'));
-    WIZ.branches[ci].compression = parseInt(t.value) || 4;
-    wizSaveBranch(ci);
+    var cv = parseInt(t.value) || 0;
+    WIZ.branches[ci].compression = cv;
+    // Sync the number input
+    var compIn = document.querySelector('[data-wiz-br-comp-input="' + ci + '"]');
+    if (compIn && compIn !== document.activeElement) compIn.value = cv;
+    wizRenderBranches();
+    return true;
+  }
+  // Branch compression number input change
+  if (t.hasAttribute('data-wiz-br-comp-input')) {
+    var ci2 = parseInt(t.getAttribute('data-wiz-br-comp-input'));
+    var cv2 = Math.max(4, Math.min(30, parseInt(t.value) || 0));
+    WIZ.branches[ci2].compression = cv2;
+    // Sync the slider
+    var compSlider = document.querySelector('[data-wiz-br-compress="' + ci2 + '"]');
+    if (compSlider) compSlider.value = cv2;
     wizRenderBranches();
     return true;
   }
