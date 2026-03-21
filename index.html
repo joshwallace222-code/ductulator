@@ -7204,6 +7204,30 @@ function wizInitBranches() {
   }
 }
 
+// Calculate max CFM a duct can carry at 0.08 IWC/100ft given size, material, compression
+function wizMaxCFM(sizeInch, material, compression) {
+  if (!sizeInch || sizeInch <= 0) return 0;
+  var D = parseFloat(sizeInch);
+  var A = Math.PI * Math.pow(D / 24, 2); // sq ft
+  var isFlex = material === 'flex';
+  var ff = isFlex ? wizFlexFactor(compression || 0) : 1;
+  // Binary search for max CFM where friction * ff <= 0.08
+  var lo = 0, hi = 900 * A; // velocity-capped
+  var best = 0;
+  for (var it = 0; it < 40; it++) {
+    var mid = (lo + hi) / 2;
+    var fr = frictionLoss(D, mid) * ff;
+    if (fr <= 0.08) { best = mid; lo = mid; }
+    else { hi = mid; }
+    if (hi - lo < 0.5) break;
+  }
+  // Also cap by Manual D velocity (700 for flex, 900 for metal supply, 700 for return)
+  var maxVel = isFlex ? 700 : 900;
+  var maxCFMvel = maxVel * A;
+  if (best > maxCFMvel) best = maxCFMvel;
+  return Math.round(best);
+}
+
 function wizRenderBranches() {
   var html = '';
   var lastTrunk = -1;
@@ -7214,10 +7238,17 @@ function wizRenderBranches() {
       var trunk = WIZ.trunks[br.trunkIdx];
       var tLabel = trunk ? trunk.label : 'Trunk';
       var tSize = trunk ? wizSizeLabel(trunk) : '';
+      // Calculate trunk capacity and total CFM it needs to carry
+      var trunkTotalCFM = 0;
+      WIZ.branches.forEach(function(b) { if (b.trunkIdx === br.trunkIdx && b.cfm) trunkTotalCFM += parseFloat(b.cfm) || 0; });
+      var trunkMaxCFM = trunk ? wizMaxCFM(trunk.size || wizEffDia(trunk), trunk.material, trunk.compression) : 0;
+      var trunkCfmOk = trunkMaxCFM >= trunkTotalCFM || trunkTotalCFM === 0;
+      var trunkCfmTag = trunkTotalCFM > 0 ? '<span style="font-size:10px;margin-left:4px;color:' + (trunkCfmOk ? '#4caf50' : '#d32f2f') + ';font-weight:600">' + trunkTotalCFM + (trunkCfmOk ? '' : '/' + trunkMaxCFM + ' max') + ' CFM</span>' : '';
+
       html += '<div class="wiz-trunk-group">';
       html += '<div class="wiz-trunk-group-hdr">' + wizSvg('trunk');
       var apTag = trunk && trunk.airPath === 'return' ? '<span style="color:#ff9800;font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border:1px solid #ff9800;border-radius:3px">RTN</span>' : '<span style="color:#d32f2f;font-size:10px;font-weight:700;margin-left:6px;padding:1px 5px;border:1px solid #d32f2f;border-radius:3px">SUP</span>';
-      html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + tLabel + (tSize && !trunk.isRadial ? ' (' + tSize + ')' : '') + apTag + '</span></div>';
+      html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + tLabel + (tSize && !trunk.isRadial ? ' (' + tSize + ')' : '') + apTag + trunkCfmTag + '</span></div>';
       html += '<div class="wiz-trunk-branches" data-wiz-trunk-branches="' + br.trunkIdx + '">';
       lastTrunk = br.trunkIdx;
     }
@@ -7226,8 +7257,14 @@ function wizRenderBranches() {
     var statusText  = br.done ? 'Done'  : (WIZ.activeBranch === i ? 'Editing' : 'Tap to edit');
     var shapeL = br.shape === 'rect' ? br.width + '\u00D7' + br.height + '"' : br.size + '\u2033';
     var matL   = br.material === 'flex' ? ' flex' : '';
-    var cfmL   = br.cfm ? ' \u00B7 ' + br.cfm + ' CFM' : '';
     var fitL   = br.fittings.length ? ' \u00B7 ' + br.fittings.length + ' fit' : '';
+    // Calculate actual capacity of this duct
+    var brMaxCFM = wizMaxCFM(br.size, br.material, br.compression);
+    var cfmL = '';
+    if (br.cfm) {
+      var cfmOk = brMaxCFM >= br.cfm;
+      cfmL = ' \u00B7 <span style="color:' + (cfmOk ? '#4caf50' : '#d32f2f') + ';font-weight:600">' + br.cfm + (cfmOk ? '' : '/' + brMaxCFM + ' max') + ' CFM</span>';
+    }
 
     html += '<div class="wiz-branch-item' + (WIZ.activeBranch === i ? ' editing' : '') + '" data-wiz-branch="' + i + '">';
     html += '<div class="wiz-branch-num">' + br.num + '</div>';
@@ -7855,10 +7892,15 @@ function wizRenderResults() {
       arH += '<div class="wiz-run-item" style="' + (isCrit ? 'border-color:#ff9800' : '') + '">';
       arH += '<div class="wiz-run-header">';
       arH += '<div class="wiz-branch-num" style="' + (isCrit ? 'background:#ff9800' : '') + '">' + r.branch.num + '</div>';
-      arH += '<div class="wiz-run-name">' + r.branch.room + (r.branch.cfm ? ' <span style="color:#888;font-weight:400">(' + r.branch.cfm + ' CFM)</span>' : '') + '</div>';
+      // Capacity check
+      var runMaxCFM = wizMaxCFM(r.branch.size, r.branch.material, r.branch.compression);
+      var runCfmOk = !r.branch.cfm || runMaxCFM >= r.branch.cfm;
+      var cfmDisplay = r.branch.cfm ? '<span style="color:' + (runCfmOk ? '#888' : '#d32f2f') + ';font-weight:' + (runCfmOk ? '400' : '600') + '">(' + r.branch.cfm + (runCfmOk ? '' : '/' + runMaxCFM + ' max') + ' CFM)</span>' : '';
+
+      arH += '<div class="wiz-run-name">' + r.branch.room + ' ' + cfmDisplay + '</div>';
       arH += '<div class="wiz-run-tel" style="color:' + barColor + '">' + Math.round(r.tel) + ' ft</div>';
       arH += '</div>';
-      arH += '<div style="font-size:10px;color:#888;margin-bottom:4px">' + shapeL + matL + ' \u00B7 FR: <span class="wiz-run-fr ' + rFRCls + '">' + rFR.toFixed(3) + '</span></div>';
+      arH += '<div style="font-size:10px;color:#888;margin-bottom:4px">' + shapeL + matL + (r.branch.compression > 0 ? ' ' + r.branch.compression + '%' : '') + ' \u00B7 FR: <span class="wiz-run-fr ' + rFRCls + '">' + rFR.toFixed(3) + '</span> \u00B7 Capacity: <span style="color:' + (runCfmOk ? '#4caf50' : '#d32f2f') + '">' + runMaxCFM + ' CFM</span></div>';
       arH += '<div class="wiz-tel-bar-wrap"><div class="wiz-tel-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
       arH += '</div>';
     });
