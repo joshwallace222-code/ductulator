@@ -2976,10 +2976,10 @@ footer a:hover { color: var(--text-muted); }
           <div class="result-unit">IWC/100ft</div>
           <div class="result-label">Friction Rate</div>
         </div>
-        <div class="result-card" id="cfmCard">
-          <div class="result-value" id="cfmResult">--</div>
+        <div class="result-card" id="maxCfmCard">
+          <div class="result-value" id="maxCfmResult">--</div>
           <div class="result-unit">CFM</div>
-          <div class="result-label">Airflow</div>
+          <div class="result-label">Max CFM @ 0.08</div>
         </div>
         <div class="result-card" id="suggestedCard">
           <div class="result-value" id="suggestedResult">--</div>
@@ -5005,6 +5005,26 @@ function calculate() {
   const frVal = parseFloat(frInput ? frInput.value : 0.06) || 0;
   const maxTEL = friction > 0 ? (frVal / friction) * 100 : 0;
 
+  // Max CFM this duct can carry at 0.08 IWC/100ft (accounting for compression)
+  let maxCFMforDuct = 0;
+  if (D_in > 0) {
+    let lo = 10, hi = maxV * A; // velocity-capped upper bound
+    for (let it = 0; it < 50; it++) {
+      let mid = (lo + hi) / 2;
+      let testFR = frictionLoss(D_in, mid);
+      if (state.material === 'flex') {
+        const comp2 = parseInt((document.getElementById('compressionSlider') || {}).value || 0);
+        testFR *= flexFactor(comp2);
+      }
+      if (testFR <= MAX_FRICTION) { maxCFMforDuct = mid; lo = mid; }
+      else { hi = mid; }
+      if (hi - lo < 0.5) break;
+    }
+    // Also cap by velocity
+    const maxCFMvel = maxV * A;
+    if (maxCFMforDuct > maxCFMvel) maxCFMforDuct = maxCFMvel;
+  }
+
   // Store on state for header pills
   state.velocity = velocity;
   state.friction = friction;
@@ -5015,6 +5035,7 @@ function calculate() {
   if (e('velocityResult')) e('velocityResult').textContent = Math.round(velocity);
   if (e('frictionResult')) e('frictionResult').textContent = friction.toFixed(3);
   if (e('cfmResult')) e('cfmResult').textContent = Math.round(cfm);
+  if (e('maxCfmResult')) e('maxCfmResult').textContent = maxCFMforDuct > 0 ? Math.round(maxCFMforDuct) : '--';
   if (e('suggestedResult')) e('suggestedResult').textContent = sugSize + '"';
   if (e('suggestedUnit')) e('suggestedUnit').textContent = state.shape === 'round' ? 'round' : 'equiv round';
   if (e('maxRunResult')) e('maxRunResult').textContent = maxTEL > 0 ? Math.round(maxTEL) : '--';
@@ -5037,6 +5058,15 @@ function calculate() {
     if (friction > MAX_FRICTION) fc.classList.add('danger');
     else if (friction > MAX_FRICTION * 0.85) fc.classList.add('warning');
     else if (friction > 0) fc.classList.add('success');
+  }
+
+  // Max CFM card color
+  const mc = e('maxCfmCard');
+  if (mc) {
+    mc.className = 'result-card';
+    if (maxCFMforDuct > 0 && cfm > maxCFMforDuct) mc.classList.add('danger');
+    else if (maxCFMforDuct > 0 && cfm > maxCFMforDuct * 0.85) mc.classList.add('warning');
+    else if (maxCFMforDuct > 0) mc.classList.add('success');
   }
 
   // Status bar
