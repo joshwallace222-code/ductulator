@@ -7016,28 +7016,35 @@ function wizPlenumSVG(type, isReturn) {
     // AHU box at bottom center
     s += '<rect x="75" y="95" width="70" height="35" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
     s += '<text x="110" y="117" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
-    // Tapered plenum on top — wider at bottom (AHU connection), tapers up to closed top
+    // Tapered plenum on top
     s += '<path d="M65 95 L65 40 L85 20 L135 20 L155 40 L155 95 Z" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Closed top cap
     s += '<line x1="85" y1="20" x2="135" y2="20" stroke="' + wc + '" stroke-width="3"/>';
-    // Offset collar going right
+    // Side collars
     s += '<rect x="155" y="38" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Collar going left
     s += '<rect x="43" y="38" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Collar going right lower
     s += '<rect x="155" y="62" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow: UP from AHU into plenum
-    s += '<line x1="110" y1="93" x2="110" y2="55" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    s += '<polygon points="106,58 110,48 114,58" fill="' + ac + '"/>';
-    // Airflow: turns RIGHT out collar
-    s += '<line x1="155" y1="45" x2="175" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="173,41 181,45 173,49" fill="' + ac + '"/>';
-    // Airflow: turns LEFT out collar
-    s += '<line x1="65" y1="45" x2="47" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="49,49 41,45 49,41" fill="' + ac + '"/>';
-    // Airflow: right lower collar
-    s += '<line x1="155" y1="69" x2="175" y2="69" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="173,65 181,69 173,73" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes IN from side collars, flows DOWN into AHU
+      s += '<line x1="110" y1="55" x2="110" y2="93" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="106,88 110,96 114,88" fill="' + ac + '"/>';
+      // Arrows: FROM collars INTO plenum
+      s += '<line x1="175" y1="45" x2="157" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="159,49 153,45 159,41" fill="' + ac + '"/>';
+      s += '<line x1="47" y1="45" x2="63" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="61,41 67,45 61,49" fill="' + ac + '"/>';
+      s += '<line x1="175" y1="69" x2="157" y2="69" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="159,73 153,69 159,65" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air goes UP from AHU, turns sideways OUT collars
+      s += '<line x1="110" y1="93" x2="110" y2="55" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="106,58 110,48 114,58" fill="' + ac + '"/>';
+      s += '<line x1="155" y1="45" x2="175" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="173,41 181,45 173,49" fill="' + ac + '"/>';
+      s += '<line x1="65" y1="45" x2="47" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="49,49 41,45 49,41" fill="' + ac + '"/>';
+      s += '<line x1="155" y1="69" x2="175" y2="69" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="173,65 181,69 173,73" fill="' + ac + '"/>';
+    }
     s += '<text x="110" y="137" text-anchor="middle" font-size="7" fill="' + lc + '">Tapered Transition \u2014 10ft EQ (Best)</text>';
   } else if (type === 'box') {
     // AHU at bottom
@@ -7055,17 +7062,29 @@ function wizPlenumSVG(type, isReturn) {
     s += '<circle cx="95" cy="55" r="4" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".4"/>';
     s += '<circle cx="120" cy="45" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".35"/>';
     s += '<circle cx="105" cy="70" r="3.5" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".3"/>';
-    // Airflow UP then turns sideways hitting end cap
-    s += '<line x1="110" y1="93" x2="110" y2="50" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    s += '<polygon points="106,53 110,43 114,53" fill="' + ac + '"/>';
-    // Turns right
-    s += '<line x1="160" y1="42" x2="180" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="178,38 186,42 178,46" fill="' + ac + '"/>';
-    s += '<line x1="160" y1="67" x2="180" y2="67" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="178,63 186,67 178,71" fill="' + ac + '"/>';
-    // Turns left
-    s += '<line x1="60" y1="52" x2="42" y2="52" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="44,56 36,52 44,48" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes IN from side collars, flows DOWN into AHU
+      s += '<line x1="110" y1="50" x2="110" y2="93" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="106,88 110,96 114,88" fill="' + ac + '"/>';
+      // FROM right collars INTO plenum
+      s += '<line x1="180" y1="42" x2="162" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="164,46 158,42 164,38" fill="' + ac + '"/>';
+      s += '<line x1="180" y1="67" x2="162" y2="67" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="164,71 158,67 164,63" fill="' + ac + '"/>';
+      // FROM left collar INTO plenum
+      s += '<line x1="42" y1="52" x2="58" y2="52" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="56,48 62,52 56,56" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air goes UP, turns sideways OUT collars
+      s += '<line x1="110" y1="93" x2="110" y2="50" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="106,53 110,43 114,53" fill="' + ac + '"/>';
+      s += '<line x1="160" y1="42" x2="180" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="178,38 186,42 178,46" fill="' + ac + '"/>';
+      s += '<line x1="160" y1="67" x2="180" y2="67" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="178,63 186,67 178,71" fill="' + ac + '"/>';
+      s += '<line x1="60" y1="52" x2="42" y2="52" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="44,56 36,52 44,48" fill="' + ac + '"/>';
+    }
     s += '<text x="110" y="137" text-anchor="middle" font-size="7" fill="' + lc + '">Box Plenum \u2014 35ft EQ</text>';
   } else if (type === 'extended') {
     // Extended plenum: AHU at left, long horizontal plenum extending right
@@ -7082,14 +7101,24 @@ function wizPlenumSVG(type, isReturn) {
     s += '<rect x="122" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
     s += '<rect x="152" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
     s += '<rect x="182" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow: enters from AHU horizontally, hits end cap, air distributes to collars
-    s += '<line x1="48" y1="65" x2="140" y2="65" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    s += '<polygon points="138,61 148,65 138,69" fill="' + ac + '"/>';
-    // Air out each collar (upward)
     var cols = [69,99,129,159,189];
-    for (var ci=0; ci<cols.length; ci++) {
-      s += '<line x1="'+cols[ci]+'" y1="50" x2="'+cols[ci]+'" y2="34" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-      s += '<polygon points="'+(cols[ci]-4)+',34 '+cols[ci]+',26 '+(cols[ci]+4)+',34" fill="' + ac + '"/>';
+    if (isReturn) {
+      // RETURN: Air comes DOWN from collars into plenum, flows LEFT toward AHU
+      for (var ci=0; ci<cols.length; ci++) {
+        s += '<line x1="'+cols[ci]+'" y1="34" x2="'+cols[ci]+'" y2="48" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+        s += '<polygon points="'+(cols[ci]-4)+',46 '+cols[ci]+',54 '+(cols[ci]+4)+',46" fill="' + ac + '"/>';
+      }
+      // Horizontal flow toward AHU (leftward)
+      s += '<line x1="140" y1="65" x2="48" y2="65" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="52,69 44,65 52,61" fill="' + ac + '"/>';
+    } else {
+      // SUPPLY: Air enters from AHU horizontally, distributes out collars
+      s += '<line x1="48" y1="65" x2="140" y2="65" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+      s += '<polygon points="138,61 148,65 138,69" fill="' + ac + '"/>';
+      for (var ci=0; ci<cols.length; ci++) {
+        s += '<line x1="'+cols[ci]+'" y1="50" x2="'+cols[ci]+'" y2="34" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+        s += '<polygon points="'+(cols[ci]-4)+',34 '+cols[ci]+',26 '+(cols[ci]+4)+',34" fill="' + ac + '"/>';
+      }
     }
     s += '<text x="120" y="100" text-anchor="middle" font-size="7" fill="' + lc + '">Extended Plenum \u2014 15ft EQ</text>';
   } else if (type === '90_vanes') {
