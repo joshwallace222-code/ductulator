@@ -7889,8 +7889,9 @@ function wizRenderResults() {
     var totalUsed = ductPD + filterPD + coilPD + safetyDeduction + filterGrillPDTotal;
     var remaining = equipESP - totalUsed;
     var budgetOk = remaining >= 0;
-    var budgetColor = remaining >= 0.05 ? '#4caf50' : remaining >= 0 ? '#ff9800' : '#d32f2f';
-    var budgetStatus = remaining >= 0.05 ? 'PASS \u2014 Good margin' : remaining >= 0 ? 'TIGHT \u2014 Very little margin' : 'OVER BUDGET \u2014 Reduce duct lengths or use larger sizes';
+    // Use small tolerance for floating point rounding
+    var budgetColor = remaining >= 0.05 ? '#4caf50' : remaining >= -0.005 ? '#ff9800' : '#d32f2f';
+    var budgetStatus = remaining >= 0.05 ? 'PASS \u2014 Good margin' : remaining >= -0.005 ? 'TIGHT \u2014 Very little margin' : 'OVER BUDGET \u2014 Reduce duct lengths or use larger sizes';
 
     var locLabel = WIZ.ductLocation ? WIZ.ductLocation.replace(/_/g, ' ') : 'conditioned';
     var bH = '<div style="background:#1a1a1a;border-radius:8px;padding:10px;font-size:12px">';
@@ -7947,12 +7948,17 @@ function wizBudgetDiagnostics(runs, availableStatic, sysFR, maxTEL, critIdx) {
       });
     }
 
-    // 2. Undersized branch — check actual friction loss per 100ft for given CFM + duct size
-    if (br.cfm > 0 && br.size > 0) {
+    // 2. Undersized branch — check if duct friction makes this run unworkable
+    // Only flag if the branch friction rate exceeds the system FR by a large margin
+    // (which means this branch needs more PD than the system can afford)
+    if (br.cfm > 0 && br.size > 0 && sysFR > 0) {
       var brDiaInch = br.shape === 'rect' ? rectEquivDiameter(parseFloat(br.width)||8, parseFloat(br.height)||8) : parseFloat(br.size);
       var brActualFR = frictionLoss(brDiaInch, br.cfm);
       if (br.material === 'flex') brActualFR *= wizFlexFactor(br.compression || 0);
-      if (brActualFR > 0.08) {
+      // Flag if duct friction is more than 3x the system FR or over 0.15 absolute
+      // (mild restriction is normal, severe restriction wastes available static)
+      var frThreshold = Math.max(sysFR * 3, 0.15);
+      if (brActualFR > frThreshold) {
         var curSize = br.shape === 'rect' ? (br.width + '\u00D7' + br.height + '"') : (br.size + '\u2033');
         // Find the right size
         var testSizes = [4,5,6,7,8,9,10,12,14,16,18,20];
@@ -7963,11 +7969,12 @@ function wizBudgetDiagnostics(runs, availableStatic, sysFR, maxTEL, critIdx) {
           if (br.material === 'flex') testFR *= wizFlexFactor(br.compression || 0);
           if (testFR <= 0.08) { recSize = testSizes[tsi]; break; }
         }
+        var severityColor = brActualFR > 0.5 ? '#d32f2f' : '#ff9800';
         diags.push({
-          severity: '#ff9800',
+          severity: severityColor,
           title: 'Branch ' + br.num + ' \u2014 Duct too restrictive',
-          detail: br.cfm + ' CFM through ' + curSize + ' ' + (br.material==='flex'?'flex':'metal') + (br.compression>0?' at '+br.compression+'% compression':'') + ' = ' + brActualFR.toFixed(3) + ' IWC/100ft (max 0.08)',
-          extra: 'Upsize to ' + recSize + '\u2033 to get under 0.08 IWC/100ft'
+          detail: br.cfm + ' CFM through ' + curSize + ' ' + (br.material==='flex'?'flex':'metal') + (br.compression>0?' at '+br.compression+'% compression':'') + ' = ' + brActualFR.toFixed(3) + ' IWC/100ft',
+          extra: 'Recommended: ' + recSize + '\u2033 (gets to \u22640.08 IWC/100ft)'
         });
       }
     }
