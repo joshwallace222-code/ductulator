@@ -18,7 +18,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Ragsdale Ductulator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2475,7 +2474,12 @@ footer a:hover { color: var(--text-muted); }
 <!-- ===== NAVIGATION ===== -->
 <nav class="nav">
   <div class="nav-brand">
-    <img src="ragsdale-logo-square.jpg" alt="Ragsdale" style="width:36px;height:36px;border-radius:8px;object-fit:contain">
+    <svg class="nav-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="8" fill="#D32F2F"/>
+      <path d="M8 18h20M18 8v20" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="18" cy="18" r="6" stroke="#fff" stroke-width="2" fill="none"/>
+      <circle cx="18" cy="18" r="2" fill="#fff"/>
+    </svg>
     <div>
       <div class="nav-title">Ragsdale Ductulator</div>
       <div class="nav-subtitle">HVAC Duct Sizing Tool</div>
@@ -3360,67 +3364,6 @@ footer a:hover { color: var(--text-muted); }
     </div>
   </div>
 
-  <div class="wiz-prompt" style="margin-top:8px">
-    <div class="wiz-prompt-q">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Where are the ducts?
-    </div>
-    <div class="wiz-prompt-help">Location affects heat gain/loss. Ducts in a hot attic lose more cooling capacity than ducts in conditioned space.</div>
-  </div>
-  <div class="opt-grid" id="wizLocOpts">
-    <div class="opt-btn active" data-wiz-loc="conditioned">
-      <div class="opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v4M12 16h.01"/></svg></div>
-      <div class="opt-label">Conditioned</div>
-      <div class="opt-note">Inside the home</div>
-    </div>
-    <div class="opt-btn" data-wiz-loc="encap_crawl">
-      <div class="opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M4 21V10l8-7 8 7v11"/><path d="M4 17h16" stroke-dasharray="3 2"/></svg></div>
-      <div class="opt-label">Encap. Crawl</div>
-      <div class="opt-note">+3% CFM</div>
-    </div>
-    <div class="opt-btn" data-wiz-loc="vented_crawl">
-      <div class="opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M4 21V10l8-7 8 7v11"/><path d="M6 21v-4M10 21v-4M14 21v-4M18 21v-4"/></svg></div>
-      <div class="opt-label">Vented Crawl</div>
-      <div class="opt-note">+7% CFM</div>
-    </div>
-    <div class="opt-btn" data-wiz-loc="encap_attic">
-      <div class="opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><rect x="5" y="12" width="14" height="9"/><path d="M5 15h14" stroke-dasharray="3 2"/></svg></div>
-      <div class="opt-label">Sealed Attic</div>
-      <div class="opt-note">+7% CFM</div>
-    </div>
-    <div class="opt-btn" data-wiz-loc="vented_attic">
-      <div class="opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><rect x="5" y="12" width="14" height="9"/><line x1="7" y1="9" x2="9" y2="9"/><line x1="15" y1="9" x2="17" y2="9"/></svg></div>
-      <div class="opt-label">Vented Attic</div>
-      <div class="opt-note">+12% CFM</div>
-    </div>
-  </div>
-
-  <div class="wiz-prompt" style="margin-top:8px">
-    <div class="wiz-prompt-q">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
-      Duct insulation?
-    </div>
-    <div class="wiz-prompt-help">Higher R-value = less heat gain/loss. Code requires R-8 in vented attics, R-6 elsewhere in unconditioned space.</div>
-  </div>
-  <div class="opt-grid" id="wizInsOpts">
-    <div class="opt-btn" data-wiz-ins="R0">
-      <div class="opt-label">Uninsulated</div>
-      <div class="opt-note">R-0 (bare metal)</div>
-    </div>
-    <div class="opt-btn" data-wiz-ins="R4">
-      <div class="opt-label">R-4.2</div>
-      <div class="opt-note">Standard flex</div>
-    </div>
-    <div class="opt-btn active" data-wiz-ins="R6">
-      <div class="opt-label">R-6</div>
-      <div class="opt-note">Code min (crawl)</div>
-    </div>
-    <div class="opt-btn" data-wiz-ins="R8">
-      <div class="opt-label">R-8</div>
-      <div class="opt-note">Code min (attic)</div>
-    </div>
-  </div>
-
   <button class="wiz-btn-primary" data-wiz-nav="2" id="wizToStep2">
     Next: Set Up Trunks
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -3524,10 +3467,6 @@ footer a:hover { color: var(--text-muted); }
   <button class="wiz-btn-primary" id="wizSendToFR">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     Send to FR Worksheet
-  </button>
-  <button class="wiz-btn-primary" id="wizExportPDF" style="background:#2a6bd6;margin-top:4px">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
-    Export PDF Report
   </button>
   <button class="wiz-btn-secondary" data-wiz-nav="3">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -6473,28 +6412,9 @@ var WIZ = {
   layout: 'LR',
   airPath: 'supply',
   material: 'metal',
-  ductLocation: 'conditioned',
-  insulation: 'R6',
   trunks: [],
   branches: [],
   activeBranch: -1
-};
-
-// CFM adjustment by duct location (heat gain/loss through duct walls)
-var WIZ_LOC_CFM_ADJ = {
-  'conditioned': 0,        // 0% — ducts in conditioned space
-  'encap_crawl':  0.03,    // +3% — encapsulated crawlspace
-  'vented_crawl': 0.07,    // +7% — vented crawlspace
-  'encap_attic':  0.07,    // +7% — sealed/encapsulated attic
-  'vented_attic': 0.12     // +12% — vented attic (worst case)
-};
-
-// R-value lookup
-var WIZ_R_VALUES = {
-  'R0': {value: 0,   label: 'Uninsulated (R-0)'},
-  'R4': {value: 4.2, label: 'R-4.2 (standard flex)'},
-  'R6': {value: 6,   label: 'R-6 (code min crawl)'},
-  'R8': {value: 8,   label: 'R-8 (code min attic)'}
 };
 
 var WIZ_ROUND_SIZES = [4,5,6,7,8,9,10,12,14,16,18,20,22,24];
@@ -6998,29 +6918,6 @@ function wizRenderBranchForm(br, i) {
     h += '<span style="font-size:11px;color:#888">%</span>';
     h += '</div>';
     h += '<div class="wiz-compression-val" style="margin-top:6px">' + ffText + '</div>';
-    // Visual compression guide
-    h += '<div style="margin-top:8px;padding:8px;background:#222;border-radius:6px;border:1px solid #333">';
-    h += '<div style="font-size:10px;font-weight:600;color:#ff9800;margin-bottom:6px">Visual Guide — What does it look like?</div>';
-    h += '<div style="display:flex;gap:6px;align-items:flex-end">';
-    // 4% - stretched tight
-    h += '<div style="flex:1;text-align:center"><svg viewBox="0 0 40 60" style="width:100%;max-width:40px"><rect x="5" y="2" width="30" height="56" rx="4" fill="none" stroke="#666" stroke-width="1"/>';
-    for(var gi=0;gi<10;gi++) h += '<line x1="8" y1="'+(6+gi*5.4)+'" x2="32" y2="'+(6+gi*5.4)+'" stroke="#555" stroke-width="0.5"/>';
-    h += '</svg><div style="font-size:9px;color:#4caf50;font-weight:600">4%</div><div style="font-size:8px;color:#888">Tight</div></div>';
-    // 10%
-    h += '<div style="flex:1;text-align:center"><svg viewBox="0 0 40 60" style="width:100%;max-width:40px"><rect x="5" y="2" width="30" height="56" rx="4" fill="none" stroke="#666" stroke-width="1"/>';
-    for(var gi2=0;gi2<14;gi2++) h += '<line x1="8" y1="'+(5+gi2*3.8)+'" x2="32" y2="'+(5+gi2*3.8)+'" stroke="#888" stroke-width="0.7"/>';
-    h += '</svg><div style="font-size:9px;color:#ff9800;font-weight:600">10%</div><div style="font-size:8px;color:#888">Visible</div></div>';
-    // 20%
-    h += '<div style="flex:1;text-align:center"><svg viewBox="0 0 40 60" style="width:100%;max-width:40px"><rect x="5" y="2" width="30" height="56" rx="4" fill="none" stroke="#666" stroke-width="1"/>';
-    for(var gi3=0;gi3<22;gi3++) h += '<line x1="7" y1="'+(4+gi3*2.4)+'" x2="33" y2="'+(4+gi3*2.4)+'" stroke="#aaa" stroke-width="1"/>';
-    h += '</svg><div style="font-size:9px;color:#d32f2f;font-weight:600">20%</div><div style="font-size:8px;color:#888">Bunched</div></div>';
-    // 30%
-    h += '<div style="flex:1;text-align:center"><svg viewBox="0 0 40 60" style="width:100%;max-width:40px"><rect x="5" y="2" width="30" height="56" rx="4" fill="none" stroke="#666" stroke-width="1"/>';
-    for(var gi4=0;gi4<30;gi4++) h += '<line x1="6" y1="'+(3+gi4*1.8)+'" x2="34" y2="'+(3+gi4*1.8)+'" stroke="#ccc" stroke-width="1.2"/>';
-    h += '</svg><div style="font-size:9px;color:#d32f2f;font-weight:600">30%</div><div style="font-size:8px;color:#888">Slinky</div></div>';
-    h += '</div>';
-    h += '<div style="font-size:9px;color:#888;margin-top:4px">Count wire spirals per foot: more spirals = more compression. If spirals are spread 3-4\u2033 apart = ~4%. Bunched tight <1\u2033 apart = 25%+.</div>';
-    h += '</div>';
     h += '</div>';
   }
 
@@ -7295,11 +7192,8 @@ function wizRenderResults() {
     if (r.tel > maxTEL) { maxTEL = r.tel; critIdx = i; }
   });
 
-  // Get system CFM from Rooms tab + duct location adjustment
+  // Get system CFM from Rooms tab
   var roomsCFM = getRoomsTotalCFM();
-  var locAdj = WIZ_LOC_CFM_ADJ[WIZ.ductLocation] || 0;
-  var adjustedCFM = roomsCFM > 0 ? Math.round(roomsCFM * (1 + locAdj)) : 0;
-  var rVal = WIZ_R_VALUES[WIZ.insulation] || WIZ_R_VALUES['R6'];
 
   // Get ESP and coil PD from inputs
   var espEl = document.getElementById('wizESP');
@@ -7334,8 +7228,8 @@ function wizRenderResults() {
 
   // -- Summary cards --
   // Add Rooms CFM to summary
-  var cfmDisplay = adjustedCFM > 0 ? adjustedCFM : (roomsCFM > 0 ? roomsCFM : '--');
-  var cfmNote = roomsCFM <= 0 ? ' <span style="font-size:9px;color:#888">(set in Rooms tab)</span>' : (locAdj > 0 ? ' <span style="font-size:9px;color:#ff9800">(+' + Math.round(locAdj*100) + '% for ' + WIZ.ductLocation.replace('_',' ') + ')</span>' : '');
+  var cfmDisplay = roomsCFM > 0 ? roomsCFM : '--';
+  var cfmNote = roomsCFM > 0 ? '' : ' <span style="font-size:9px;color:#888">(set in Rooms tab)</span>';
 
   var sumH = '<div class="wiz-results-grid">';
   sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono" style="color:#4caf50">' + cfmDisplay + '</div><div class="wiz-result-lbl">System CFM' + cfmNote + '</div></div>';
@@ -7435,9 +7329,7 @@ function wizRenderResults() {
     var budgetColor = remaining >= 0.05 ? '#4caf50' : remaining >= 0 ? '#ff9800' : '#d32f2f';
     var budgetStatus = remaining >= 0.05 ? 'PASS — Good margin' : remaining >= 0 ? 'TIGHT — Very little margin' : 'OVER BUDGET — Reduce duct lengths or use larger sizes';
 
-    var locLabel = WIZ.ductLocation ? WIZ.ductLocation.replace(/_/g, ' ') : 'conditioned';
     var bH = '<div style="background:#1a1a1a;border-radius:8px;padding:10px;font-size:12px">';
-    bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#888;font-size:10px">Location: ' + locLabel + ' | Insulation: ' + rVal.label + (locAdj > 0 ? ' | CFM +' + Math.round(locAdj*100) + '%' : '') + '</span></div>';
     bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">Equipment ESP</span><span style="font-family:\'SF Mono\',monospace;color:#4caf50">' + equipESP.toFixed(2) + ' IWC</span></div>';
     bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Coil pressure drop</span><span style="font-family:\'SF Mono\',monospace;color:#ff9800">-' + coilPD.toFixed(2) + '</span></div>';
     if (filterPD > 0) {
@@ -7520,174 +7412,6 @@ function wizSendToFR() {
 //   });
 // ================================================================
 
-function wizExportPDF() {
-  if (typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined') {
-    alert('PDF library loading... please try again in a moment.');
-    return;
-  }
-  var jsPDF = (window.jspdf || jspdf).jsPDF;
-  var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-  var y = 15;
-  var lm = 15; // left margin
-  var pw = 185; // page width usable
-
-  // Header
-  doc.setFillColor(211, 47, 47);
-  doc.rect(0, 0, 220, 25, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('RAGSDALE', lm, 10);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Heating \u00B7 Air \u00B7 Plumbing \u00B7 Electric  |  Duct System Report', lm, 16);
-  doc.setFontSize(8);
-  doc.text('Generated: ' + new Date().toLocaleDateString() + '  |  "The Name You Know You Can Trust!"', lm, 21);
-  y = 32;
-
-  doc.setTextColor(0, 0, 0);
-
-  // System Summary
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text('System Summary', lm, y); y += 7;
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  var roomsCFM = getRoomsTotalCFM();
-  var locAdj = WIZ_LOC_CFM_ADJ[WIZ.ductLocation] || 0;
-  var adjCFM = roomsCFM > 0 ? Math.round(roomsCFM * (1 + locAdj)) : 0;
-  doc.text('Total System CFM: ' + (adjCFM || roomsCFM || '--') + (locAdj > 0 ? ' (+' + Math.round(locAdj*100) + '% for ' + WIZ.ductLocation.replace(/_/g,' ') + ')' : ''), lm, y); y += 5;
-  doc.text('Duct Location: ' + (WIZ.ductLocation||'conditioned').replace(/_/g,' ') + '  |  Insulation: ' + ((WIZ_R_VALUES[WIZ.insulation]||{}).label || 'R-6'), lm, y); y += 5;
-  doc.text('Layout: ' + WIZ.layout + '  |  Trunks: ' + WIZ.trunks.length + '  |  Branches: ' + WIZ.branches.length, lm, y); y += 5;
-  doc.text('Default Material: ' + WIZ.material, lm, y); y += 8;
-
-  // Rooms
-  var rooms = getRoomsList();
-  if (rooms.length > 0) {
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Room-by-Room CFM', lm, y); y += 6;
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    // Table header
-    doc.setFillColor(240, 240, 240);
-    doc.rect(lm, y-3, pw, 5, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.text('Room', lm+2, y); doc.text('CFM', lm+80, y); y += 5;
-    doc.setFont('helvetica', 'normal');
-    rooms.forEach(function(rm) {
-      doc.text(rm.name, lm+2, y); doc.text(String(rm.cfm), lm+80, y); y += 4;
-      if (y > 260) { doc.addPage(); y = 15; }
-    });
-    doc.setFont('helvetica', 'bold');
-    doc.text('Total: ' + roomsCFM + ' CFM', lm+2, y); y += 8;
-  }
-
-  // Trunks
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Trunk Lines', lm, y); y += 6;
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  WIZ.trunks.forEach(function(t, ti) {
-    var matL = t.material === 'flex' ? 'Flex' + (t.compression ? ' (' + t.compression + '% comp)' : '') : 'Metal';
-    var sizeL = t.shape === 'rect' ? t.width + 'x' + t.height + '"' : t.size + '" round';
-    doc.text((ti+1) + '. ' + t.label + ' \u2014 ' + (t.airPath||'supply').toUpperCase() + ' \u2014 ' + sizeL + ' \u2014 ' + t.length + 'ft \u2014 ' + matL, lm+2, y);
-    y += 4;
-    if (y > 260) { doc.addPage(); y = 15; }
-  });
-  y += 4;
-
-  // Branches
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Branches & Runouts', lm, y); y += 6;
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  WIZ.branches.forEach(function(br) {
-    var trunk = WIZ.trunks[br.trunkIdx];
-    var tLabel = trunk ? trunk.label : 'Trunk';
-    var matL = br.material === 'flex' ? 'Flex' + (br.compression ? ' (' + br.compression + '%)' : '') : 'Metal';
-    var sizeL = br.shape === 'rect' ? br.width + 'x' + br.height + '"' : br.size + '"';
-    doc.text(br.num + '. ' + br.room + ' \u2014 ' + sizeL + ' ' + matL + ' \u2014 ' + br.length + 'ft \u2014 ' + (WIZ_BOOT_EQ[br.bootType]||{}).name + (br.cfm ? ' \u2014 ' + br.cfm + ' CFM' : '') + ' (off ' + tLabel + ')', lm+2, y);
-    y += 4;
-    if (br.runouts && br.runouts.length > 0) {
-      br.runouts.forEach(function(ro, ri) {
-        doc.text('   Runout ' + (ri+1) + ': ' + (ro.room||'') + ' \u2014 ' + ro.size + '" ' + ro.material + ' \u2014 ' + ro.length + 'ft \u2014 ' + (WIZ_BOOT_EQ[ro.bootType]||{}).name, lm+6, y);
-        y += 4;
-      });
-    }
-    if (y > 260) { doc.addPage(); y = 15; }
-  });
-  y += 4;
-
-  // Results
-  var runs = [];
-  var maxTEL = 0;
-  WIZ.branches.forEach(function(br) {
-    var r = wizCalcRun(br);
-    runs.push(r);
-    if (r.tel > maxTEL) maxTEL = r.tel;
-  });
-  var espEl = document.getElementById('wizESP');
-  var coilEl = document.getElementById('wizCoilPD');
-  var equipESP = espEl ? parseFloat(espEl.value) || 0.50 : 0.50;
-  var coilPD = coilEl ? parseFloat(coilEl.value) || 0.07 : 0.07;
-  var avail = equipESP - coilPD;
-  var sysFR = maxTEL > 0 ? avail / maxTEL * 100 : 0;
-
-  if (y > 240) { doc.addPage(); y = 15; }
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Static Pressure Budget', lm, y); y += 6;
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Equipment ESP: ' + equipESP.toFixed(2) + ' IWC', lm+2, y); y += 4;
-  doc.text('Coil PD: -' + coilPD.toFixed(2), lm+2, y); y += 4;
-  doc.text('Available for ductwork: ' + avail.toFixed(2) + ' IWC', lm+2, y); y += 4;
-  doc.text('Longest TEL: ' + Math.round(maxTEL) + ' ft', lm+2, y); y += 4;
-  doc.text('System Friction Rate: ' + sysFR.toFixed(3) + ' IWC/100ft', lm+2, y); y += 4;
-  var ductPD = maxTEL > 0 ? sysFR * maxTEL / 100 : 0;
-  var remaining = equipESP - coilPD - ductPD;
-  doc.setFont('helvetica', 'bold');
-  doc.text('RESULT: ' + (remaining >= 0.05 ? 'PASS' : remaining >= 0 ? 'TIGHT' : 'OVER BUDGET') + ' (remaining: ' + remaining.toFixed(3) + ' IWC)', lm+2, y); y += 8;
-
-  // Per-run table
-  doc.setFontSize(10);
-  doc.text('Per-Run Results', lm, y); y += 5;
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.setFillColor(240, 240, 240);
-  doc.rect(lm, y-3, pw, 4, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.text('#', lm+1, y); doc.text('Room', lm+8, y); doc.text('Size', lm+55, y); doc.text('TEL', lm+75, y); doc.text('FR', lm+95, y); doc.text('CFM', lm+115, y); doc.text('Trunk', lm+135, y);
-  y += 4;
-  doc.setFont('helvetica', 'normal');
-  runs.forEach(function(r) {
-    var br = r.branch;
-    var trunk = WIZ.trunks[br.trunkIdx];
-    var rFR = r.tel > 0 ? avail / r.tel * 100 : 0;
-    doc.text(String(br.num), lm+1, y);
-    doc.text(br.room, lm+8, y);
-    doc.text(br.size + '"' + (br.material==='flex'?' flex':''), lm+55, y);
-    doc.text(Math.round(r.tel) + 'ft', lm+75, y);
-    doc.text(rFR.toFixed(3), lm+95, y);
-    doc.text(br.cfm ? String(br.cfm) : '--', lm+115, y);
-    doc.text(trunk ? trunk.label : '--', lm+135, y);
-    y += 3.5;
-    if (y > 270) { doc.addPage(); y = 15; }
-  });
-
-  // Footer
-  y += 6;
-  doc.setFontSize(7);
-  doc.setTextColor(150, 150, 150);
-  doc.text('Ragsdale Heating, Air, Plumbing & Electric | (770) 441-4141 | ragsdaleair.com', lm, y);
-  doc.text('This report is an estimate based on field measurements and Manual D guidelines. Not a substitute for a full Manual J/D load calculation.', lm, y+3);
-
-  doc.save('Ragsdale-Duct-Report-' + new Date().toISOString().split('T')[0] + '.pdf');
-}
-
 function wizHandleClick(ev) {
   var t = ev.target;
 
@@ -7727,24 +7451,6 @@ function wizHandleClick(ev) {
     WIZ.material = matBtn.getAttribute('data-wiz-mat');
     document.querySelectorAll('#wizMatOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
     matBtn.classList.add('active');
-    return true;
-  }
-
-  // --- Duct location ---
-  var locBtn = t.closest('[data-wiz-loc]');
-  if (locBtn) {
-    WIZ.ductLocation = locBtn.getAttribute('data-wiz-loc');
-    document.querySelectorAll('#wizLocOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
-    locBtn.classList.add('active');
-    return true;
-  }
-
-  // --- Insulation ---
-  var insBtn = t.closest('[data-wiz-ins]');
-  if (insBtn) {
-    WIZ.insulation = insBtn.getAttribute('data-wiz-ins');
-    document.querySelectorAll('#wizInsOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
-    insBtn.classList.add('active');
     return true;
   }
 
@@ -7962,12 +7668,6 @@ function wizHandleClick(ev) {
   // --- Send to FR Worksheet ---
   if (t.closest('#wizSendToFR')) {
     wizSendToFR();
-    return true;
-  }
-
-  // --- Export PDF ---
-  if (t.closest('#wizExportPDF')) {
-    wizExportPDF();
     return true;
   }
 
