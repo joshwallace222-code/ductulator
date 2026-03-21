@@ -3272,56 +3272,897 @@ footer a:hover { color: var(--text-muted); }
     </div>
   </div>
 
-  <!-- Run Tabs + Content -->
-  <div class="panel">
-    <div class="panel-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16h16M4 14l4-4 4 4 8-8"/></svg>
-      Duct Runs
+
+<!-- ===== SYSTEM BUILDER WIZARD ===== -->
+
+<!-- Wizard Step Indicator -->
+<div class="wiz-step-bar" id="wizStepBar">
+  <div class="wiz-pill active" data-wiz-nav="1" id="wizPill1">
+    <span class="wiz-pill-num">1</span>
+    <span class="wiz-pill-lbl">Layout</span>
+  </div>
+  <div class="wiz-pill-sep">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+  <div class="wiz-pill" data-wiz-nav="2" id="wizPill2">
+    <span class="wiz-pill-num">2</span>
+    <span class="wiz-pill-lbl">Trunks</span>
+  </div>
+  <div class="wiz-pill-sep">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+  <div class="wiz-pill" data-wiz-nav="3" id="wizPill3">
+    <span class="wiz-pill-num">3</span>
+    <span class="wiz-pill-lbl">Branches</span>
+  </div>
+  <div class="wiz-pill-sep">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+  <div class="wiz-pill" data-wiz-nav="4" id="wizPill4">
+    <span class="wiz-pill-num">4</span>
+    <span class="wiz-pill-lbl">Results</span>
+  </div>
+</div>
+<div class="wiz-progress-track"><div class="wiz-progress-fill" id="wizProgressFill"></div></div>
+
+<!-- ===== STEP 1: LAYOUT ===== -->
+<div class="wiz-step active" id="wizStep1">
+
+  <div class="wiz-prompt">
+    <div class="wiz-prompt-q">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      What does this system look like?
     </div>
-    <div class="sys-run-tabs-wrap" id="sysRunTabs"></div>
-    <div class="panel" id="branchTreePanel" style="display:none">
-    <div class="panel-title" data-sys-toggle="branchtree" style="cursor:pointer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9v12M6 9h12M6 15h12"/></svg>
-      Branch Map
-      <span style="margin-left:auto;font-size:10px;color:var(--text-dim)">&#9660;</span>
-    </div>
-    <div id="branchTreeBody" class="branch-tree"></div>
+    <div class="wiz-prompt-help">Pick the layout that matches your duct system. Most homes have a unit with trunks going out left and right.</div>
   </div>
 
-  <div id="sysRunArea"></div>
+  <div class="opt-grid" id="wizLayoutOpts">
+    <div class="opt-btn active" data-wiz-layout="LR">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/><line x1="3" y1="8" x2="9" y2="12"/><line x1="3" y1="16" x2="9" y2="12"/><line x1="21" y1="8" x2="15" y2="12"/><line x1="21" y1="16" x2="15" y2="12"/></svg>
+      </div>
+      <div class="opt-label">Left + Right</div>
+      <div class="opt-note">Trunk each direction</div>
+    </div>
+    <div class="opt-btn" data-wiz-layout="1SIDE">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="4" cy="12" r="2"/><line x1="6" y1="12" x2="22" y2="12"/><polyline points="18 8 22 12 18 16"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="16" y1="8" x2="16" y2="12"/></svg>
+      </div>
+      <div class="opt-label">One Direction</div>
+      <div class="opt-note">Single trunk run</div>
+    </div>
+    <div class="opt-btn" data-wiz-layout="RADIAL">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/><line x1="5.6" y1="5.6" x2="9" y2="9"/><line x1="15" y1="15" x2="18.4" y2="18.4"/></svg>
+      </div>
+      <div class="opt-label">Radial / Homerun</div>
+      <div class="opt-note">Branches off plenum</div>
+    </div>
+    <div class="opt-btn" data-wiz-layout="CUSTOM">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="opt-label">Custom</div>
+      <div class="opt-note">I'll set it up</div>
+    </div>
   </div>
 
-  <!-- System Totals -->
-  <div class="panel" id="sysTotalsPanel">
-    <div class="panel-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      System Analysis
+  <div class="wiz-prompt" style="margin-top:8px">
+    <div class="wiz-prompt-q">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+      What's the air path?
     </div>
-    <div class="sys-totals-grid">
-      <div class="sys-total-card hl"><div class="sys-total-value" id="stCFM">0</div><div class="sys-total-unit">CFM</div><div class="sys-total-label">Total System CFM</div></div>
-      <div class="sys-total-card"><div class="sys-total-value" id="stRuns">1</div><div class="sys-total-unit">runs</div><div class="sys-total-label">Active Runs</div></div>
-      <div class="sys-total-card"><div class="sys-total-value" id="stTEL">--</div><div class="sys-total-unit">ft</div><div class="sys-total-label">Longest Run TEL</div></div>
-      <div class="sys-total-card"><div class="sys-total-value" id="stFR">--</div><div class="sys-total-unit">IWC/100ft</div><div class="sys-total-label">Critical Path FR</div></div>
+  </div>
+  <div class="opt-grid" id="wizAirPathOpts">
+    <div class="opt-btn active" data-wiz-ap="supply">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+      </div>
+      <div class="opt-label">Supply</div>
+      <div class="opt-note">Air to rooms</div>
     </div>
-    <div class="mj-row">
-      <label>Manual J:</label>
-      <input type="number" id="mjTarget" value="" min="0" max="10000" step="25" placeholder="CFM">
-      <span class="mj-result" id="mjRes">--</span>
+    <div class="opt-btn" data-wiz-ap="return">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="5 12 12 19 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
+      </div>
+      <div class="opt-label">Return</div>
+      <div class="opt-note">Air back to unit</div>
     </div>
-    <div style="margin-top:10px"><div class="input-label" style="margin-bottom:6px">Per-Run Breakdown</div><div id="sysRunList"></div></div>
-    <div id="sysStatus" class="status-bar ok" style="margin-top:8px"><span class="status-dot"></span><span id="sysStatusTxt">Add runs to analyze</span></div>
   </div>
 
-  <!-- CFM Estimator moved to Rooms tab -->
+  <div class="wiz-prompt" style="margin-top:8px">
+    <div class="wiz-prompt-q">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/></svg>
+      Default duct material?
+    </div>
+  </div>
+  <div class="opt-grid" id="wizMatOpts">
+    <div class="opt-btn active" data-wiz-mat="metal">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="4"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
+      </div>
+      <div class="opt-label">Hard Duct</div>
+      <div class="opt-note">Sheet metal / round</div>
+    </div>
+    <div class="opt-btn" data-wiz-mat="flex">
+      <div class="opt-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M3 8c2-3 4-3 6 0s4 3 6 0 4-3 6 0" opacity=".4"/><path d="M3 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0" opacity=".4"/></svg>
+      </div>
+      <div class="opt-label">Flex Duct</div>
+      <div class="opt-note">Insulated flex</div>
+    </div>
+  </div>
 
-  <div class="info-note">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-    <span>Build each run step-by-step from plenum to register. FR = ASP/TEL&times;100. Critical path = longest TEL. Manual D Table 3-1 velocity limits apply. FR max <strong>0.08</strong>.</span>
+  <button class="wiz-btn-primary" data-wiz-nav="2" id="wizToStep2">
+    Next: Set Up Trunks
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<!-- ===== STEP 2: TRUNKS ===== -->
+<div class="wiz-step" id="wizStep2">
+
+  <div class="wiz-info-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <p><strong>Map your trunks.</strong> A trunk is the main large duct off the plenum. Set size, shape, and length for each one.</p>
   </div>
-  <div class="filter-warning-banner" id="sysFilterDisclaimer" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <span><strong>Filter grille velocity: max 500 FPM.</strong> Return runs with filter grilles must keep face velocity under 500 FPM. A restrictive filter adds pressure drop that reduces available static for ductwork. Enable the filter option on return runs to see the impact.</span>
+
+  <div id="wizTrunkCards"></div>
+
+  <button class="wiz-btn-add" id="wizAddTrunk">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Trunk
+  </button>
+
+  <button class="wiz-btn-primary" data-wiz-nav="3" id="wizToStep3">
+    Next: Add Branches
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <button class="wiz-btn-secondary" data-wiz-nav="1">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Layout
+  </button>
+</div>
+
+<!-- ===== STEP 3: BRANCHES ===== -->
+<div class="wiz-step" id="wizStep3">
+
+  <div class="wiz-info-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M6 9h12l-3-3"/><path d="M6 15h8l-3-3"/></svg>
+    <p><strong>Add each branch run.</strong> Branches split off a trunk and go to a room. Tap to enter size, length, fittings, and endpoint.</p>
   </div>
+
+  <div id="wizBranchArea"></div>
+
+  <button class="wiz-btn-primary" data-wiz-nav="4" id="wizToStep4" style="margin-top:12px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    Calculate Results
+  </button>
+  <button class="wiz-btn-secondary" data-wiz-nav="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Trunks
+  </button>
+</div>
+
+<!-- ===== STEP 4: RESULTS ===== -->
+<div class="wiz-step" id="wizStep4">
+
+  <div class="panel" style="border-left:3px solid var(--red,#d32f2f);background:var(--bg-card,#222)">
+    <div class="wiz-card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      System Summary
+    </div>
+    <div id="wizSummaryCards"></div>
+  </div>
+
+  <div class="panel" style="border-left:3px solid var(--red,#d32f2f);background:var(--bg-card,#222)">
+    <div class="wiz-card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Friction Rate
+    </div>
+    <div id="wizFrictionGauge"></div>
+  </div>
+
+  <div class="panel" style="border-left:3px solid var(--orange,#ff9800);background:var(--bg-card,#222)">
+    <div class="wiz-card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Critical Path
+    </div>
+    <div id="wizCritPath"></div>
+  </div>
+
+  <div class="panel" style="border-left:3px solid var(--red,#d32f2f);background:var(--bg-card,#222)">
+    <div class="wiz-card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      All Runs by Trunk
+    </div>
+    <div id="wizAllRuns"></div>
+  </div>
+
+  <button class="wiz-btn-primary" id="wizSendToFR">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Send to FR Worksheet
+  </button>
+  <button class="wiz-btn-secondary" data-wiz-nav="3">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Branches
+  </button>
+</div>
+
+<style>
+/* ===== WIZARD STEP BAR ===== */
+.wiz-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  gap: 0;
+}
+.wiz-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid #3a3a3a;
+  background: #1e1e1e;
+  cursor: pointer;
+  transition: all .2s;
+  min-height: 36px;
+  min-width: 44px;
+  justify-content: center;
+}
+.wiz-pill.active {
+  background: var(--red, #d32f2f);
+  border-color: var(--red, #d32f2f);
+  box-shadow: 0 0 12px rgba(211,47,47,.3);
+}
+.wiz-pill.done {
+  background: rgba(76,175,80,.12);
+  border-color: var(--green, #4caf50);
+}
+.wiz-pill-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  line-height: 1;
+  min-width: 14px;
+  text-align: center;
+}
+.wiz-pill.active .wiz-pill-num,
+.wiz-pill.done .wiz-pill-num {
+  color: #fff;
+}
+.wiz-pill.done .wiz-pill-num {
+  color: var(--green, #4caf50);
+}
+.wiz-pill-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+.wiz-pill.active .wiz-pill-lbl {
+  color: #fff;
+}
+.wiz-pill.done .wiz-pill-lbl {
+  color: var(--green, #4caf50);
+}
+.wiz-pill-sep {
+  color: #3a3a3a;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.wiz-progress-track {
+  height: 3px;
+  background: #2a2a2a;
+  margin: 0 16px 12px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.wiz-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--red,#d32f2f), #ff5252);
+  width: 25%;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ===== WIZARD STEPS ===== */
+.wiz-step { display: none; padding: 0 16px 16px; }
+.wiz-step.active { display: block; animation: wizFadeIn .3s ease forwards; }
+@keyframes wizFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== PROMPT BOXES ===== */
+.wiz-prompt {
+  background: #1e1e1e;
+  border-left: 3px solid var(--red, #d32f2f);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.wiz-prompt-q {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.wiz-prompt-q svg { color: var(--red, #d32f2f); flex-shrink: 0; }
+.wiz-prompt-help { font-size: 11px; color: #888; line-height: 1.5; }
+
+/* ===== OPT BUTTONS (reuse/extend) ===== */
+.opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.opt-btn {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  overflow: hidden;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.opt-btn:active { transform: scale(.97); }
+.opt-btn.active {
+  background: var(--red, #d32f2f);
+  border-color: var(--red, #d32f2f);
+  box-shadow: 0 0 16px rgba(211,47,47,.25);
+}
+.opt-btn .opt-icon { margin-bottom: 4px; display: flex; justify-content: center; align-items: center; }
+.opt-btn .opt-icon svg { width: 22px; height: 22px; }
+.opt-btn .opt-label { font-size: 12px; font-weight: 600; color: #ccc; }
+.opt-btn.active .opt-label { color: #fff; }
+.opt-btn .opt-note { font-size: 9px; color: #888; margin-top: 2px; }
+.opt-btn.active .opt-note { color: rgba(255,255,255,.75); }
+
+/* ===== INFO BANNER ===== */
+.wiz-info-banner {
+  background: rgba(33,150,243,.07);
+  border: 1px solid rgba(33,150,243,.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.wiz-info-banner svg { flex-shrink: 0; color: #64b5f6; margin-top: 1px; }
+.wiz-info-banner p { font-size: 11px; color: #90caf9; line-height: 1.5; }
+.wiz-info-banner strong { color: #64b5f6; }
+
+/* ===== TRUNK CARDS ===== */
+.wiz-trunk-card {
+  background: var(--bg-card, #222);
+  border: 1px solid #333;
+  border-left: 3px solid var(--red, #d32f2f);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.wiz-trunk-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.wiz-trunk-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red, #d32f2f);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wiz-trunk-remove {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.wiz-trunk-remove:hover { background: var(--red, #d32f2f); border-color: var(--red, #d32f2f); }
+.wiz-trunk-remove svg { width: 13px; height: 13px; color: #999; }
+.wiz-trunk-remove:hover svg { color: #fff; }
+.wiz-shape-toggle {
+  display: flex;
+  border: 1px solid #444;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.wiz-shape-btn {
+  flex: 1;
+  padding: 9px 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #777;
+  background: #2a2a2a;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-shape-btn.active { background: var(--red, #d32f2f); color: #fff; }
+.wiz-shape-btn svg { width: 13px; height: 13px; }
+
+/* ===== INPUT ROWS ===== */
+.wiz-input-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 10px; }
+.wiz-input-group { flex: 1; }
+.wiz-input-label {
+  font-size: 10px;
+  color: var(--text-muted, #888);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.input-field {
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  width: 100%;
+  min-height: 44px;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.input-field:focus { border-color: var(--red, #d32f2f); outline: none; box-shadow: 0 0 0 2px rgba(211,47,47,.15); }
+select.input-field {
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-color: #333;
+}
+
+/* ===== BRANCH AREA ===== */
+.wiz-trunk-group { margin-bottom: 18px; }
+.wiz-trunk-group-hdr {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 0;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.wiz-trunk-group-hdr svg { width: 15px; height: 15px; color: var(--red, #d32f2f); flex-shrink: 0; }
+.wiz-trunk-group-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red, #d32f2f);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.wiz-add-branch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: 1px dashed #444;
+  border-radius: 6px;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  margin-top: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-add-branch-btn:hover { border-color: var(--red, #d32f2f); color: var(--red, #d32f2f); }
+.wiz-add-branch-btn svg { width: 13px; height: 13px; }
+
+/* ===== BRANCH ITEMS ===== */
+.wiz-branch-item {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all .15s;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-branch-item.editing { border-color: var(--red, #d32f2f); background: #2e1a1a; }
+.wiz-branch-num {
+  width: 26px;
+  height: 26px;
+  background: var(--red, #d32f2f);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.wiz-branch-info { flex: 1; min-width: 0; }
+.wiz-branch-name { font-size: 12px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wiz-branch-detail { font-size: 10px; color: #888; margin-top: 1px; }
+.wiz-branch-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.wiz-branch-badge.pending { background: #2a2a2a; color: #666; border: 1px solid #444; }
+.wiz-branch-badge.done { background: rgba(76,175,80,.12); color: var(--green, #4caf50); border: 1px solid rgba(76,175,80,.2); }
+.wiz-branch-badge.editing { background: rgba(211,47,47,.12); color: var(--red, #d32f2f); border: 1px solid rgba(211,47,47,.2); }
+
+/* ===== BRANCH EDIT FORM ===== */
+.wiz-branch-form {
+  background: #1e1e1e;
+  border: 1px solid var(--red, #d32f2f);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 4px 0 10px;
+}
+.wiz-fittings-lbl {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.wiz-fit-btns { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.wiz-fit-btn {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  color: #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  transition: all .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-fit-btn:active { background: var(--red, #d32f2f); border-color: var(--red, #d32f2f); color: #fff; }
+.wiz-fit-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+.wiz-fit-list { margin-top: 6px; }
+.wiz-fit-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  background: #1a1a1a;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #ccc;
+}
+.wiz-fit-item-name { flex: 1; }
+.wiz-fit-item-eq { color: var(--orange, #ff9800); font-weight: 600; font-family: 'SF Mono','Menlo',monospace; font-size: 11px; }
+.wiz-fit-item-rm {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-fit-item-rm:hover { background: var(--red, #d32f2f); border-color: var(--red, #d32f2f); }
+.wiz-fit-item-rm svg { width: 10px; height: 10px; color: #888; }
+.wiz-compression-box {
+  background: #161616;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.wiz-compression-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--orange, #ff9800);
+  font-family: 'SF Mono','Menlo',monospace;
+  margin-top: 4px;
+}
+.wiz-save-row { display: flex; gap: 8px; margin-top: 10px; }
+.wiz-btn-save {
+  flex: 1;
+  background: var(--red, #d32f2f);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-btn-save:active { background: #b71c1c; }
+.wiz-btn-rm {
+  width: 44px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-btn-rm:hover { background: rgba(211,47,47,.15); border-color: var(--red, #d32f2f); }
+.wiz-btn-rm svg { width: 15px; height: 15px; color: #888; }
+
+/* ===== NAV BUTTONS ===== */
+.wiz-btn-primary {
+  background: var(--red, #d32f2f);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 8px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-btn-primary:active { background: #b71c1c; }
+.wiz-btn-secondary {
+  background: transparent;
+  color: var(--red, #d32f2f);
+  border: 1px solid var(--red, #d32f2f);
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 8px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-btn-secondary:active { background: rgba(211,47,47,.1); }
+.wiz-btn-add {
+  background: transparent;
+  border: 1px dashed #555;
+  border-radius: 8px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #777;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 4px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wiz-btn-add:hover { border-color: var(--red, #d32f2f); color: var(--red, #d32f2f); }
+.wiz-btn-add svg { width: 15px; height: 15px; }
+
+/* ===== RESULTS ===== */
+.wiz-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red, #d32f2f);
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.wiz-card-title svg { width: 15px; height: 15px; flex-shrink: 0; }
+.wiz-results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.wiz-result-cell {
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+.wiz-result-val {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'SF Mono','Menlo','Courier New',monospace;
+}
+.wiz-result-val.ok { color: var(--green, #4caf50); }
+.wiz-result-val.warn { color: var(--orange, #ff9800); }
+.wiz-result-val.bad { color: var(--red, #d32f2f); }
+.wiz-result-lbl { font-size: 9px; color: #777; text-transform: uppercase; letter-spacing: .3px; margin-top: 2px; }
+.wiz-gauge-wrap { margin: 4px 0 8px; }
+.wiz-gauge-label {
+  font-size: 10px;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.wiz-gauge-track { height: 14px; background: #2a2a2a; border-radius: 7px; overflow: hidden; }
+.wiz-gauge-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.wiz-gauge-fill.green { background: linear-gradient(90deg,#2e7d32,#4caf50); }
+.wiz-gauge-fill.yellow { background: linear-gradient(90deg,#4caf50,#ff9800); }
+.wiz-gauge-fill.red { background: linear-gradient(90deg,#ff9800,#d32f2f); }
+.wiz-gauge-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+  font-size: 9px;
+  color: #555;
+  font-family: 'SF Mono','Menlo',monospace;
+}
+.wiz-path-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 0;
+  position: relative;
+}
+.wiz-path-step-line {
+  position: absolute;
+  left: 11px;
+  top: 28px;
+  width: 2px;
+  bottom: -5px;
+  background: #333;
+  z-index: 0;
+}
+.wiz-path-step:last-child .wiz-path-step-line { display: none; }
+.wiz-path-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.wiz-path-dot.start { background: var(--red, #d32f2f); }
+.wiz-path-dot.duct { background: #555; }
+.wiz-path-dot.fitting { background: var(--orange, #ff9800); }
+.wiz-path-dot.end { background: var(--green, #4caf50); }
+.wiz-path-info { flex: 1; min-width: 0; }
+.wiz-path-name { font-size: 12px; font-weight: 600; color: #e0e0e0; }
+.wiz-path-eq {
+  font-size: 11px;
+  color: var(--orange, #ff9800);
+  font-weight: 600;
+  font-family: 'SF Mono','Menlo',monospace;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.wiz-run-item {
+  background: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.wiz-run-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.wiz-run-name { font-size: 12px; font-weight: 600; color: #e0e0e0; flex: 1; }
+.wiz-run-tel {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'SF Mono','Menlo',monospace;
+}
+.wiz-run-fr { font-size: 10px; font-weight: 600; font-family: 'SF Mono','Menlo',monospace; }
+.wiz-tel-bar-wrap { height: 5px; background: #1a1a1a; border-radius: 3px; overflow: hidden; }
+.wiz-tel-bar { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.wiz-trunk-result-hdr {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 0;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.wiz-trunk-result-hdr svg { width: 14px; height: 14px; color: var(--red, #d32f2f); }
+.wiz-trunk-result-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red, #d32f2f);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  flex: 1;
+}
+.wiz-trunk-result-maxtel {
+  font-size: 10px;
+  color: var(--orange, #ff9800);
+  font-family: 'SF Mono','Menlo',monospace;
+}
+.wiz-crit-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--orange, #ff9800);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+</style>
+
 
 </div>
 </div>
@@ -4622,6 +5463,7 @@ function renderRetCollars() {
 
 function renderRunTabs() {
   var c = document.getElementById('sysRunTabs');
+  if (!c) return;
   var h = '';
   // Build hierarchical tab display
   function renderRunTab(ri) {
@@ -4655,6 +5497,7 @@ function renderRunArea() {
   const r = SS.runs[SS.activeRun];
   if (!r) return;
   const c = document.getElementById('sysRunArea');
+  if (!c) return;
   const i = SS.activeRun;
   const canRemove = SS.runs.length > 1;
 
@@ -4902,6 +5745,7 @@ function renderFittingResults() {
 
 // ---- Event Delegation ----
 document.getElementById('page-system').addEventListener('click', function(ev) {
+  if (wizHandleClick(ev)) return;
   const t = ev.target;
   // Run tabs
   const rt = t.closest('[data-rt]');
@@ -4999,10 +5843,16 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
     return;
   }
   // Return collar add
-  if (t.closest('#addRetCollarBtn')) { const sz=document.getElementById('retCollarSizeSel').value; const tp=document.getElementById('retCollarTypeSel')?document.getElementById('retCollarTypeSel').value:'tab'; SS.retCollars.push({size:sz,type:tp}); renderRetCollars(); return; }
+  if (t.closest('#addRetCollarBtn')) { const sz=document.getElementById('retCollarSizeSel').value; const tp=document.getElementById('retCollarTypeSel')?document.getElementById('retCollarTypeSel').value:'tab'; SS.retCollars.push({size:sz,type:tp}); renderRetCollars();
+
+
+ return; }
   // Return collar remove
   const rcrm = t.closest('[data-ret-col-rm]');
-  if (rcrm) { SS.retCollars.splice(parseInt(rcrm.dataset.retColRm),1); renderRetCollars(); return; }
+  if (rcrm) { SS.retCollars.splice(parseInt(rcrm.dataset.retColRm),1); renderRetCollars();
+
+
+ return; }
   // Section toggle
   const tog = t.closest('[data-sys-toggle]');
   if (tog) { const key=tog.dataset.sysToggle; const bodies={plenum:'sysPlBody',retplenum:'sysRetPlBody',cfmest:'cfmEstBody',branchtree:'branchTreeBody'}; const b=document.getElementById(bodies[key]); if(b){b.classList.toggle('collapsed');tog.classList.toggle('collapsed');} return; }
@@ -5570,6 +6420,962 @@ updateCalcFilterVisibility();
 initSystem();
 renderCollars();
 renderRetCollars();
+
+// ===== SYSTEM BUILDER WIZARD =====
+// Insert this block into the existing <script> section.
+// The event handler block (wizHandleClick / wizHandleChange) must be
+// called at the TOP of the existing page-system click/change listeners.
+
+var WIZ = {
+  step: 1,
+  layout: 'LR',
+  airPath: 'supply',
+  material: 'metal',
+  trunks: [],
+  branches: [],
+  activeBranch: -1
+};
+
+var WIZ_ROUND_SIZES = [4,5,6,7,8,9,10,12,14,16,18,20,22,24];
+var WIZ_RECT_DIMS   = [4,6,8,10,12,14,16,18,20,22,24];
+var WIZ_COMPRESS    = [4,5,10,15,20,25,30];
+
+var WIZ_BOOT_EQ = {
+  '90boot':       { name:'90\u00B0 Boot',          eq: 55 },
+  'straightboot': { name:'Straight Boot',           eq: 35 },
+  'ceilTop':      { name:'Ceiling Diff (top)',       eq: 10 },
+  'ceilSide':     { name:'Ceiling Diff (side)',      eq: 40 },
+  'floorReg':     { name:'Floor Register',           eq: 35 },
+  'wallReg':      { name:'Wall Register',            eq: 40 }
+};
+
+var WIZ_FITTINGS = [
+  { id:'elbow90', name:'90\u00B0 Elbow', eqFn: function(d){ return d<=6?10:d<=8?15:d<=10?20:25; } },
+  { id:'elbow45', name:'45\u00B0 Elbow', eqFn: function(){ return 5; } },
+  { id:'tee',     name:'Tee',            eqFn: function(){ return 35; } },
+  { id:'wye',     name:'Wye',            eqFn: function(){ return 15; } },
+  { id:'reducer', name:'Reducer',        eqFn: function(){ return 5; } }
+];
+
+// ---- helpers ----
+function wizFlexFactor(c) {
+  c = c || 0;
+  if (c <= 0)  return 1;
+  if (c <= 15) return 1 + (c / 15);
+  return 2 + ((c - 15) / 15) * 2;
+}
+
+function wizRectEqDia(w, h) {
+  w = parseFloat(w) || 1;
+  h = parseFloat(h) || 1;
+  return 1.3 * Math.pow(w * h, 0.625) / Math.pow(w + h, 0.25);
+}
+
+function wizEffDia(obj) {
+  if (!obj) return 6;
+  if (obj.shape === 'rect') return wizRectEqDia(obj.width || 8, obj.height || 8);
+  return parseFloat(obj.size) || 6;
+}
+
+function wizSizeLabel(obj) {
+  if (!obj) return '';
+  if (obj.isRadial) return 'Plenum';
+  if (obj.shape === 'rect') return (obj.width || '?') + '\u00D7' + (obj.height || '?') + '"';
+  return (obj.size || '?') + '\u2033';
+}
+
+function wizSvg(type) {
+  var svgs = {
+    trunk:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="8" width="20" height="8" rx="4"/><line x1="6" y1="8" x2="6" y2="16" opacity=".5"/><line x1="12" y1="8" x2="12" y2="16" opacity=".5"/><line x1="18" y1="8" x2="18" y2="16" opacity=".5"/></svg>',
+    branch:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3v18"/><path d="M6 9h12l-3-3"/><path d="M6 15h8l-3-3"/></svg>',
+    remove:   '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    round:    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>',
+    rect:     '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/></svg>',
+    elbow90:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10a6 6 0 0 1 6-6h10"/></svg>',
+    elbow45:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20L12 8h10"/></svg>',
+    tee:      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="12" y1="8" x2="12" y2="20"/></svg>',
+    wye:      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="20" x2="12" y2="12"/><line x1="12" y1="12" x2="6" y2="4"/><line x1="12" y1="12" x2="18" y2="4"/></svg>',
+    reducer:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h6l4 4h6"/><path d="M4 18h6l4-4h6"/></svg>',
+    check:    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    bolt:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+  };
+  return svgs[type] || '';
+}
+
+// ---- navigation ----
+function wizGoTo(step) {
+  step = parseInt(step);
+  if (step === WIZ.step) return;
+
+  // Save any open branch form before leaving step 3
+  if (WIZ.step === 3 && WIZ.activeBranch >= 0) {
+    wizSaveBranch(WIZ.activeBranch);
+    WIZ.activeBranch = -1;
+  }
+  // Save trunk fields before leaving step 2
+  if (WIZ.step === 2) {
+    wizSaveTrunks();
+  }
+
+  // Init downstream data
+  if (step === 2 && WIZ.trunks.length === 0) wizInitTrunks();
+  if (step === 3 && WIZ.branches.length === 0) wizInitBranches();
+  if (step === 4) wizCalcResults();
+
+  var prev = document.getElementById('wizStep' + WIZ.step);
+  if (prev) prev.classList.remove('active');
+
+  WIZ.step = step;
+
+  var next = document.getElementById('wizStep' + step);
+  if (next) next.classList.add('active');
+
+  wizUpdateBar();
+
+  if (step === 2) wizRenderTrunks();
+  if (step === 3) wizRenderBranches();
+  if (step === 4) wizRenderResults();
+
+  // Scroll to wizard step bar
+  var bar = document.getElementById('wizStepBar');
+  if (bar) bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function wizUpdateBar() {
+  var pcts = ['8%','33%','66%','100%'];
+  var fill = document.getElementById('wizProgressFill');
+  if (fill) fill.style.width = pcts[WIZ.step - 1];
+
+  [1,2,3,4].forEach(function(n) {
+    var pill = document.getElementById('wizPill' + n);
+    if (!pill) return;
+    pill.classList.remove('active','done');
+    if (n === WIZ.step) pill.classList.add('active');
+    else if (n < WIZ.step) pill.classList.add('done');
+  });
+}
+
+// ---- STEP 1 ----
+// Layout / airPath / material are toggled directly by click handler
+
+// ---- STEP 2: TRUNKS ----
+function wizInitTrunks() {
+  var layout = WIZ.layout;
+  WIZ.trunks = [];
+
+  if (layout === 'RADIAL') {
+    WIZ.trunks.push({ label:'Plenum', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0 });
+    return;
+  }
+  if (layout === 'LR') {
+    WIZ.trunks.push({ label:'Left Trunk',  isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Right Trunk', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+    return;
+  }
+  if (layout === '1SIDE') {
+    WIZ.trunks.push({ label:'Main Trunk', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0 });
+    return;
+  }
+  // CUSTOM — start with one trunk
+  WIZ.trunks.push({ label:'Trunk A', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+}
+
+function wizRenderTrunks() {
+  var html = '';
+  WIZ.trunks.forEach(function(t, i) {
+    html += '<div class="wiz-trunk-card" id="wizTrunkCard' + i + '">';
+    html += '<div class="wiz-trunk-label-row">';
+    html += '<div class="wiz-trunk-label">' + wizSvg('trunk') + '<span>' + t.label + '</span></div>';
+    if (!t.isRadial || WIZ.trunks.length > 1) {
+      html += '<div class="wiz-trunk-remove" data-wiz-trunk-rm="' + i + '">' + wizSvg('remove') + '</div>';
+    }
+    html += '</div>';
+
+    if (!t.isRadial) {
+      // Shape toggle
+      html += '<div class="wiz-shape-toggle">';
+      html += '<div class="wiz-shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
+      html += '<div class="wiz-shape-btn' + (t.shape === 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
+      html += '</div>';
+
+      // Size
+      if (t.shape === 'rect') {
+        html += '<div class="wiz-input-row">';
+        html += '<div class="wiz-input-group"><div class="wiz-input-label">Width (in)</div>';
+        html += '<select class="input-field" data-wiz-trunk-w="' + i + '">';
+        WIZ_RECT_DIMS.forEach(function(v){ html += '<option value="' + v + '"' + (t.width == v ? ' selected':'') + '>' + v + '"</option>'; });
+        html += '</select></div>';
+        html += '<div class="wiz-input-group"><div class="wiz-input-label">Height (in)</div>';
+        html += '<select class="input-field" data-wiz-trunk-h="' + i + '">';
+        WIZ_RECT_DIMS.forEach(function(v){ html += '<option value="' + v + '"' + (t.height == v ? ' selected':'') + '>' + v + '"</option>'; });
+        html += '</select></div>';
+        html += '</div>';
+        var deq = wizRectEqDia(t.width, t.height);
+        html += '<div style="font-size:10px;color:#888;margin-bottom:8px">Equiv. dia: <span style="color:#ff9800;font-family:\'SF Mono\',monospace">' + deq.toFixed(1) + '"</span></div>';
+      } else {
+        html += '<div class="wiz-input-row">';
+        html += '<div class="wiz-input-group"><div class="wiz-input-label">Size</div>';
+        html += '<select class="input-field" data-wiz-trunk-size="' + i + '">';
+        WIZ_ROUND_SIZES.forEach(function(v){ html += '<option value="' + v + '"' + (t.size == v ? ' selected':'') + '>' + v + '\u2033</option>'; });
+        html += '</select></div>';
+        html += '<div class="wiz-input-group"><div class="wiz-input-label">Length (ft)</div>';
+        html += '<input type="number" class="input-field" value="' + (t.length || '') + '" min="0" max="500" data-wiz-trunk-len="' + i + '"></div>';
+        html += '</div>';
+      }
+      if (t.shape === 'rect') {
+        html += '<div class="wiz-input-row">';
+        html += '<div class="wiz-input-group"><div class="wiz-input-label">Length (ft)</div>';
+        html += '<input type="number" class="input-field" value="' + (t.length || '') + '" min="0" max="500" data-wiz-trunk-len="' + i + '"></div>';
+        html += '<div class="wiz-input-group"></div>';
+        html += '</div>';
+      }
+
+      // Elbows
+      html += '<div class="wiz-input-row">';
+      html += '<div class="wiz-input-group"><div class="wiz-input-label">90\u00B0 Elbows</div>';
+      html += '<input type="number" class="input-field" value="' + (t.elbows90 || 0) + '" min="0" max="20" data-wiz-trunk-e90="' + i + '"></div>';
+      html += '<div class="wiz-input-group"><div class="wiz-input-label">45\u00B0 Elbows</div>';
+      html += '<input type="number" class="input-field" value="' + (t.elbows45 || 0) + '" min="0" max="20" data-wiz-trunk-e45="' + i + '"></div>';
+      html += '</div>';
+
+      // Label
+      html += '<div class="wiz-input-row">';
+      html += '<div class="wiz-input-group"><div class="wiz-input-label">Label</div>';
+      html += '<input type="text" class="input-field" value="' + t.label + '" data-wiz-trunk-lbl="' + i + '"></div>';
+      html += '</div>';
+    }
+    html += '</div>'; // /trunk-card
+  });
+
+  var el = document.getElementById('wizTrunkCards');
+  if (el) el.innerHTML = html;
+}
+
+function wizSaveTrunks() {
+  WIZ.trunks.forEach(function(t, i) {
+    var lbl = document.querySelector('[data-wiz-trunk-lbl="' + i + '"]');
+    var size = document.querySelector('[data-wiz-trunk-size="' + i + '"]');
+    var len = document.querySelector('[data-wiz-trunk-len="' + i + '"]');
+    var e90 = document.querySelector('[data-wiz-trunk-e90="' + i + '"]');
+    var e45 = document.querySelector('[data-wiz-trunk-e45="' + i + '"]');
+    var w = document.querySelector('[data-wiz-trunk-w="' + i + '"]');
+    var h = document.querySelector('[data-wiz-trunk-h="' + i + '"]');
+    if (lbl) t.label = lbl.value;
+    if (size) t.size = size.value;
+    if (len) t.length = len.value;
+    if (e90) t.elbows90 = parseInt(e90.value) || 0;
+    if (e45) t.elbows45 = parseInt(e45.value) || 0;
+    if (w) t.width = w.value;
+    if (h) t.height = h.value;
+  });
+}
+
+// ---- STEP 3: BRANCHES ----
+function wizInitBranches() {
+  if (WIZ.branches.length > 0) return;
+  var total = WIZ.layout === 'LR' ? 6 : (WIZ.layout === 'RADIAL' ? 6 : 4);
+  var num = 1;
+  WIZ.trunks.forEach(function(trunk, ti) {
+    var count = Math.ceil(total / WIZ.trunks.length);
+    for (var b = 0; b < count; b++) {
+      WIZ.branches.push({
+        trunkIdx:    ti,
+        num:         num,
+        room:        'Room ' + num,
+        cfm:         '',
+        shape:       'round',
+        size:        '6',
+        width:       '8',
+        height:      '8',
+        material:    WIZ.material,
+        compression: 4,
+        length:      '12',
+        fittings:    [],
+        bootType:    '90boot',
+        done:        false
+      });
+      num++;
+    }
+  });
+}
+
+function wizRenderBranches() {
+  var html = '';
+  var lastTrunk = -1;
+
+  WIZ.branches.forEach(function(br, i) {
+    if (br.trunkIdx !== lastTrunk) {
+      if (lastTrunk >= 0) html += '</div>'; // close prev trunk group branches
+      var trunk = WIZ.trunks[br.trunkIdx];
+      var tLabel = trunk ? trunk.label : 'Trunk';
+      var tSize = trunk ? wizSizeLabel(trunk) : '';
+      html += '<div class="wiz-trunk-group">';
+      html += '<div class="wiz-trunk-group-hdr">' + wizSvg('trunk');
+      html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + tLabel + (tSize && !trunk.isRadial ? ' (' + tSize + ')' : '') + '</span></div>';
+      html += '<div class="wiz-trunk-branches" data-wiz-trunk-branches="' + br.trunkIdx + '">';
+      lastTrunk = br.trunkIdx;
+    }
+
+    var statusClass = br.done ? 'done' : (WIZ.activeBranch === i ? 'editing' : 'pending');
+    var statusText  = br.done ? 'Done'  : (WIZ.activeBranch === i ? 'Editing' : 'Tap to edit');
+    var shapeL = br.shape === 'rect' ? br.width + '\u00D7' + br.height + '"' : br.size + '\u2033';
+    var matL   = br.material === 'flex' ? ' flex' : '';
+    var cfmL   = br.cfm ? ' \u00B7 ' + br.cfm + ' CFM' : '';
+    var fitL   = br.fittings.length ? ' \u00B7 ' + br.fittings.length + ' fit' : '';
+
+    html += '<div class="wiz-branch-item' + (WIZ.activeBranch === i ? ' editing' : '') + '" data-wiz-branch="' + i + '">';
+    html += '<div class="wiz-branch-num">' + br.num + '</div>';
+    html += '<div class="wiz-branch-info">';
+    html += '<div class="wiz-branch-name">' + br.room + '</div>';
+    html += '<div class="wiz-branch-detail">' + shapeL + matL + ' \u00B7 ' + br.length + ' ft' + fitL + cfmL + '</div>';
+    html += '</div>';
+    html += '<div class="wiz-branch-badge ' + statusClass + '">' + statusText + '</div>';
+    html += '</div>'; // /branch-item
+
+    // Inline edit form
+    if (WIZ.activeBranch === i) {
+      html += wizRenderBranchForm(br, i);
+    }
+  });
+
+  if (lastTrunk >= 0) html += '</div></div>'; // close last trunk group
+
+  // Per-trunk "Add Branch" buttons
+  if (WIZ.trunks.length > 0) {
+    WIZ.trunks.forEach(function(trunk, ti) {
+      var hasBranches = WIZ.branches.some(function(b){ return b.trunkIdx === ti; });
+      if (!hasBranches) {
+        html += '<div class="wiz-trunk-group">';
+        html += '<div class="wiz-trunk-group-hdr">' + wizSvg('trunk');
+        html += '<span class="wiz-trunk-group-lbl">\u21B3 Off ' + trunk.label + (trunk.isRadial ? '' : ' (' + wizSizeLabel(trunk) + ')') + '</span></div>';
+        html += '<button class="wiz-add-branch-btn" data-wiz-add-branch="' + ti + '">' + wizSvg('branch') + 'Add Branch</button>';
+        html += '</div>';
+      }
+    });
+  }
+
+  // Add-Branch buttons at bottom of each trunk's group
+  // (Re-render adds them inline below each group)
+  var el = document.getElementById('wizBranchArea');
+  if (el) {
+    el.innerHTML = html;
+
+    // Append add-branch buttons under each trunk block
+    WIZ.trunks.forEach(function(trunk, ti) {
+      var groupEls = el.querySelectorAll('[data-wiz-trunk-branches="' + ti + '"]');
+      groupEls.forEach(function(g) {
+        var addBtn = document.createElement('button');
+        addBtn.className = 'wiz-add-branch-btn';
+        addBtn.setAttribute('data-wiz-add-branch', ti);
+        addBtn.innerHTML = wizSvg('branch') + ' Add Branch to ' + trunk.label;
+        g.parentNode.appendChild(addBtn);
+      });
+    });
+  }
+}
+
+function wizRenderBranchForm(br, i) {
+  var h = '';
+  h += '<div class="wiz-branch-form">';
+
+  // Room name + CFM
+  h += '<div class="wiz-input-row">';
+  h += '<div class="wiz-input-group"><div class="wiz-input-label">Room Name</div>';
+  h += '<input type="text" class="input-field" value="' + br.room + '" data-wiz-br-room="' + i + '"></div>';
+  h += '<div class="wiz-input-group" style="max-width:90px"><div class="wiz-input-label">CFM</div>';
+  h += '<input type="number" class="input-field" value="' + (br.cfm || '') + '" placeholder="CFM" min="0" max="9999" data-wiz-br-cfm="' + i + '"></div>';
+  h += '</div>';
+
+  // Material
+  h += '<div class="wiz-input-label" style="margin-bottom:4px">Material</div>';
+  h += '<div class="wiz-shape-toggle" style="margin-bottom:8px">';
+  h += '<div class="wiz-shape-btn' + (br.material !== 'flex' ? ' active' : '') + '" data-wiz-br-mat="' + i + '" data-matval="metal">' + wizSvg('rect') + ' Metal</div>';
+  h += '<div class="wiz-shape-btn' + (br.material === 'flex' ? ' active' : '') + '" data-wiz-br-mat="' + i + '" data-matval="flex">' + wizSvg('round') + ' Flex</div>';
+  h += '</div>';
+
+  // Compression (flex only)
+  if (br.material === 'flex') {
+    var ff = wizFlexFactor(br.compression);
+    h += '<div class="wiz-compression-box">';
+    h += '<div class="wiz-input-label">Flex Compression</div>';
+    h += '<select class="input-field" data-wiz-br-compress="' + i + '" style="margin-top:4px">';
+    WIZ_COMPRESS.forEach(function(c){
+      h += '<option value="' + c + '"' + (br.compression == c ? ' selected':'') + '>' + c + '%</option>';
+    });
+    h += '</select>';
+    h += '<div class="wiz-compression-val">Friction \u00D7' + ff.toFixed(2) + '</div>';
+    h += '</div>';
+  }
+
+  // Shape
+  h += '<div class="wiz-input-label" style="margin-bottom:4px">Duct Shape</div>';
+  h += '<div class="wiz-shape-toggle">';
+  h += '<div class="wiz-shape-btn' + (br.shape !== 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
+  h += '<div class="wiz-shape-btn' + (br.shape === 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
+  h += '</div>';
+
+  // Size fields
+  if (br.shape === 'rect') {
+    h += '<div class="wiz-input-row">';
+    h += '<div class="wiz-input-group"><div class="wiz-input-label">Width (in)</div>';
+    h += '<select class="input-field" data-wiz-br-width="' + i + '">';
+    WIZ_RECT_DIMS.forEach(function(v){ h += '<option value="' + v + '"' + (br.width == v ? ' selected':'') + '>' + v + '"</option>'; });
+    h += '</select></div>';
+    h += '<div class="wiz-input-group"><div class="wiz-input-label">Height (in)</div>';
+    h += '<select class="input-field" data-wiz-br-height="' + i + '">';
+    WIZ_RECT_DIMS.forEach(function(v){ h += '<option value="' + v + '"' + (br.height == v ? ' selected':'') + '>' + v + '"</option>'; });
+    h += '</select></div>';
+    h += '</div>';
+    var deq = wizRectEqDia(parseFloat(br.width) || 8, parseFloat(br.height) || 8);
+    h += '<div style="font-size:10px;color:#888;margin-bottom:8px">Equiv. dia: <span style="color:#ff9800;font-family:\'SF Mono\',monospace">' + deq.toFixed(1) + '"</span></div>';
+    h += '<div class="wiz-input-row">';
+    h += '<div class="wiz-input-group"><div class="wiz-input-label">Length (ft)</div>';
+    h += '<input type="number" class="input-field" value="' + br.length + '" min="1" max="200" data-wiz-br-len="' + i + '"></div>';
+    h += '<div class="wiz-input-group"></div>';
+    h += '</div>';
+  } else {
+    h += '<div class="wiz-input-row">';
+    h += '<div class="wiz-input-group"><div class="wiz-input-label">Size</div>';
+    h += '<select class="input-field" data-wiz-br-size="' + i + '">';
+    [4,5,6,7,8,9,10,12,14,16].forEach(function(v){ h += '<option value="' + v + '"' + (br.size == v ? ' selected':'') + '>' + v + '\u2033</option>'; });
+    h += '</select></div>';
+    h += '<div class="wiz-input-group"><div class="wiz-input-label">Length (ft)</div>';
+    h += '<input type="number" class="input-field" value="' + br.length + '" min="1" max="200" data-wiz-br-len="' + i + '"></div>';
+    h += '</div>';
+  }
+
+  // Boot type
+  h += '<div class="wiz-input-row">';
+  h += '<div class="wiz-input-group"><div class="wiz-input-label">Ends At</div>';
+  h += '<select class="input-field" data-wiz-br-boot="' + i + '">';
+  Object.keys(WIZ_BOOT_EQ).forEach(function(k){
+    h += '<option value="' + k + '"' + (br.bootType === k ? ' selected':'') + '>' + WIZ_BOOT_EQ[k].name + '</option>';
+  });
+  h += '</select></div>';
+  h += '</div>';
+
+  // Fittings
+  h += '<div class="wiz-input-label" style="margin-top:4px;margin-bottom:6px">Fittings (tap to add)</div>';
+  h += '<div class="wiz-fit-btns">';
+  WIZ_FITTINGS.forEach(function(ft){
+    h += '<div class="wiz-fit-btn" data-wiz-add-fit="' + i + '" data-fit-type="' + ft.id + '">' + wizSvg(ft.id) + ' ' + ft.name + '</div>';
+  });
+  h += '</div>';
+  if (br.fittings.length > 0) {
+    h += '<div class="wiz-fit-list">';
+    br.fittings.forEach(function(f, fi){
+      var ft = WIZ_FITTINGS.filter(function(t){ return t.id === f.type; })[0];
+      var dia = wizEffDia(br);
+      var eq = ft ? ft.eqFn(dia) : 0;
+      h += '<div class="wiz-fit-item">';
+      h += '<span class="wiz-fit-item-name">' + (ft ? ft.name : f.type) + '</span>';
+      h += '<span class="wiz-fit-item-eq">+' + eq + ' ft</span>';
+      h += '<span class="wiz-fit-item-rm" data-wiz-rm-fit="' + i + '" data-fit-idx="' + fi + '">' + wizSvg('remove') + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  // Save + Remove
+  h += '<div class="wiz-save-row">';
+  h += '<button class="wiz-btn-save" data-wiz-br-save="' + i + '">' + wizSvg('check') + ' Save Branch ' + br.num + '</button>';
+  h += '<button class="wiz-btn-rm" data-wiz-br-remove="' + i + '">' + wizSvg('remove') + '</button>';
+  h += '</div>';
+
+  h += '</div>'; // /branch-form
+  return h;
+}
+
+function wizSaveBranch(idx) {
+  var br = WIZ.branches[idx];
+  if (!br) return;
+  var q = function(sel){ return document.querySelector('[' + sel + '="' + idx + '"]'); };
+  var roomEl     = q('data-wiz-br-room');
+  var cfmEl      = q('data-wiz-br-cfm');
+  var sizeEl     = q('data-wiz-br-size');
+  var lenEl      = q('data-wiz-br-len');
+  var bootEl     = q('data-wiz-br-boot');
+  var widthEl    = q('data-wiz-br-width');
+  var heightEl   = q('data-wiz-br-height');
+  var compressEl = q('data-wiz-br-compress');
+  if (roomEl)     br.room        = roomEl.value;
+  if (cfmEl)      br.cfm         = cfmEl.value;
+  if (sizeEl)     br.size        = sizeEl.value;
+  if (lenEl)      br.length      = lenEl.value;
+  if (bootEl)     br.bootType    = bootEl.value;
+  if (widthEl)    br.width       = widthEl.value;
+  if (heightEl)   br.height      = heightEl.value;
+  if (compressEl) br.compression = parseInt(compressEl.value) || 4;
+}
+
+// ---- STEP 4: RESULTS ----
+function wizCalcRun(br) {
+  var trunk = WIZ.trunks[br.trunkIdx] || WIZ.trunks[0];
+  var tel = 0;
+  var breakdown = [];
+
+  // Start collar
+  tel += 10;
+  breakdown.push({ name:'Start Collar', eq:10, type:'start' });
+
+  // Trunk
+  if (trunk && !trunk.isRadial) {
+    var tLen = parseFloat(trunk.length) || 0;
+    var tDia = wizEffDia(trunk);
+    var t90eq = (trunk.elbows90 || 0) * (tDia <= 6 ? 10 : tDia <= 8 ? 15 : tDia <= 10 ? 20 : 25);
+    var t45eq = (trunk.elbows45 || 0) * 5;
+    tel += tLen + t90eq + t45eq;
+    if (tLen) breakdown.push({ name: trunk.label + ' straight (' + tLen + ' ft)', eq: tLen, type: 'duct' });
+    if (t90eq) breakdown.push({ name: trunk.elbows90 + '\u00D790\u00B0 elbow (trunk)', eq: t90eq, type: 'fitting' });
+    if (t45eq) breakdown.push({ name: trunk.elbows45 + '\u00D745\u00B0 elbow (trunk)', eq: t45eq, type: 'fitting' });
+  }
+
+  // Reducer trunk → branch
+  var trunkDia = (trunk && !trunk.isRadial) ? wizEffDia(trunk) : 0;
+  var brDia = wizEffDia(br);
+  if (trunkDia > 0 && Math.abs(trunkDia - brDia) > 0.5) {
+    tel += 5;
+    breakdown.push({ name: 'Reducer (' + Math.round(trunkDia) + '\u2033\u2192' + Math.round(brDia) + '\u2033)', eq: 5, type: 'fitting' });
+  }
+
+  // Branch straight run
+  var bLen = parseFloat(br.length) || 0;
+  var isFlex = br.material === 'flex';
+  var ff = isFlex ? wizFlexFactor(br.compression) : 1;
+  var effLen = bLen * ff;
+  tel += effLen;
+  if (isFlex) {
+    breakdown.push({ name: 'Branch flex (' + bLen + ' ft \u00D7' + ff.toFixed(2) + ')', eq: Math.round(effLen * 10) / 10, type: 'duct' });
+  } else {
+    breakdown.push({ name: 'Branch straight (' + bLen + ' ft)', eq: bLen, type: 'duct' });
+  }
+
+  // Branch fittings
+  br.fittings.forEach(function(f){
+    var ft = WIZ_FITTINGS.filter(function(t){ return t.id === f.type; })[0];
+    if (ft) {
+      var eq = ft.eqFn(brDia);
+      tel += eq;
+      breakdown.push({ name: ft.name, eq: eq, type: 'fitting' });
+    }
+  });
+
+  // Boot
+  var boot = WIZ_BOOT_EQ[br.bootType] || { name:'End', eq:35 };
+  tel += boot.eq;
+  breakdown.push({ name: boot.name, eq: boot.eq, type: 'end' });
+
+  return { tel: tel, breakdown: breakdown, trunk: trunk, branch: br };
+}
+
+function wizCalcResults() {
+  // Results calculated lazily inside wizRenderResults
+}
+
+function wizRenderResults() {
+  var runs = [];
+  var maxTEL = 0;
+  var critIdx = -1;
+
+  WIZ.branches.forEach(function(br, i){
+    var r = wizCalcRun(br);
+    runs.push(r);
+    if (r.tel > maxTEL) { maxTEL = r.tel; critIdx = i; }
+  });
+
+  // Available Static Pressure — use SS.avsp if defined, else default 0.5 IWC
+  var asp = (typeof SS !== 'undefined' && SS.avsp) ? parseFloat(SS.avsp) || 0.5 : 0.5;
+  var sysFR = maxTEL > 0 ? asp / maxTEL * 100 : 0;
+  var frClass = sysFR <= 0.05 ? 'ok' : sysFR <= 0.08 ? 'warn' : 'bad';
+  var frColor = sysFR <= 0.05 ? '#4caf50' : sysFR <= 0.08 ? '#ff9800' : '#d32f2f';
+
+  // -- Summary cards --
+  var sumH = '<div class="wiz-results-grid">';
+  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono">' + WIZ.branches.length + '</div><div class="wiz-result-lbl">Branches</div></div>';
+  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono">' + WIZ.trunks.length + '</div><div class="wiz-result-lbl">Trunks</div></div>';
+  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono ' + frClass + '">' + sysFR.toFixed(3) + '</div><div class="wiz-result-lbl">FR (IWC/100ft)</div></div>';
+  sumH += '<div class="wiz-result-cell"><div class="wiz-result-val mono ' + (maxTEL > 300 ? 'bad' : maxTEL > 200 ? 'warn' : 'ok') + '">' + Math.round(maxTEL) + ' ft</div><div class="wiz-result-lbl">Longest TEL</div></div>';
+  sumH += '</div>';
+  var sumEl = document.getElementById('wizSummaryCards');
+  if (sumEl) sumEl.innerHTML = sumH;
+
+  // -- Gauge --
+  var gaugePct = Math.min(sysFR / 0.12 * 100, 100);
+  var gaugeColor = sysFR <= 0.05 ? 'green' : sysFR <= 0.08 ? 'yellow' : 'red';
+  var gaugeH = '';
+  gaugeH += '<div class="wiz-gauge-wrap">';
+  gaugeH += '<div class="wiz-gauge-label"><span>System Friction Rate</span>';
+  gaugeH += '<span style="color:' + frColor + ';font-family:\'SF Mono\',monospace">' + sysFR.toFixed(3) + ' IWC/100ft</span></div>';
+  gaugeH += '<div class="wiz-gauge-track"><div class="wiz-gauge-fill ' + gaugeColor + '" style="width:' + gaugePct + '%"></div></div>';
+  gaugeH += '<div class="wiz-gauge-markers"><span>0.00</span><span style="color:#4caf50">0.05</span><span style="color:#ff9800">0.08</span><span style="color:#d32f2f">0.12</span></div>';
+  gaugeH += '</div>';
+  var gaugeEl = document.getElementById('wizFrictionGauge');
+  if (gaugeEl) gaugeEl.innerHTML = gaugeH;
+
+  // -- Critical path --
+  var cpH = '';
+  if (critIdx >= 0) {
+    var cr = runs[critIdx];
+    cpH += '<div class="wiz-crit-label">';
+    cpH += wizSvg('bolt');
+    cpH += 'Branch ' + cr.branch.num + ' \u2014 ' + cr.branch.room;
+    if (cr.branch.cfm) cpH += ' (' + cr.branch.cfm + ' CFM)';
+    cpH += ' \u2014 <span style="font-family:\'SF Mono\',monospace">' + Math.round(cr.tel) + ' ft TEL</span>';
+    cpH += '</div>';
+    cr.breakdown.forEach(function(step, si){
+      var dotCls = step.type === 'start' ? 'start' : step.type === 'end' ? 'end' : step.type === 'fitting' ? 'fitting' : 'duct';
+      var dotChar = step.type === 'start' ? 'P' : step.type === 'end' ? 'E' : step.type === 'fitting' ? 'F' : '\u2500';
+      cpH += '<div class="wiz-path-step">';
+      if (si < cr.breakdown.length - 1) cpH += '<div class="wiz-path-step-line"></div>';
+      cpH += '<div class="wiz-path-dot ' + dotCls + '">' + dotChar + '</div>';
+      cpH += '<div class="wiz-path-info"><div class="wiz-path-name">' + step.name + '</div></div>';
+      cpH += '<div class="wiz-path-eq">+' + Math.round(step.eq) + ' ft</div>';
+      cpH += '</div>';
+    });
+  } else {
+    cpH = '<div style="font-size:12px;color:#666;padding:8px 0">No branches entered yet.</div>';
+  }
+  var cpEl = document.getElementById('wizCritPath');
+  if (cpEl) cpEl.innerHTML = cpH;
+
+  // -- All runs by trunk --
+  var arH = '';
+  WIZ.trunks.forEach(function(trunk, ti){
+    var tRuns = runs.filter(function(r){ return r.branch.trunkIdx === ti; });
+    if (!tRuns.length) return;
+    var tMaxTEL = tRuns.reduce(function(m, r){ return Math.max(m, r.tel); }, 0);
+
+    arH += '<div style="margin-bottom:16px">';
+    arH += '<div class="wiz-trunk-result-hdr">' + wizSvg('trunk');
+    arH += '<span class="wiz-trunk-result-lbl">' + trunk.label + '</span>';
+    arH += '<span class="wiz-trunk-result-maxtel">Max TEL: ' + Math.round(tMaxTEL) + ' ft</span>';
+    arH += '</div>';
+
+    tRuns.forEach(function(r){
+      var isCrit = r === runs[critIdx];
+      var pct = maxTEL > 0 ? (r.tel / maxTEL * 100) : 0;
+      var barColor = r.tel === maxTEL ? '#d32f2f' : r.tel > maxTEL * 0.8 ? '#ff9800' : '#4caf50';
+      var rFR = r.tel > 0 ? asp / r.tel * 100 : 0;
+      var rFRCls = rFR <= 0.05 ? 'ok' : rFR <= 0.08 ? 'warn' : 'bad';
+      var shapeL = r.branch.shape === 'rect' ? r.branch.width + '\u00D7' + r.branch.height + '"' : r.branch.size + '\u2033';
+      var matL = r.branch.material === 'flex' ? ' flex' : '';
+
+      arH += '<div class="wiz-run-item" style="' + (isCrit ? 'border-color:#ff9800' : '') + '">';
+      arH += '<div class="wiz-run-header">';
+      arH += '<div class="wiz-branch-num" style="' + (isCrit ? 'background:#ff9800' : '') + '">' + r.branch.num + '</div>';
+      arH += '<div class="wiz-run-name">' + r.branch.room + (r.branch.cfm ? ' <span style="color:#888;font-weight:400">(' + r.branch.cfm + ' CFM)</span>' : '') + '</div>';
+      arH += '<div class="wiz-run-tel" style="color:' + barColor + '">' + Math.round(r.tel) + ' ft</div>';
+      arH += '</div>';
+      arH += '<div style="font-size:10px;color:#888;margin-bottom:4px">' + shapeL + matL + ' \u00B7 FR: <span class="wiz-run-fr ' + rFRCls + '">' + rFR.toFixed(3) + '</span></div>';
+      arH += '<div class="wiz-tel-bar-wrap"><div class="wiz-tel-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
+      arH += '</div>';
+    });
+    arH += '</div>';
+  });
+
+  if (!arH) arH = '<div style="font-size:12px;color:#666;padding:8px 0">No runs to display.</div>';
+  var arEl = document.getElementById('wizAllRuns');
+  if (arEl) arEl.innerHTML = arH;
+}
+
+// ---- Send to FR Worksheet ----
+function wizSendToFR() {
+  // Build runs and send to FR tab
+  var runs = [];
+  var maxTEL = 0;
+  WIZ.branches.forEach(function(br){
+    var r = wizCalcRun(br);
+    runs.push(r);
+    if (r.tel > maxTEL) maxTEL = r.tel;
+  });
+
+  // Try to populate FR worksheet if the function exists
+  if (typeof populateFRWorksheet === 'function') {
+    populateFRWorksheet(runs, maxTEL, WIZ);
+    return;
+  }
+
+  // Fallback: try to switch tab and populate FR table rows if present
+  var frTab = document.querySelector('[data-tab="fr"]') || document.querySelector('#tab-fr') || document.querySelector('[href="#fr"]');
+  if (frTab) { frTab.click(); }
+
+  // Try to fill a standard FR table
+  var tbody = document.querySelector('#frRunsTable tbody') || document.querySelector('#frTable tbody');
+  if (tbody) {
+    var asp = (typeof SS !== 'undefined' && SS.avsp) ? parseFloat(SS.avsp) || 0.5 : 0.5;
+    tbody.innerHTML = '';
+    runs.forEach(function(r){
+      var fr = r.tel > 0 ? asp / r.tel * 100 : 0;
+      var frCls = fr <= 0.05 ? 'ok' : fr <= 0.08 ? 'warn' : 'bad';
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + r.branch.num + '</td>' +
+        '<td>' + r.branch.room + '</td>' +
+        '<td>' + (r.branch.cfm || '--') + '</td>' +
+        '<td>' + wizSizeLabel(r.branch) + '</td>' +
+        '<td>' + r.branch.length + '</td>' +
+        '<td>' + Math.round(r.tel) + '</td>' +
+        '<td class="' + frCls + '">' + fr.toFixed(3) + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Store on SS for other parts of the app
+  if (typeof SS !== 'undefined') {
+    SS.wizard = SS.wizard || {};
+    SS.wizard.runs = runs;
+    SS.wizard.maxTEL = maxTEL;
+  }
+}
+
+// ================================================================
+// EVENT HANDLER BLOCK
+// Insert the call to wizHandleClick(ev) and wizHandleChange(ev)
+// at the TOP of the existing page-system click/change listeners.
+//
+// Example:
+//   document.getElementById('page-system').addEventListener('click', function(ev) {
+//     if (wizHandleClick(ev)) return;   // <-- add this line
+//     // ... existing handler code ...
+//   });
+//   document.getElementById('page-system').addEventListener('change', function(ev) {
+//     if (wizHandleChange(ev)) return;  // <-- add this line
+//     // ... existing handler code ...
+//   });
+// ================================================================
+
+function wizHandleClick(ev) {
+  var t = ev.target;
+
+  // --- Step pill navigation ---
+  var pill = t.closest('[data-wiz-nav]');
+  if (pill) {
+    var target = parseInt(pill.getAttribute('data-wiz-nav'));
+    // Only allow going back, or next via buttons
+    if (!isNaN(target)) { wizGoTo(target); return true; }
+  }
+
+  // --- Layout option buttons ---
+  var layoutBtn = t.closest('[data-wiz-layout]');
+  if (layoutBtn) {
+    WIZ.layout = layoutBtn.getAttribute('data-wiz-layout');
+    document.querySelectorAll('#wizLayoutOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
+    layoutBtn.classList.add('active');
+    // Reset trunks+branches when layout changes
+    WIZ.trunks = [];
+    WIZ.branches = [];
+    WIZ.activeBranch = -1;
+    return true;
+  }
+
+  // --- Air path option ---
+  var apBtn = t.closest('[data-wiz-ap]');
+  if (apBtn) {
+    WIZ.airPath = apBtn.getAttribute('data-wiz-ap');
+    document.querySelectorAll('#wizAirPathOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
+    apBtn.classList.add('active');
+    return true;
+  }
+
+  // --- Material option ---
+  var matBtn = t.closest('[data-wiz-mat]');
+  if (matBtn) {
+    WIZ.material = matBtn.getAttribute('data-wiz-mat');
+    document.querySelectorAll('#wizMatOpts .opt-btn').forEach(function(b){ b.classList.remove('active'); });
+    matBtn.classList.add('active');
+    return true;
+  }
+
+  // --- Add trunk ---
+  if (t.closest('#wizAddTrunk')) {
+    wizSaveTrunks();
+    var idx = WIZ.trunks.length;
+    WIZ.trunks.push({ label:'Trunk ' + String.fromCharCode(65 + idx), isRadial:false, shape:'round', size:'10', width:'10', height:'8', length:'20', elbows90:0, elbows45:0 });
+    WIZ.branches = []; // reset branches when trunks change
+    WIZ.activeBranch = -1;
+    wizRenderTrunks();
+    return true;
+  }
+
+  // --- Remove trunk ---
+  var trunkRm = t.closest('[data-wiz-trunk-rm]');
+  if (trunkRm) {
+    wizSaveTrunks();
+    var rmi = parseInt(trunkRm.getAttribute('data-wiz-trunk-rm'));
+    if (WIZ.trunks.length > 1) {
+      WIZ.trunks.splice(rmi, 1);
+      WIZ.branches = WIZ.branches.filter(function(b){ return b.trunkIdx !== rmi; });
+      WIZ.branches.forEach(function(b){ if (b.trunkIdx > rmi) b.trunkIdx--; });
+      // Renumber
+      var n = 1; WIZ.branches.forEach(function(b){ b.num = n++; });
+      WIZ.activeBranch = -1;
+      wizRenderTrunks();
+    }
+    return true;
+  }
+
+  // --- Trunk shape toggle ---
+  var trunkShape = t.closest('[data-wiz-trunk-shape]');
+  if (trunkShape) {
+    wizSaveTrunks();
+    var tsi = parseInt(trunkShape.getAttribute('data-wiz-trunk-shape'));
+    var sv = trunkShape.getAttribute('data-shape');
+    WIZ.trunks[tsi].shape = sv;
+    wizRenderTrunks();
+    return true;
+  }
+
+  // --- Branch: tap to expand/collapse ---
+  var branchItem = t.closest('[data-wiz-branch]');
+  if (branchItem && !t.closest('[data-wiz-br-save]') && !t.closest('[data-wiz-br-remove]') &&
+      !t.closest('[data-wiz-add-fit]') && !t.closest('[data-wiz-rm-fit]') &&
+      !t.closest('[data-wiz-br-mat]') && !t.closest('[data-wiz-br-shape]')) {
+    var bi = parseInt(branchItem.getAttribute('data-wiz-branch'));
+    if (WIZ.activeBranch >= 0 && WIZ.activeBranch !== bi) {
+      wizSaveBranch(WIZ.activeBranch);
+    }
+    WIZ.activeBranch = (WIZ.activeBranch === bi) ? -1 : bi;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Branch: save ---
+  var brSave = t.closest('[data-wiz-br-save]');
+  if (brSave) {
+    var si2 = parseInt(brSave.getAttribute('data-wiz-br-save'));
+    wizSaveBranch(si2);
+    WIZ.branches[si2].done = true;
+    WIZ.activeBranch = -1;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Branch: remove ---
+  var brRm = t.closest('[data-wiz-br-remove]');
+  if (brRm) {
+    var ri2 = parseInt(brRm.getAttribute('data-wiz-br-remove'));
+    if (WIZ.branches.length > 1) {
+      WIZ.branches.splice(ri2, 1);
+      var num2 = 1; WIZ.branches.forEach(function(b){ b.num = num2++; });
+      WIZ.activeBranch = -1;
+      wizRenderBranches();
+    }
+    return true;
+  }
+
+  // --- Add fitting to branch ---
+  var addFit = t.closest('[data-wiz-add-fit]');
+  if (addFit) {
+    var afi = parseInt(addFit.getAttribute('data-wiz-add-fit'));
+    var ftype = addFit.getAttribute('data-fit-type');
+    wizSaveBranch(afi);
+    WIZ.branches[afi].fittings.push({ type: ftype });
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Remove fitting from branch ---
+  var rmFit = t.closest('[data-wiz-rm-fit]');
+  if (rmFit) {
+    var rfi = parseInt(rmFit.getAttribute('data-wiz-rm-fit'));
+    var fidx = parseInt(rmFit.getAttribute('data-fit-idx'));
+    wizSaveBranch(rfi);
+    WIZ.branches[rfi].fittings.splice(fidx, 1);
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Branch material toggle ---
+  var brMat = t.closest('[data-wiz-br-mat]');
+  if (brMat) {
+    var bmi = parseInt(brMat.getAttribute('data-wiz-br-mat'));
+    var mv = brMat.getAttribute('data-matval');
+    wizSaveBranch(bmi);
+    WIZ.branches[bmi].material = mv;
+    if (mv === 'flex' && !WIZ.branches[bmi].compression) WIZ.branches[bmi].compression = 4;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Branch shape toggle ---
+  var brShape = t.closest('[data-wiz-br-shape]');
+  if (brShape) {
+    var bsi = parseInt(brShape.getAttribute('data-wiz-br-shape'));
+    var bsv = brShape.getAttribute('data-shape');
+    wizSaveBranch(bsi);
+    WIZ.branches[bsi].shape = bsv;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Add branch to trunk group ---
+  var addBranchBtn = t.closest('[data-wiz-add-branch]');
+  if (addBranchBtn) {
+    var ti2 = parseInt(addBranchBtn.getAttribute('data-wiz-add-branch'));
+    if (WIZ.activeBranch >= 0) wizSaveBranch(WIZ.activeBranch);
+    var newNum = WIZ.branches.length + 1;
+    WIZ.branches.push({
+      trunkIdx:    ti2,
+      num:         newNum,
+      room:        'Room ' + newNum,
+      cfm:         '',
+      shape:       'round',
+      size:        '6',
+      width:       '8',
+      height:      '8',
+      material:    WIZ.material,
+      compression: 4,
+      length:      '12',
+      fittings:    [],
+      bootType:    '90boot',
+      done:        false
+    });
+    WIZ.activeBranch = WIZ.branches.length - 1;
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Send to FR Worksheet ---
+  if (t.closest('#wizSendToFR')) {
+    wizSendToFR();
+    return true;
+  }
+
+  return false; // not handled by wizard
+}
+
+function wizHandleChange(ev) {
+  var t = ev.target;
+
+  // Branch compression change re-render
+  if (t.hasAttribute('data-wiz-br-compress')) {
+    var ci = parseInt(t.getAttribute('data-wiz-br-compress'));
+    WIZ.branches[ci].compression = parseInt(t.value) || 4;
+    wizSaveBranch(ci);
+    wizRenderBranches();
+    return true;
+  }
+
+  // Trunk shape/size live update equivalents
+  if (t.hasAttribute('data-wiz-trunk-w') || t.hasAttribute('data-wiz-trunk-h')) {
+    wizSaveTrunks();
+    wizRenderTrunks();
+    return true;
+  }
+
+  return false;
+}
+
+// ---- Init on page load ----
+(function wizInit() {
+  // Store wizard on SS if available
+  if (typeof SS !== 'undefined') {
+    SS.wizard = WIZ;
+  }
+  wizUpdateBar();
+})();
+
+
 
 // ===== PSYCHROMETRIC ENGINE (ASHRAE Fundamentals) =====
 function psychSatPress(T) {
