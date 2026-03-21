@@ -6534,10 +6534,52 @@ function wizUpdateBar() {
 // Layout / airPath / material are toggled directly by click handler
 
 // ---- STEP 2: TRUNKS ----
-function wizInitTrunks() {
-  var layout = WIZ.layout;
-  WIZ.trunks = [];
+// Recommend a round duct size for given CFM + material
+// Uses Manual D velocity limits: supply trunk 900, supply branch 600, return trunk 700, return branch 600
+function wizRecommendSize(cfm, isReturn, isTrunk, material) {
+  var maxVel = isTrunk ? (isReturn ? 700 : 900) : 600;
+  // Find smallest round size where velocity <= maxVel
+  for (var si = 0; si < WIZ_ROUND_SIZES.length; si++) {
+    var d = WIZ_ROUND_SIZES[si];
+    var area = Math.PI * Math.pow(d / 12 / 2, 2); // sq ft
+    var vel = cfm / area;
+    if (vel <= maxVel) return String(d);
+  }
+  return '24'; // max
+}
 
+function wizInitTrunks() {
+  WIZ.trunks = [];
+  var layout = WIZ.layout;
+
+  // Auto-create from plenum collars if any exist
+  var supplyCollars = (typeof SS !== 'undefined' && SS.collars) ? SS.collars : [];
+  var returnCollars = (typeof SS !== 'undefined' && SS.retCollars) ? SS.retCollars : [];
+  var hasCollars = supplyCollars.length > 0 || returnCollars.length > 0;
+
+  if (hasCollars) {
+    // Create supply trunks from supply collars
+    supplyCollars.forEach(function(col, i) {
+      WIZ.trunks.push({
+        label: 'Supply ' + (i + 1) + ' (' + col.size + '\u2033)',
+        airPath: 'supply', isRadial: false, shape: 'round',
+        size: col.size, width: col.size, height: '8',
+        length: '20', elbows90: 0, elbows45: 0
+      });
+    });
+    // Create return trunks from return collars
+    returnCollars.forEach(function(col, i) {
+      WIZ.trunks.push({
+        label: 'Return ' + (i + 1) + ' (' + col.size + '\u2033)',
+        airPath: 'return', isRadial: false, shape: 'round',
+        size: col.size, width: col.size, height: '8',
+        length: '15', elbows90: 0, elbows45: 0
+      });
+    });
+    if (WIZ.trunks.length > 0) return;
+  }
+
+  // Fallback: layout-based defaults
   if (layout === 'RADIAL') {
     WIZ.trunks.push({ label:'Plenum', airPath:'supply', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0 });
     return;
@@ -6551,7 +6593,6 @@ function wizInitTrunks() {
     WIZ.trunks.push({ label:'Main Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0 });
     return;
   }
-  // CUSTOM — start with one trunk
   WIZ.trunks.push({ label:'Trunk A', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
 }
 
@@ -6657,30 +6698,69 @@ function wizSaveTrunks() {
 // ---- STEP 3: BRANCHES ----
 function wizInitBranches() {
   if (WIZ.branches.length > 0) return;
-  var total = WIZ.layout === 'LR' ? 6 : (WIZ.layout === 'RADIAL' ? 6 : 4);
+
+  // Get rooms from Rooms tab
+  var rooms = getRoomsList(); // [{name, cfm}, ...]
+  var supplyTrunks = WIZ.trunks.filter(function(t){ return t.airPath === 'supply'; });
+  var returnTrunks = WIZ.trunks.filter(function(t){ return t.airPath === 'return'; });
+
   var num = 1;
-  WIZ.trunks.forEach(function(trunk, ti) {
-    var count = Math.ceil(total / WIZ.trunks.length);
-    for (var b = 0; b < count; b++) {
+
+  if (rooms.length > 0 && supplyTrunks.length > 0) {
+    // Distribute rooms evenly across supply trunks
+    var perTrunk = Math.ceil(rooms.length / supplyTrunks.length);
+    var ri = 0;
+    supplyTrunks.forEach(function(trunk) {
+      var ti = WIZ.trunks.indexOf(trunk);
+      for (var b = 0; b < perTrunk && ri < rooms.length; b++, ri++) {
+        var rm = rooms[ri];
+        var isReturn = false;
+        var recSize = rm.cfm ? wizRecommendSize(rm.cfm, isReturn, false, WIZ.material) : '6';
+        WIZ.branches.push({
+          trunkIdx: ti, num: num, room: rm.name,
+          cfm: rm.cfm || '', shape: 'round',
+          size: recSize, width: '8', height: '8',
+          material: WIZ.material, compression: 4,
+          length: '12', fittings: [], bootType: '90boot',
+          done: false, recommended: recSize
+        });
+        num++;
+      }
+    });
+
+    // Add one return branch per return trunk (whole-house return)
+    returnTrunks.forEach(function(trunk) {
+      var ti = WIZ.trunks.indexOf(trunk);
+      var totalCfm = getRoomsTotalCFM();
+      var retCfm = returnTrunks.length > 0 ? Math.round(totalCfm / returnTrunks.length) : totalCfm;
+      var recSize = retCfm ? wizRecommendSize(retCfm, true, false, WIZ.material) : '14';
       WIZ.branches.push({
-        trunkIdx:    ti,
-        num:         num,
-        room:        'Room ' + num,
-        cfm:         '',
-        shape:       'round',
-        size:        '6',
-        width:       '8',
-        height:      '8',
-        material:    WIZ.material,
-        compression: 4,
-        length:      '12',
-        fittings:    [],
-        bootType:    '90boot',
-        done:        false
+        trunkIdx: ti, num: num, room: 'Return ' + (num - rooms.length),
+        cfm: retCfm || '', shape: 'round',
+        size: recSize, width: '14', height: '10',
+        material: WIZ.material, compression: 4,
+        length: '10', fittings: [], bootType: 'wallReg',
+        done: false, recommended: recSize
       });
       num++;
-    }
-  });
+    });
+  } else {
+    // Fallback: generic branches if no rooms data
+    var total = WIZ.layout === 'LR' ? 6 : (WIZ.layout === 'RADIAL' ? 6 : 4);
+    WIZ.trunks.forEach(function(trunk, ti) {
+      var count = Math.ceil(total / WIZ.trunks.length);
+      for (var b = 0; b < count; b++) {
+        WIZ.branches.push({
+          trunkIdx: ti, num: num, room: 'Room ' + num,
+          cfm: '', shape: 'round', size: '6',
+          width: '8', height: '8', material: WIZ.material,
+          compression: 4, length: '12', fittings: [],
+          bootType: '90boot', done: false
+        });
+        num++;
+      }
+    });
+  }
 }
 
 function wizRenderBranches() {
@@ -6712,7 +6792,8 @@ function wizRenderBranches() {
     html += '<div class="wiz-branch-num">' + br.num + '</div>';
     html += '<div class="wiz-branch-info">';
     html += '<div class="wiz-branch-name">' + br.room + '</div>';
-    html += '<div class="wiz-branch-detail">' + shapeL + matL + ' \u00B7 ' + br.length + ' ft' + fitL + cfmL + '</div>';
+    var recL = br.recommended && br.size === br.recommended ? ' <span style="color:#4caf50">\u2713 rec</span>' : (br.recommended ? ' <span style="color:#ff9800">rec:' + br.recommended + '\u2033</span>' : '');
+    html += '<div class="wiz-branch-detail">' + shapeL + matL + ' \u00B7 ' + br.length + ' ft' + fitL + cfmL + recL + '</div>';
     html += '</div>';
     html += '<div class="wiz-branch-badge ' + statusClass + '">' + statusText + '</div>';
     html += '</div>'; // /branch-item
