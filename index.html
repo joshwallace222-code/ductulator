@@ -7624,7 +7624,7 @@ function wizCalcRun(br) {
   var plTypeEl = isReturn ? document.getElementById('retPlType') : document.getElementById('plType');
   var plTypeVal = plTypeEl ? plTypeEl.value : (isReturn ? 'box' : 'tapered');
   var plenumEQ = WIZ_PLENUM_EQ[plTypeVal] || 10;
-  var plenumName = plTypeEl ? plTypeEl.options[plTypeEl.selectedIndex].text.split('(')[0].trim() : 'Start Collar';
+  var plenumName = (plTypeEl && plTypeEl.selectedIndex >= 0 && plTypeEl.options[plTypeEl.selectedIndex]) ? plTypeEl.options[plTypeEl.selectedIndex].text.split('(')[0].trim() : (plTypeVal || 'Start Collar');
   tel += plenumEQ;
   breakdown.push({ name: plenumName + ' (' + plenumEQ + 'ft)', eq: plenumEQ, type:'start' });
 
@@ -7947,17 +7947,27 @@ function wizBudgetDiagnostics(runs, availableStatic, sysFR, maxTEL, critIdx) {
       });
     }
 
-    // 2. Undersized branch (individual FR > 0.08)
-    if (r.tel > 0) {
-      var brFR = availableStatic / r.tel * 100;
-      if (brFR > 0.08) {
+    // 2. Undersized branch — check actual friction loss per 100ft for given CFM + duct size
+    if (br.cfm > 0 && br.size > 0) {
+      var brDiaInch = br.shape === 'rect' ? rectEquivDiameter(parseFloat(br.width)||8, parseFloat(br.height)||8) : parseFloat(br.size);
+      var brActualFR = frictionLoss(brDiaInch, br.cfm);
+      if (br.material === 'flex') brActualFR *= wizFlexFactor(br.compression || 0);
+      if (brActualFR > 0.08) {
         var curSize = br.shape === 'rect' ? (br.width + '\u00D7' + br.height + '"') : (br.size + '\u2033');
-        var sugSize = br.shape === 'rect' ? 'next wider dimension' : ((parseInt(br.size) + 2) + '\u2033');
+        // Find the right size
+        var testSizes = [4,5,6,7,8,9,10,12,14,16,18,20];
+        var recSize = parseInt(br.size) + 2;
+        for (var tsi = 0; tsi < testSizes.length; tsi++) {
+          if (testSizes[tsi] <= br.size) continue;
+          var testFR = frictionLoss(testSizes[tsi], br.cfm);
+          if (br.material === 'flex') testFR *= wizFlexFactor(br.compression || 0);
+          if (testFR <= 0.08) { recSize = testSizes[tsi]; break; }
+        }
         diags.push({
           severity: '#ff9800',
-          title: 'Branch ' + br.num + ' \u2014 Undersized',
-          detail: 'FR = ' + brFR.toFixed(3) + ' (above 0.08 limit). Consider upsizing from ' + curSize + ' to ' + sugSize,
-          extra: 'Higher FR = more noise and restriction'
+          title: 'Branch ' + br.num + ' \u2014 Duct too restrictive',
+          detail: br.cfm + ' CFM through ' + curSize + ' ' + (br.material==='flex'?'flex':'metal') + (br.compression>0?' at '+br.compression+'% compression':'') + ' = ' + brActualFR.toFixed(3) + ' IWC/100ft (max 0.08)',
+          extra: 'Upsize to ' + recSize + '\u2033 to get under 0.08 IWC/100ft'
         });
       }
     }
@@ -7995,12 +8005,22 @@ function wizBudgetDiagnostics(runs, availableStatic, sysFR, maxTEL, critIdx) {
       });
       if (tArea > 0 && totalCFM > 0) {
         var tVel = totalCFM / tArea;
-        if (tVel > 900) {
+        var tMat = trunk.material === 'flex' ? 'flex' : 'rigid';
+        var tMaxVel = trunk.airPath === 'return' ? (tMat === 'flex' ? 700 : 700) : (tMat === 'flex' ? 700 : 900);
+        if (tVel > tMaxVel) {
+          // Find recommended size
+          var recTrunkSize = Math.round(tDia) + 2;
+          var tTestSizes = [6,8,10,12,14,16,18,20,22,24];
+          for (var tti = 0; tti < tTestSizes.length; tti++) {
+            if (tTestSizes[tti] <= Math.round(tDia)) continue;
+            var tTestArea = Math.PI * Math.pow(tTestSizes[tti] / 24, 2);
+            if (totalCFM / tTestArea <= tMaxVel) { recTrunkSize = tTestSizes[tti]; break; }
+          }
           diags.push({
             severity: '#d32f2f',
             title: trunk.label + ' \u2014 Trunk velocity high',
-            detail: 'Velocity ~' + Math.round(tVel) + ' FPM (Manual D max 900 for residential). Upsize trunk or split branches',
-            extra: trunk.label + ': ' + Math.round(tDia) + '\u2033 dia carrying ' + Math.round(totalCFM) + ' CFM'
+            detail: 'Velocity ~' + Math.round(tVel) + ' FPM exceeds Manual D max ' + tMaxVel + ' FPM for ' + tMat + ' ' + trunk.airPath + ' trunk. Upsize to ' + recTrunkSize + '\u2033',
+            extra: 'Currently ' + Math.round(tDia) + '\u2033 carrying ' + Math.round(totalCFM) + ' CFM'
           });
         }
       }
