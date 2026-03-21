@@ -2487,8 +2487,8 @@ footer a:hover { color: var(--text-muted); }
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" data-page="roomcfm">Rooms</button>
-    <button class="nav-tab" data-page="calculator">Calc</button>
     <button class="nav-tab" data-page="system">System</button>
+    <button class="nav-tab" data-page="calculator">Calc</button>
     <button class="nav-tab" data-page="eqlen">EQ Len</button>
     <button class="nav-tab" data-page="frworksheet">FR Work</button>
     <button class="nav-tab" data-page="filters">Filters</button>
@@ -7978,38 +7978,69 @@ function updateSysFilterDisclaimer() {
 // ===== FILTER PRESSURE DROP DATABASE =====
 var FILTER_DB = {
   aprilaire: [
-    {model:'201',  name:'Space-Gard 2200 (Model 201)', merv:10, depth:6, ratedCfm:1200, ratedPD:0.14, note:'Media replacement filter'},
-    {model:'210',  name:'Space-Gard 2210 (Model 210)', merv:11, depth:4, ratedCfm:1200, ratedPD:0.11, note:'Upgraded media'},
-    {model:'213',  name:'Space-Gard 2210 (Model 213)', merv:13, depth:4, ratedCfm:1200, ratedPD:0.15, note:'High efficiency media'},
-    {model:'401',  name:'Space-Gard 2400 (Model 401)', merv:10, depth:6, ratedCfm:2000, ratedPD:0.14, note:'Whole-home media'},
-    {model:'410',  name:'Space-Gard 2410 (Model 410)', merv:11, depth:4, ratedCfm:2000, ratedPD:0.12, note:'Whole-home media'},
-    {model:'413',  name:'Space-Gard 2410 (Model 413)', merv:13, depth:4, ratedCfm:2000, ratedPD:0.17, note:'Whole-home high eff'},
-    {model:'501',  name:'Model 5000 (Model 501)',       merv:16, depth:6, ratedCfm:2000, ratedPD:0.14, note:'Electronic + media hybrid'},
-    {model:'216',  name:'Model 216 (MERV 16)',          merv:16, depth:4, ratedCfm:1200, ratedPD:0.20, note:'Allergy & Asthma'},
-    {model:'416',  name:'Model 416 (MERV 16)',          merv:16, depth:4, ratedCfm:2000, ratedPD:0.20, note:'Allergy & Asthma'}
+    {model:'201',    name:'MERV 10 (Model 201, 20x25)',    merv:10, depth:4, ratedCfm:2000, ratedPD:0.12, note:'Legacy Space-Gard 2200'},
+    {model:'210',    name:'MERV 11 Clean Air (210, 20x25)', merv:11, depth:4, ratedCfm:2000, ratedPD:0.11, note:'Fits 1210/2210/3210/4200'},
+    {model:'213',    name:'MERV 13 Healthy Home (213, 20x25)', merv:13, depth:4, ratedCfm:2000, ratedPD:0.15, note:'Fits 1210/2210/2216/3210'},
+    {model:'213CBN', name:'MERV 13+ Carbon (213CBN, 20x25)',   merv:13, depth:4, ratedCfm:2000, ratedPD:0.17, note:'Odor reduction + MERV 13'},
+    {model:'216',    name:'MERV 16 Allergy (216, 20x25)',   merv:16, depth:4, ratedCfm:1400, ratedPD:0.29, note:'Allergy & Asthma'},
+    {model:'401',    name:'MERV 10 (Model 401, 16x25)',     merv:10, depth:4, ratedCfm:2000, ratedPD:0.14, note:'Legacy Space-Gard 2400'},
+    {model:'410',    name:'MERV 11 Clean Air (410, 16x25)', merv:11, depth:4, ratedCfm:2000, ratedPD:0.12, note:'Fits 1410/2410/3410/4400'},
+    {model:'413',    name:'MERV 13 Healthy Home (413, 16x25)', merv:13, depth:4, ratedCfm:2000, ratedPD:0.17, note:'Fits 1410/2410/2416/3410'},
+    {model:'413CBN', name:'MERV 13+ Carbon (413CBN, 16x25)',   merv:13, depth:4, ratedCfm:1600, ratedPD:0.24, note:'Odor reduction + MERV 13'},
+    {model:'416',    name:'MERV 16 Allergy (416, 16x25)',   merv:16, depth:4, ratedCfm:1400, ratedPD:0.31, note:'Allergy & Asthma'},
+    {model:'310',    name:'MERV 11 Clean Air (310, 20x20)', merv:11, depth:4, ratedCfm:1200, ratedPD:0.19, note:'Fits 1310/2310/3310/4300'},
+    {model:'313',    name:'MERV 13 Healthy Home (313, 20x20)', merv:13, depth:4, ratedCfm:1200, ratedPD:0.23, note:'Fits 1310/2310/3310/4300'},
+    {model:'110',    name:'MERV 11 Clean Air (110, 16x20)', merv:11, depth:4, ratedCfm:1200, ratedPD:0.20, note:'Fits 1110'},
+    {model:'113',    name:'MERV 13 Healthy Home (113, 16x20)', merv:13, depth:4, ratedCfm:1200, ratedPD:0.29, note:'Fits 1110'},
+    {model:'510',    name:'MERV 11 Clean Air (510, 31x28)', merv:11, depth:4, ratedCfm:3000, ratedPD:0.05, note:'Large/geothermal 1510/2516'},
+    {model:'513',    name:'MERV 13 Healthy Home (513, 31x28)', merv:13, depth:4, ratedCfm:3000, ratedPD:0.07, note:'Large/geothermal 1510/2516'},
+    {model:'513CBN', name:'MERV 13+ Carbon (513CBN, 31x28)',   merv:13, depth:4, ratedCfm:3000, ratedPD:0.08, note:'Large/geo odor reduction'},
+    {model:'516',    name:'MERV 16 Allergy (516, 31x28)',   merv:16, depth:4, ratedCfm:2600, ratedPD:0.10, note:'Large/geothermal'},
+    {model:'501',    name:'Electronic Hybrid (501, MERV 16)', merv:16, depth:6, ratedCfm:2000, ratedPD:0.14, note:'Model 5000 hybrid'}
   ],
   honeywell: [
-    {model:'FC100A1029', name:'FC100A (16x25x4)', merv:11, depth:4, ratedCfm:1200, ratedPD:0.13, note:'Replaces media filter'},
-    {model:'FC100A1037', name:'FC100A (20x25x4)', merv:11, depth:4, ratedCfm:1600, ratedPD:0.12, note:'Replaces media filter'},
-    {model:'FC40R1003',  name:'FC40R (Return Grille 20x25)', merv:10, depth:4, ratedCfm:1200, ratedPD:0.12, note:'Return grille filter'},
-    {model:'F100F1012',  name:'F100 Media (16x25)', merv:11, depth:4, ratedCfm:1200, ratedPD:0.15, note:'Media air cleaner'},
-    {model:'F100F2002',  name:'F100 Media (20x25)', merv:11, depth:4, ratedCfm:1600, ratedPD:0.14, note:'Media air cleaner'},
-    {model:'F200E1029',  name:'F200E (16x25)', merv:13, depth:4, ratedCfm:1200, ratedPD:0.22, note:'High efficiency media'},
-    {model:'F200E1037',  name:'F200E (20x25)', merv:13, depth:4, ratedCfm:1600, ratedPD:0.20, note:'High efficiency media'}
+    {model:'FC100A1025', name:'FC100A 16x20 MERV 11',  merv:11, depth:4, ratedCfm:1000, ratedPD:0.23, note:'Media air cleaner'},
+    {model:'FC100A1029', name:'FC100A 16x25 MERV 11',  merv:11, depth:4, ratedCfm:1400, ratedPD:0.23, note:'Media air cleaner'},
+    {model:'FC100A1011', name:'FC100A 20x20 MERV 11',  merv:11, depth:4, ratedCfm:1400, ratedPD:0.23, note:'Media air cleaner'},
+    {model:'FC100A1037', name:'FC100A 20x25 MERV 11',  merv:11, depth:4, ratedCfm:1700, ratedPD:0.23, note:'Media air cleaner'},
+    {model:'FC100A1052', name:'FC100A 20x12.5 MERV 11',merv:11, depth:4, ratedCfm:1000, ratedPD:0.23, note:'Media air cleaner'},
+    {model:'FC200E1003', name:'FC200E 16x20 MERV 13',  merv:13, depth:4, ratedCfm:1000, ratedPD:0.28, note:'Charged media'},
+    {model:'FC200E1029', name:'FC200E 16x25 MERV 13',  merv:13, depth:4, ratedCfm:1400, ratedPD:0.28, note:'Charged media'},
+    {model:'FC200E1011', name:'FC200E 20x20 MERV 13',  merv:13, depth:4, ratedCfm:1400, ratedPD:0.28, note:'Charged media'},
+    {model:'FC200E1037', name:'FC200E 20x25 MERV 13',  merv:13, depth:4, ratedCfm:1700, ratedPD:0.28, note:'Charged media'},
+    {model:'FC40R1003',  name:'FC40R Return 20x25 MERV 10', merv:10, depth:4, ratedCfm:1485, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1011',  name:'FC40R Return 20x25 MERV 10', merv:10, depth:4, ratedCfm:1485, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1029',  name:'FC40R Return 20x30 MERV 10', merv:10, depth:4, ratedCfm:1800, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1052',  name:'FC40R Return 16x20 MERV 10', merv:10, depth:4, ratedCfm:900,  ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1060',  name:'FC40R Return 16x25 MERV 10', merv:10, depth:4, ratedCfm:1165, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1078',  name:'FC40R Return 24x24 MERV 10', merv:10, depth:4, ratedCfm:1730, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1037',  name:'FC40R Return 12x24 MERV 10', merv:10, depth:4, ratedCfm:600,  ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1045',  name:'FC40R Return 14x25 MERV 10', merv:10, depth:4, ratedCfm:1000, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1110',  name:'FC40R Return 14x20 MERV 10', merv:10, depth:4, ratedCfm:700,  ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1136',  name:'FC40R Return 18x24 MERV 10', merv:10, depth:4, ratedCfm:1100, ratedPD:0.12, note:'Return grille filter'},
+    {model:'FC40R1144',  name:'FC40R Return 20x24 MERV 10', merv:10, depth:4, ratedCfm:1400, ratedPD:0.12, note:'Return grille filter'},
+    {model:'F100F1012',  name:'F100 Media 16x25 MERV 11',   merv:11, depth:4, ratedCfm:1200, ratedPD:0.15, note:'Media air cleaner'},
+    {model:'F100F2002',  name:'F100 Media 20x25 MERV 11',   merv:11, depth:4, ratedCfm:1600, ratedPD:0.14, note:'Media air cleaner'}
   ],
   lennox: [
-    {model:'X6670',  name:'Healthy Climate MERV 11',  merv:11, depth:5, ratedCfm:2000, ratedPD:0.25, note:'5-inch media'},
-    {model:'X6672',  name:'Healthy Climate MERV 16',  merv:16, depth:5, ratedCfm:2000, ratedPD:0.31, note:'5-inch high eff'},
-    {model:'HCF20-16', name:'HCF20-16 Cabinet Filter', merv:16, depth:5, ratedCfm:1200, ratedPD:0.30, note:'Cabinet filter'},
-    {model:'X0585',  name:'Healthy Climate MERV 10',  merv:10, depth:4, ratedCfm:2000, ratedPD:0.18, note:'4-inch media'},
-    {model:'X8310',  name:'PureAir S MERV 16',        merv:16, depth:5, ratedCfm:2000, ratedPD:0.28, note:'PureAir system'}
+    {model:'X0585',    name:'Healthy Climate MERV 10 (16x25)', merv:10, depth:4, ratedCfm:2000, ratedPD:0.18, note:'4-inch media'},
+    {model:'X6670',    name:'Healthy Climate MERV 11 (16x25)', merv:11, depth:5, ratedCfm:2000, ratedPD:0.25, note:'5-inch media'},
+    {model:'X6672',    name:'Healthy Climate MERV 16 (16x25)', merv:16, depth:5, ratedCfm:2000, ratedPD:0.31, note:'5-inch high eff'},
+    {model:'X8310',    name:'PureAir S MERV 16 (16x25)',       merv:16, depth:5, ratedCfm:2000, ratedPD:0.28, note:'PureAir system'},
+    {model:'HCF20-16', name:'HCF20-16 Cabinet MERV 16',       merv:16, depth:5, ratedCfm:1200, ratedPD:0.30, note:'Cabinet filter'},
+    {model:'X0586',    name:'Healthy Climate MERV 10 (20x25)', merv:10, depth:4, ratedCfm:2000, ratedPD:0.15, note:'4-inch media 20x25'},
+    {model:'X6673',    name:'Healthy Climate MERV 11 (20x25)', merv:11, depth:5, ratedCfm:2000, ratedPD:0.22, note:'5-inch media 20x25'},
+    {model:'X6675',    name:'Healthy Climate MERV 16 (20x25)', merv:16, depth:5, ratedCfm:2000, ratedPD:0.30, note:'5-inch high eff 20x25'}
   ],
   carrier: [
-    {model:'GAPCCCAR1625', name:'EZ Flex 16x25 (MERV 10)',  merv:10, depth:4, ratedCfm:1200, ratedPD:0.12, note:'EZ Flex media'},
-    {model:'GAPCCCAR2025', name:'EZ Flex 20x25 (MERV 10)',  merv:10, depth:4, ratedCfm:1600, ratedPD:0.11, note:'EZ Flex media'},
-    {model:'GAPCCCAR2420', name:'EZ Flex 24x20 (MERV 10)',  merv:10, depth:4, ratedCfm:1600, ratedPD:0.11, note:'EZ Flex media'},
-    {model:'FILCCFNC0021', name:'Infinity MERV 15',          merv:15, depth:5, ratedCfm:2000, ratedPD:0.26, note:'Infinity system'},
-    {model:'FILXXCAR0020', name:'EZ Flex MERV 13',           merv:13, depth:4, ratedCfm:1600, ratedPD:0.18, note:'High eff media'}
+    {model:'GAPCCCAR1625', name:'EZ Flex 16x25 MERV 10',  merv:10, depth:4, ratedCfm:1200, ratedPD:0.12, note:'EZ Flex media'},
+    {model:'GAPCCCAR2025', name:'EZ Flex 20x25 MERV 10',  merv:10, depth:4, ratedCfm:1600, ratedPD:0.11, note:'EZ Flex media'},
+    {model:'GAPCCCAR2420', name:'EZ Flex 24x20 MERV 10',  merv:10, depth:4, ratedCfm:1600, ratedPD:0.11, note:'EZ Flex media'},
+    {model:'GAPCCCAR1620', name:'EZ Flex 16x20 MERV 10',  merv:10, depth:4, ratedCfm:1000, ratedPD:0.13, note:'EZ Flex media'},
+    {model:'FILXXCAR0020', name:'EZ Flex 20x25 MERV 13',  merv:13, depth:4, ratedCfm:1600, ratedPD:0.18, note:'High eff media'},
+    {model:'FILXXCAR0016', name:'EZ Flex 16x25 MERV 13',  merv:13, depth:4, ratedCfm:1200, ratedPD:0.20, note:'High eff media'},
+    {model:'FILCCFNC0021', name:'Infinity 20x25 MERV 15', merv:15, depth:5, ratedCfm:2000, ratedPD:0.26, note:'Infinity system'},
+    {model:'FILCCFNC0017', name:'Infinity 16x25 MERV 15', merv:15, depth:5, ratedCfm:1200, ratedPD:0.28, note:'Infinity system'}
   ],
   generic: [
     {model:'1in-M8',   name:'1" Disposable MERV 8',  merv:8,  depth:1, ratedCfm:1200, ratedPD:0.12, note:'Standard fiberglass/pleated'},
