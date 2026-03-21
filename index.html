@@ -3095,20 +3095,12 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysPlBody">
-      <!-- Plenum Shape Toggle -->
-      <div style="display:flex;gap:4px;margin-top:8px;margin-bottom:8px">
-        <button class="material-btn active" data-pl-shape="rect" id="plShapeRect" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:var(--red);color:#fff">Rectangular</button>
-        <button class="material-btn" data-pl-shape="round" id="plShapeRound" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:#2a2a2a;color:#ccc">Round</button>
-      </div>
-      <div id="plRectFields" class="plenum-grid">
+      <div class="plenum-grid" style="margin-top:8px">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="plLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="plWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="plHt" value="8" min="4" max="24" step="1"></div>
       </div>
-      <div id="plRoundFields" class="plenum-grid" style="display:none">
-        <div class="input-group"><label class="input-label">Diameter (in)</label><input type="number" class="input-field" id="plDia" value="18" min="4" max="48" step="1"></div>
-        <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="plRndLen" value="48" min="6" max="120" step="1"></div>
-      </div>
+
       <div style="margin-top:8px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <span class="input-label">Start Collars</span>
@@ -3154,20 +3146,12 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysRetPlBody">
-      <!-- Return Plenum Shape Toggle -->
-      <div style="display:flex;gap:4px;margin-top:8px;margin-bottom:8px">
-        <button class="material-btn active" data-retpl-shape="rect" id="retPlShapeRect" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:var(--red);color:#fff">Rectangular</button>
-        <button class="material-btn" data-retpl-shape="round" id="retPlShapeRound" style="flex:1;padding:6px 8px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #555;cursor:pointer;background:#2a2a2a;color:#ccc">Round</button>
-      </div>
-      <div id="retPlRectFields" class="plenum-grid">
+      <div class="plenum-grid" style="margin-top:8px">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="retPlWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="retPlHt" value="8" min="4" max="24" step="1"></div>
       </div>
-      <div id="retPlRoundFields" class="plenum-grid" style="display:none">
-        <div class="input-group"><label class="input-label">Diameter (in)</label><input type="number" class="input-field" id="retPlDia" value="18" min="4" max="48" step="1"></div>
-        <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlRndLen" value="48" min="6" max="120" step="1"></div>
-      </div>
+
 
       <!-- Return Plenum Start Collars -->
       <div style="margin-top:8px">
@@ -5818,30 +5802,7 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
   // Collar remove
   const crm = t.closest('[data-col-rm]');
   if (crm) { SS.collars.splice(parseInt(crm.dataset.colRm),1); renderCollars(); return; }
-  // Supply plenum shape toggle
-  var plShape = t.closest('[data-pl-shape]');
-  if (plShape) {
-    var shape = plShape.dataset.plShape;
-    document.getElementById('plRectFields').style.display = shape==='rect'?'':'none';
-    document.getElementById('plRoundFields').style.display = shape==='round'?'':'none';
-    document.getElementById('plShapeRect').style.background = shape==='rect'?'var(--red)':'#2a2a2a';
-    document.getElementById('plShapeRect').style.color = shape==='rect'?'#fff':'#ccc';
-    document.getElementById('plShapeRound').style.background = shape==='round'?'var(--red)':'#2a2a2a';
-    document.getElementById('plShapeRound').style.color = shape==='round'?'#fff':'#ccc';
-    return;
-  }
-  // Return plenum shape toggle
-  var retPlShape = t.closest('[data-retpl-shape]');
-  if (retPlShape) {
-    var rshape = retPlShape.dataset.retplShape;
-    document.getElementById('retPlRectFields').style.display = rshape==='rect'?'':'none';
-    document.getElementById('retPlRoundFields').style.display = rshape==='round'?'':'none';
-    document.getElementById('retPlShapeRect').style.background = rshape==='rect'?'var(--red)':'#2a2a2a';
-    document.getElementById('retPlShapeRect').style.color = rshape==='rect'?'#fff':'#ccc';
-    document.getElementById('retPlShapeRound').style.background = rshape==='round'?'var(--red)':'#2a2a2a';
-    document.getElementById('retPlShapeRound').style.color = rshape==='round'?'#fff':'#ccc';
-    return;
-  }
+
   // Return collar add
   if (t.closest('#addRetCollarBtn')) { const sz=document.getElementById('retCollarSizeSel').value; const tp=document.getElementById('retCollarTypeSel')?document.getElementById('retCollarTypeSel').value:'tab'; SS.retCollars.push({size:sz,type:tp}); renderRetCollars();
 
