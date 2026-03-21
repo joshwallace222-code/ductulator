@@ -6579,6 +6579,18 @@ var WIZ_PLENUM_EQ = {
   'filter_rack':15    // Filter rack return
 };
 
+// Trunk-to-branch junction fitting types (Manual D Group 5 & 11)
+var WIZ_TAKEOFF_TYPES = {
+  'conical':    { name: 'Conical Takeoff',              eq: 10, note: 'Best — smooth transition' },
+  'straight90': { name: '90° Straight Takeoff',          eq: 35, note: 'Common — tab collar or spin-in' },
+  'angle45':    { name: '45° Angled Takeoff',            eq: 20, note: 'Good — angled branch off trunk' },
+  'wye':        { name: 'Wye (2-outlet)',                eq: 15, note: 'Metal wye splitter' },
+  'tee':        { name: 'Tee Branch',                    eq: 35, note: 'T-junction off trunk' },
+  'jbox':       { name: 'Junction Box / Dist. Box',      eq: 50, note: 'Flex distribution box (velocity dependent)' },
+  'top_takeoff':{ name: 'Top Takeoff (enlarged collar)',  eq: 10, note: 'Enlarged collar reduces restriction' },
+  'reducer':    { name: 'Reducer Only',                  eq: 5,  note: 'Simple size reduction, no turn' }
+};
+
 var WIZ_ROUND_SIZES = [4,5,6,7,8,9,10,12,14,16,18,20,22,24];
 var WIZ_RECT_DIMS   = [4,6,8,10,12,14,16,18,20,22,24];
 var WIZ_COMPRESS    = [4,5,10,15,20,25,30];
@@ -6924,7 +6936,7 @@ function wizInitBranches() {
           cfm: rm.cfm || '', shape: 'round',
           size: recSize, width: '8', height: '8',
           material: WIZ.material, compression: 0,
-          length: '12', fittings: [], bootType: '90boot',
+          length: '12', fittings: [], bootType: '90boot', takeoffType: 'straight90',
           done: false, recommended: recSize
         });
         num++;
@@ -6942,7 +6954,7 @@ function wizInitBranches() {
         cfm: retCfm || '', shape: 'round',
         size: recSize, width: '14', height: '10',
         material: WIZ.material, compression: 0,
-        length: '10', fittings: [], bootType: 'wallReg',
+        length: '10', fittings: [], bootType: 'wallReg', takeoffType: 'straight90',
         done: false, recommended: recSize
       });
       num++;
@@ -6958,7 +6970,7 @@ function wizInitBranches() {
           cfm: '', shape: 'round', size: '6',
           width: '8', height: '8', material: WIZ.material,
           compression: 0, length: '12', fittings: [],
-          bootType: '90boot', done: false
+          bootType: '90boot', takeoffType: 'straight90', done: false
         });
         num++;
       }
@@ -7149,9 +7161,23 @@ function wizRenderBranchForm(br, i) {
     h += '</div>';
   }
 
-  // Boot type
+  // Takeoff type (how this branch connects to the trunk)
   h += '<div class="wiz-input-row">';
-  h += '<div class="wiz-input-group"><div class="wiz-input-label">Ends At</div>';
+  h += '<div class="wiz-input-group"><div class="wiz-input-label">Takeoff from Trunk</div>';
+  h += '<select class="input-field" data-wiz-br-takeoff="' + i + '">';
+  Object.keys(WIZ_TAKEOFF_TYPES).forEach(function(k){
+    var to = WIZ_TAKEOFF_TYPES[k];
+    h += '<option value="' + k + '"' + (br.takeoffType === k ? ' selected':'') + '>' + to.name + ' (' + to.eq + 'ft)</option>';
+  });
+  h += '</select></div>';
+  h += '</div>';
+  if (br.takeoffType && WIZ_TAKEOFF_TYPES[br.takeoffType]) {
+    h += '<div style="font-size:10px;color:#888;margin-bottom:6px;margin-top:-4px">' + WIZ_TAKEOFF_TYPES[br.takeoffType].note + '</div>';
+  }
+
+  // Boot type (what's at the end of the branch)
+  h += '<div class="wiz-input-row">';
+  h += '<div class="wiz-input-group"><div class="wiz-input-label">Ends At (Register/Boot)</div>';
   h += '<select class="input-field" data-wiz-br-boot="' + i + '">';
   Object.keys(WIZ_BOOT_EQ).forEach(function(k){
     h += '<option value="' + k + '"' + (br.bootType === k ? ' selected':'') + '>' + WIZ_BOOT_EQ[k].name + '</option>';
@@ -7238,6 +7264,7 @@ function wizSaveBranch(idx) {
   var sizeEl     = q('data-wiz-br-size');
   var lenEl      = q('data-wiz-br-len');
   var bootEl     = q('data-wiz-br-boot');
+  var takeoffEl  = q('data-wiz-br-takeoff');
   var widthEl    = q('data-wiz-br-width');
   var heightEl   = q('data-wiz-br-height');
   var compressEl = q('data-wiz-br-compress');
@@ -7246,6 +7273,7 @@ function wizSaveBranch(idx) {
   if (sizeEl)     br.size        = sizeEl.value;
   if (lenEl)      br.length      = lenEl.value;
   if (bootEl)     br.bootType    = bootEl.value;
+  if (takeoffEl)  br.takeoffType = takeoffEl.value;
   if (widthEl)    br.width       = widthEl.value;
   if (heightEl)   br.height      = heightEl.value;
   if (compressEl) br.compression = parseInt(compressEl.value) || 0;
@@ -7307,13 +7335,17 @@ function wizCalcRun(br) {
     if (t45eq) breakdown.push({ name: trunk.elbows45 + '\u00D745\u00B0 elbow (trunk)', eq: t45eq, type: 'fitting' });
   }
 
-  // Reducer trunk → branch
+  // Takeoff fitting (trunk → branch junction)
+  var takeoffKey = br.takeoffType || 'straight90';
+  var takeoff = WIZ_TAKEOFF_TYPES[takeoffKey] || WIZ_TAKEOFF_TYPES['straight90'];
   var trunkDia = (trunk && !trunk.isRadial) ? wizEffDia(trunk) : 0;
   var brDia = wizEffDia(br);
+  tel += takeoff.eq;
+  var takeoffLabel = takeoff.name;
   if (trunkDia > 0 && Math.abs(trunkDia - brDia) > 0.5) {
-    tel += 5;
-    breakdown.push({ name: 'Reducer (' + Math.round(trunkDia) + '\u2033\u2192' + Math.round(brDia) + '\u2033)', eq: 5, type: 'fitting' });
+    takeoffLabel += ' (' + Math.round(trunkDia) + '\u2033\u2192' + Math.round(brDia) + '\u2033)';
   }
+  breakdown.push({ name: takeoffLabel, eq: takeoff.eq, type: 'fitting' });
 
   // Branch straight run
   var bLen = parseFloat(br.length) || 0;
@@ -8040,6 +8072,7 @@ function wizHandleClick(ev) {
       length:      '12',
       fittings:    [],
       bootType:    '90boot',
+      takeoffType: 'straight90',
       done:        false
     });
     WIZ.activeBranch = WIZ.branches.length - 1;
