@@ -24,22 +24,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --red: #D32F2F;
+  --red: #E53935;
   --red-glow: #FF5252;
-  --red-dark: #B71C1C;
-  --bg: #0E0E0E;
-  --surface: #1A1A1A;
-  --surface-2: #222222;
-  --surface-3: #2A2A2A;
-  --border: #333333;
-  --border-light: #444444;
-  --text: #F0F0F0;
-  --text-muted: #999999;
-  --text-dim: #666666;
-  --green: #4CAF50;
-  --yellow: #FFC107;
-  --orange: #FF9800;
-  --blue: #2196F3;
+  --red-dark: #C62828;
+  --bg: #0A0A0C;
+  --surface: #141416;
+  --surface-2: #1C1C20;
+  --surface-3: #242428;
+  --border: #2A2A30;
+  --border-light: #3A3A42;
+  --text: #F5F5F7;
+  --text-muted: #8E8E93;
+  --text-dim: #5A5A60;
+  --green: #34C759;
+  --yellow: #FFD60A;
+  --orange: #FF9F0A;
+  --blue: #0A84FF;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 1px rgba(255,255,255,0.05);
+  --glow-red: 0 0 20px rgba(229,57,53,0.15);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,15 +62,16 @@ body {
 
 /* ===== NAV ===== */
 .nav {
-  background: var(--surface);
-  border-bottom: 2px solid var(--red);
-  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .nav-brand {
@@ -102,17 +105,18 @@ body {
 }
 
 .nav-tab {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   background: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  letter-spacing: 0.2px;
 }
 
 .nav-tab:hover {
@@ -121,8 +125,9 @@ body {
 }
 
 .nav-tab.active {
-  color: var(--red);
-  background: rgba(211, 47, 47, 0.1);
+  color: #fff;
+  background: var(--red);
+  box-shadow: 0 2px 12px rgba(229,57,53,0.3);
   border-color: var(--red);
 }
 
@@ -207,11 +212,13 @@ body {
 
 /* ===== INPUTS PANEL ===== */
 .panel {
-  background: var(--surface);
+  background: linear-gradient(145deg, var(--surface) 0%, var(--surface-2) 100%);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 16px;
   margin-bottom: 12px;
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.2s;
 }
 
 .panel-title {
@@ -257,18 +264,20 @@ body {
 .input-field {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 10px;
+  padding: 11px 14px;
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
   font-size: 15px;
   font-weight: 600;
   width: 100%;
-  transition: border-color 0.2s;
+  transition: all 0.25s;
+  -webkit-appearance: none;
 }
 
 .input-field:focus {
   outline: none;
+  box-shadow: 0 0 0 2px rgba(229,57,53,0.3);
   border-color: var(--red);
 }
 
@@ -2473,12 +2482,14 @@ footer a:hover { color: var(--text-muted); }
 <body>
 
 <!-- ===== NAVIGATION ===== -->
-<nav class="nav">
-  <div class="nav-brand">
-    <img src="ragsdale-logo-square.jpg" alt="Ragsdale" style="width:36px;height:36px;border-radius:8px;object-fit:contain">
-    <div>
-      <div class="nav-title">Ragsdale Ductulator</div>
-      <div class="nav-subtitle">HVAC Duct Sizing Tool</div>
+<nav class="nav" style="flex-direction:column;gap:8px;padding:10px 16px 8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+    <div class="nav-brand">
+      <img src="ragsdale-logo-square.jpg" alt="Ragsdale" style="width:40px;height:40px;border-radius:10px;object-fit:contain;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
+      <div>
+        <div class="nav-title" style="font-size:17px;letter-spacing:0.3px">Ragsdale Ductulator</div>
+        <div class="nav-subtitle">HVAC Duct Sizing Tool</div>
+      </div>
     </div>
   </div>
   <div class="nav-tabs">
