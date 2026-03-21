@@ -3099,7 +3099,22 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysPlBody">
-      <div class="plenum-grid" style="margin-top:8px">
+      <!-- Plenum Type -->
+      <div style="margin-top:8px;margin-bottom:8px">
+        <label class="input-label" style="margin-bottom:4px">Plenum Type</label>
+        <select class="input-field" id="plType" style="width:100%">
+          <option value="tapered" selected>Tapered Transition w/ Offset Collar (Best — 10ft EQ)</option>
+          <option value="box">Box Plenum — Straight Into Side (35ft EQ)</option>
+          <option value="extended">Extended Plenum — 6ft+ Box (15ft EQ)</option>
+          <option value="90_vanes">90° Turn with Turning Vanes (20ft EQ)</option>
+          <option value="90_radius">90° Turn — Radiused Throat (45ft EQ)</option>
+          <option value="90_square">90° Turn — Square Throat, No Vanes (120ft EQ ⚠)</option>
+          <option value="bullhead">Bullhead Tee (Worst — 120ft EQ ⚠)</option>
+        </select>
+        <div style="font-size:10px;color:#888;margin-top:3px" id="plTypeNote">Tapered transition is the most efficient. Saves up to 0.11 IWC vs bullhead tee.</div>
+      </div>
+      <!-- Plenum Dimensions -->
+      <div class="plenum-grid">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="plLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="plWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="plHt" value="8" min="4" max="24" step="1"></div>
@@ -3150,7 +3165,21 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysRetPlBody">
-      <div class="plenum-grid" style="margin-top:8px">
+      <!-- Return Plenum Type -->
+      <div style="margin-top:8px;margin-bottom:8px">
+        <label class="input-label" style="margin-bottom:4px">Return Plenum Type</label>
+        <select class="input-field" id="retPlType" style="width:100%">
+          <option value="box" selected>Box Plenum — Top or Side Entry (35ft EQ)</option>
+          <option value="drop_90">Right-Angle Return Drop (65ft EQ)</option>
+          <option value="drop_radius">Return Drop w/ Internal Radius (30ft EQ)</option>
+          <option value="filter_rack">Filter Rack Return (15ft EQ)</option>
+          <option value="90_square">90° Turn — Square Throat (120ft EQ ⚠)</option>
+          <option value="90_vanes">90° Turn with Turning Vanes (20ft EQ)</option>
+        </select>
+        <div style="font-size:10px;color:#888;margin-top:3px">Right-angle return drops are common. Adding an internal radius saves ~35ft of equivalent length.</div>
+      </div>
+      <!-- Return Plenum Dimensions -->
+      <div class="plenum-grid">
         <div class="input-group"><label class="input-label">Length (in)</label><input type="number" class="input-field" id="retPlLen" value="48" min="6" max="120" step="1"></div>
         <div class="input-group"><label class="input-label">Width (in)</label><input type="number" class="input-field" id="retPlWid" value="20" min="4" max="48" step="1"></div>
         <div class="input-group"><label class="input-label">Height (in)</label><input type="number" class="input-field" id="retPlHt" value="8" min="4" max="24" step="1"></div>
@@ -6497,6 +6526,22 @@ var WIZ_R_VALUES = {
   'R8': {value: 8,   label: 'R-8 (code min attic)'}
 };
 
+// Plenum type EQ lengths (Manual D Group 1 fittings)
+var WIZ_PLENUM_EQ = {
+  // Supply plenum types
+  'tapered':    10,   // 1-D tapered transition w/ offset collar (best)
+  'box':        35,   // 1-C box plenum straight into side
+  'extended':   15,   // Extended plenum 6ft+ box
+  '90_vanes':   20,   // 90° turn with turning vanes
+  '90_radius':  45,   // 90° turn with radiused throat
+  '90_square': 120,   // 90° square throat no vanes (H/W=0.5)
+  'bullhead':  120,   // 1-H bullhead tee (worst)
+  // Return plenum types
+  'drop_90':    65,   // Right-angle return drop
+  'drop_radius':30,   // Return drop with internal radius
+  'filter_rack':15    // Filter rack return
+};
+
 var WIZ_ROUND_SIZES = [4,5,6,7,8,9,10,12,14,16,18,20,22,24];
 var WIZ_RECT_DIMS   = [4,6,8,10,12,14,16,18,20,22,24];
 var WIZ_COMPRESS    = [4,5,10,15,20,25,30];
@@ -7194,9 +7239,14 @@ function wizCalcRun(br) {
   var tel = 0;
   var breakdown = [];
 
-  // Start collar
-  tel += 10;
-  breakdown.push({ name:'Start Collar', eq:10, type:'start' });
+  // Plenum fitting (start collar + plenum type EQ)
+  var isReturn = trunk && trunk.airPath === 'return';
+  var plTypeEl = isReturn ? document.getElementById('retPlType') : document.getElementById('plType');
+  var plTypeVal = plTypeEl ? plTypeEl.value : (isReturn ? 'box' : 'tapered');
+  var plenumEQ = WIZ_PLENUM_EQ[plTypeVal] || 10;
+  var plenumName = plTypeEl ? plTypeEl.options[plTypeEl.selectedIndex].text.split('(')[0].trim() : 'Start Collar';
+  tel += plenumEQ;
+  breakdown.push({ name: plenumName + ' (' + plenumEQ + 'ft)', eq: plenumEQ, type:'start' });
 
   // Trunk
   if (trunk && !trunk.isRadial) {
