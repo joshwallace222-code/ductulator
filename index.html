@@ -7005,81 +7005,93 @@ function wizPlenumSVG(type, isReturn) {
   var ac = '#4caf50'; // airflow
   var bg = '#333';    // AHU box fill
   var lc = '#888';    // labels/structure
-  var s = '<svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">';
+  var s = '<svg viewBox="0 0 220 140" fill="none" xmlns="http://www.w3.org/2000/svg">';
+
+  // =============== SUPPLY PLENUMS ===============
+  // Orientation: AHU at bottom, plenum on top, air goes UP from AHU
+  // then TURNS SIDEWAYS to exit through side collars (left and right)
+  // End cap is on TOP (closed) — air cannot exit the end
 
   if (type === 'tapered') {
-    // SUPPLY: Tapered box CLOSED at narrow end, side takeoff collars
-    s += '<rect x="5" y="30" width="40" height="60" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
-    s += '<text x="25" y="64" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
-    // Tapered plenum body — closed at right end
-    s += '<path d="M45 30 L150 42 L150 78 L45 90 Z" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Closed end cap
-    s += '<line x1="150" y1="42" x2="150" y2="78" stroke="' + wc + '" stroke-width="3"/>';
-    // Side takeoff collars (top)
-    s += '<rect x="70" y="14" width="14" height="18" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="105" y="18" width="14" height="16" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="130" y="22" width="14" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow: AHU into plenum
-    s += '<line x1="48" y1="60" x2="90" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    // Airflow: out side collars (upward)
-    s += '<line x1="77" y1="34" x2="77" y2="18" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="73,18 77,10 81,18" fill="' + ac + '"/>';
-    s += '<line x1="112" y1="36" x2="112" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="108,22 112,14 116,22" fill="' + ac + '"/>';
-    s += '<line x1="137" y1="38" x2="137" y2="26" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="133,26 137,18 141,26" fill="' + ac + '"/>';
-    s += '<text x="100" y="108" text-anchor="middle" font-size="7" fill="' + lc + '">10ft EQ \u2014 Best</text>';
+    // AHU box at bottom center
+    s += '<rect x="75" y="95" width="70" height="35" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
+    s += '<text x="110" y="117" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
+    // Tapered plenum on top — wider at bottom (AHU connection), tapers up to closed top
+    s += '<path d="M65 95 L65 40 L85 20 L135 20 L155 40 L155 95 Z" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Closed top cap
+    s += '<line x1="85" y1="20" x2="135" y2="20" stroke="' + wc + '" stroke-width="3"/>';
+    // Offset collar going right
+    s += '<rect x="155" y="38" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    // Collar going left
+    s += '<rect x="43" y="38" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    // Collar going right lower
+    s += '<rect x="155" y="62" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    // Airflow: UP from AHU into plenum
+    s += '<line x1="110" y1="93" x2="110" y2="55" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<polygon points="106,58 110,48 114,58" fill="' + ac + '"/>';
+    // Airflow: turns RIGHT out collar
+    s += '<line x1="155" y1="45" x2="175" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="173,41 181,45 173,49" fill="' + ac + '"/>';
+    // Airflow: turns LEFT out collar
+    s += '<line x1="65" y1="45" x2="47" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="49,49 41,45 49,41" fill="' + ac + '"/>';
+    // Airflow: right lower collar
+    s += '<line x1="155" y1="69" x2="175" y2="69" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="173,65 181,69 173,73" fill="' + ac + '"/>';
+    s += '<text x="110" y="137" text-anchor="middle" font-size="7" fill="' + lc + '">Tapered Transition \u2014 10ft EQ (Best)</text>';
   } else if (type === 'box') {
-    // SUPPLY: Box plenum closed, collars on sides/top
-    s += '<rect x="5" y="30" width="40" height="60" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
-    s += '<text x="25" y="64" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
-    // Box body — closed
-    s += '<rect x="45" y="28" width="80" height="64" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Closed end
-    s += '<line x1="125" y1="28" x2="125" y2="92" stroke="' + wc + '" stroke-width="3"/>';
-    // Side collars (top)
-    s += '<rect x="60" y="10" width="14" height="18" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="90" y="10" width="14" height="18" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Turbulence inside box
-    s += '<circle cx="75" cy="55" r="4" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".4"/>';
-    s += '<circle cx="95" cy="68" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".4"/>';
-    s += '<circle cx="110" cy="50" r="3.5" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".35"/>';
-    // Airflow
-    s += '<line x1="48" y1="60" x2="80" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    s += '<line x1="67" y1="28" x2="67" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="63,14 67,6 71,14" fill="' + ac + '"/>';
-    s += '<line x1="97" y1="28" x2="97" y2="14" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="93,14 97,6 101,14" fill="' + ac + '"/>';
-    s += '<text x="160" y="60" font-size="7" fill="' + lc + '">35ft EQ</text>';
+    // AHU at bottom
+    s += '<rect x="75" y="95" width="70" height="35" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
+    s += '<text x="110" y="117" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
+    // Box plenum on top — rectangular, closed top
+    s += '<rect x="60" y="20" width="100" height="75" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Closed top
+    s += '<line x1="60" y1="20" x2="160" y2="20" stroke="' + wc + '" stroke-width="3"/>';
+    // Side collars
+    s += '<rect x="160" y="35" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="160" y="60" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="38" y="45" width="22" height="14" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    // Turbulence at 90° turn
+    s += '<circle cx="95" cy="55" r="4" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".4"/>';
+    s += '<circle cx="120" cy="45" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".35"/>';
+    s += '<circle cx="105" cy="70" r="3.5" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".3"/>';
+    // Airflow UP then turns sideways hitting end cap
+    s += '<line x1="110" y1="93" x2="110" y2="50" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<polygon points="106,53 110,43 114,53" fill="' + ac + '"/>';
+    // Turns right
+    s += '<line x1="160" y1="42" x2="180" y2="42" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="178,38 186,42 178,46" fill="' + ac + '"/>';
+    s += '<line x1="160" y1="67" x2="180" y2="67" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="178,63 186,67 178,71" fill="' + ac + '"/>';
+    // Turns left
+    s += '<line x1="60" y1="52" x2="42" y2="52" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<polygon points="44,56 36,52 44,48" fill="' + ac + '"/>';
+    s += '<text x="110" y="137" text-anchor="middle" font-size="7" fill="' + lc + '">Box Plenum \u2014 35ft EQ</text>';
   } else if (type === 'extended') {
-    // SUPPLY: Long closed plenum, multiple collars along length
-    s += '<rect x="5" y="35" width="35" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
-    s += '<text x="22" y="64" text-anchor="middle" font-size="8" fill="#aaa">AHU</text>';
-    // Long rectangular plenum — closed at far end
-    s += '<rect x="40" y="38" width="150" height="44" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
-    // Closed end
-    s += '<line x1="190" y1="38" x2="190" y2="82" stroke="' + wc + '" stroke-width="3"/>';
-    // Side takeoff collars (top)
-    s += '<rect x="58" y="18" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="88" y="18" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="118" y="18" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    s += '<rect x="148" y="18" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Bottom collar
-    s += '<rect x="168" y="82" width="14" height="18" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
-    // Airflow in
-    s += '<line x1="42" y1="60" x2="85" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
-    // Airflow out collars
-    s += '<line x1="65" y1="38" x2="65" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="61,22 65,14 69,22" fill="' + ac + '"/>';
-    s += '<line x1="95" y1="38" x2="95" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="91,22 95,14 99,22" fill="' + ac + '"/>';
-    s += '<line x1="125" y1="38" x2="125" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="121,22 125,14 129,22" fill="' + ac + '"/>';
-    s += '<line x1="155" y1="38" x2="155" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="151,22 155,14 159,22" fill="' + ac + '"/>';
-    s += '<line x1="175" y1="82" x2="175" y2="96" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
-    s += '<polygon points="171,96 175,104 179,96" fill="' + ac + '"/>';
-    s += '<text x="100" y="110" text-anchor="middle" font-size="7" fill="' + lc + '">15ft EQ</text>';
+    // Extended plenum: AHU at left, long horizontal plenum extending right
+    // Multiple collars along the top coming off at intervals
+    s += '<rect x="5" y="50" width="40" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
+    s += '<text x="25" y="80" text-anchor="middle" font-size="8" fill="#aaa">AHU</text>';
+    // Long horizontal plenum — closed at far end
+    s += '<rect x="45" y="50" width="165" height="30" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Closed end cap at right
+    s += '<line x1="210" y1="50" x2="210" y2="80" stroke="' + wc + '" stroke-width="3"/>';
+    // Takeoff collars along TOP
+    s += '<rect x="62" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="92" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="122" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="152" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="182" y="30" width="14" height="20" rx="6" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    // Airflow: enters from AHU horizontally, hits end cap, air distributes to collars
+    s += '<line x1="48" y1="65" x2="140" y2="65" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<polygon points="138,61 148,65 138,69" fill="' + ac + '"/>';
+    // Air out each collar (upward)
+    var cols = [69,99,129,159,189];
+    for (var ci=0; ci<cols.length; ci++) {
+      s += '<line x1="'+cols[ci]+'" y1="50" x2="'+cols[ci]+'" y2="34" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+      s += '<polygon points="'+(cols[ci]-4)+',34 '+cols[ci]+',26 '+(cols[ci]+4)+',34" fill="' + ac + '"/>';
+    }
+    s += '<text x="120" y="100" text-anchor="middle" font-size="7" fill="' + lc + '">Extended Plenum \u2014 15ft EQ</text>';
   } else if (type === '90_vanes') {
     // SUPPLY: 90deg turn with turning vanes, collars exit top
     s += '<rect x="5" y="50" width="40" height="50" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
