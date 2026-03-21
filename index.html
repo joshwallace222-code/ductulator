@@ -6587,19 +6587,19 @@ function wizInitTrunks() {
 
   // Fallback: layout-based defaults
   if (layout === 'RADIAL') {
-    WIZ.trunks.push({ label:'Plenum', airPath:'supply', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Plenum', airPath:'supply', isRadial:true, shape:'round', size:'12', width:'12', height:'10', length:'0', elbows90:0, elbows45:0, material:'metal', compression:0 });
     return;
   }
   if (layout === 'LR') {
-    WIZ.trunks.push({ label:'Left Trunk',  airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
-    WIZ.trunks.push({ label:'Right Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Left Trunk',  airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0, material:'metal', compression:0 });
+    WIZ.trunks.push({ label:'Right Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0, material:'metal', compression:0 });
     return;
   }
   if (layout === '1SIDE') {
-    WIZ.trunks.push({ label:'Main Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Main Trunk', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'30', elbows90:0, elbows45:0, material:'metal', compression:0 });
     return;
   }
-  WIZ.trunks.push({ label:'Trunk A', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0 });
+  WIZ.trunks.push({ label:'Trunk A', airPath:'supply', isRadial:false, shape:'round', size:'12', width:'12', height:'10', length:'20', elbows90:0, elbows45:0, material:'metal', compression:0 });
 }
 
 function wizRenderTrunks() {
@@ -6622,6 +6622,35 @@ function wizRenderTrunks() {
       html += '<div class="wiz-shape-btn' + (ap === 'return' ? ' active' : '') + '" data-wiz-trunk-ap="' + i + '" data-ap="return" style="' + (ap === 'return' ? 'background:#ff9800;border-color:#ff9800' : '') + '">';
       html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg> Return</div>';
       html += '</div>';
+
+      // Material toggle (Metal / Flex)
+      var tMat = t.material || 'metal';
+      html += '<div class="wiz-shape-toggle" style="margin-bottom:8px">';
+      html += '<div class="wiz-shape-btn' + (tMat === 'metal' ? ' active' : '') + '" data-wiz-trunk-mat="' + i + '" data-tmatval="metal">' + wizSvg('rect') + ' Metal</div>';
+      html += '<div class="wiz-shape-btn' + (tMat === 'flex' ? ' active' : '') + '" data-wiz-trunk-mat="' + i + '" data-tmatval="flex">' + wizSvg('round') + ' Flex</div>';
+      html += '</div>';
+
+      // Trunk compression (flex only)
+      if (tMat === 'flex') {
+        var tComp = t.compression || 0;
+        var tFF = tComp ? wizFlexFactor(tComp) : 1;
+        var tFFText = tComp ? 'Friction \u00D7' + tFF.toFixed(2) : '<span style="color:#d32f2f">Set trunk compression</span>';
+        html += '<div style="background:#1a1a1a;border:1px solid ' + (tComp ? '#444' : '#d32f2f') + ';border-radius:8px;padding:8px;margin-bottom:8px">';
+        html += '<div class="wiz-input-label" style="margin-bottom:4px">Trunk Compression</div>';
+        html += '<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px">';
+        WIZ_COMPRESS.forEach(function(c){
+          var isA = tComp == c;
+          html += '<div class="compression-preset-btn' + (isA ? ' active' : '') + '" data-wiz-trunk-comp-preset="' + i + '" data-wiz-tcomp-val="' + c + '" style="cursor:pointer;padding:4px 8px;border-radius:5px;font-size:11px;font-weight:600;border:1px solid ' + (isA ? '#d32f2f' : '#555') + ';background:' + (isA ? '#d32f2f' : '#2a2a2a') + ';color:' + (isA ? '#fff' : '#ccc') + '">' + c + '%</div>';
+        });
+        html += '</div>';
+        html += '<div style="display:flex;align-items:center;gap:6px">';
+        html += '<input type="range" style="flex:1" min="4" max="30" step="1" value="' + (tComp || 4) + '" data-wiz-trunk-compress="' + i + '">';
+        html += '<input type="number" class="slider-value-input" style="width:48px;text-align:center" min="4" max="30" step="1" value="' + (tComp || '') + '" placeholder="%" data-wiz-trunk-comp-input="' + i + '">';
+        html += '<span style="font-size:10px;color:#888">%</span>';
+        html += '</div>';
+        html += '<div style="font-size:11px;margin-top:4px;color:' + (tComp ? '#ff9800' : '#d32f2f') + '">' + tFFText + '</div>';
+        html += '</div>';
+      }
 
       // Shape toggle
       html += '<div class="wiz-shape-toggle">';
@@ -7002,10 +7031,17 @@ function wizCalcRun(br) {
   if (trunk && !trunk.isRadial) {
     var tLen = parseFloat(trunk.length) || 0;
     var tDia = wizEffDia(trunk);
+    var tIsFlex = trunk.material === 'flex';
+    var tFF = tIsFlex ? wizFlexFactor(trunk.compression) : 1;
+    var tEffLen = tLen * tFF;
     var t90eq = (trunk.elbows90 || 0) * (tDia <= 6 ? 10 : tDia <= 8 ? 15 : tDia <= 10 ? 20 : 25);
     var t45eq = (trunk.elbows45 || 0) * 5;
-    tel += tLen + t90eq + t45eq;
-    if (tLen) breakdown.push({ name: trunk.label + ' straight (' + tLen + ' ft)', eq: tLen, type: 'duct' });
+    tel += tEffLen + t90eq + t45eq;
+    if (tIsFlex && tLen) {
+      breakdown.push({ name: trunk.label + ' flex (' + tLen + ' ft \u00D7' + tFF.toFixed(2) + ')', eq: Math.round(tEffLen * 10) / 10, type: 'duct' });
+    } else if (tLen) {
+      breakdown.push({ name: trunk.label + ' straight (' + tLen + ' ft)', eq: tLen, type: 'duct' });
+    }
     if (t90eq) breakdown.push({ name: trunk.elbows90 + '\u00D790\u00B0 elbow (trunk)', eq: t90eq, type: 'fitting' });
     if (t45eq) breakdown.push({ name: trunk.elbows45 + '\u00D745\u00B0 elbow (trunk)', eq: t45eq, type: 'fitting' });
   }
@@ -7354,7 +7390,7 @@ function wizHandleClick(ev) {
   if (t.closest('#wizAddTrunk')) {
     wizSaveTrunks();
     var idx = WIZ.trunks.length;
-    WIZ.trunks.push({ label:'Trunk ' + String.fromCharCode(65 + idx), airPath:'supply', isRadial:false, shape:'round', size:'10', width:'10', height:'8', length:'20', elbows90:0, elbows45:0 });
+    WIZ.trunks.push({ label:'Trunk ' + String.fromCharCode(65 + idx), airPath:'supply', isRadial:false, shape:'round', size:'10', width:'10', height:'8', length:'20', elbows90:0, elbows45:0, material:'metal', compression:0 });
     WIZ.branches = []; // reset branches when trunks change
     WIZ.activeBranch = -1;
     wizRenderTrunks();
@@ -7379,6 +7415,27 @@ function wizHandleClick(ev) {
   }
 
   // --- Trunk shape toggle ---
+  // --- Trunk material toggle ---
+  var trunkMat = t.closest('[data-wiz-trunk-mat]');
+  if (trunkMat) {
+    wizSaveTrunks();
+    var tmi = parseInt(trunkMat.getAttribute('data-wiz-trunk-mat'));
+    WIZ.trunks[tmi].material = trunkMat.getAttribute('data-tmatval');
+    if (WIZ.trunks[tmi].material === 'metal') WIZ.trunks[tmi].compression = 0;
+    wizRenderTrunks();
+    return true;
+  }
+
+  // --- Trunk compression preset ---
+  var tCompPreset = t.closest('[data-wiz-trunk-comp-preset]');
+  if (tCompPreset) {
+    var tcpi = parseInt(tCompPreset.getAttribute('data-wiz-trunk-comp-preset'));
+    var tcpv = parseInt(tCompPreset.getAttribute('data-wiz-tcomp-val'));
+    WIZ.trunks[tcpi].compression = tcpv;
+    wizRenderTrunks();
+    return true;
+  }
+
   // --- Trunk air path toggle ---
   var trunkAP = t.closest('[data-wiz-trunk-ap]');
   if (trunkAP) {
@@ -7551,6 +7608,27 @@ function wizHandleChange(ev) {
     var compSlider = document.querySelector('[data-wiz-br-compress="' + ci2 + '"]');
     if (compSlider) compSlider.value = cv2;
     wizRenderBranches();
+    return true;
+  }
+
+  // Trunk compression slider
+  if (t.hasAttribute('data-wiz-trunk-compress')) {
+    var tci = parseInt(t.getAttribute('data-wiz-trunk-compress'));
+    var tcv = parseInt(t.value) || 0;
+    WIZ.trunks[tci].compression = tcv;
+    var tcIn = document.querySelector('[data-wiz-trunk-comp-input="' + tci + '"]');
+    if (tcIn && tcIn !== document.activeElement) tcIn.value = tcv;
+    wizRenderTrunks();
+    return true;
+  }
+  // Trunk compression number input
+  if (t.hasAttribute('data-wiz-trunk-comp-input')) {
+    var tci2 = parseInt(t.getAttribute('data-wiz-trunk-comp-input'));
+    var tcv2 = Math.max(4, Math.min(30, parseInt(t.value) || 0));
+    WIZ.trunks[tci2].compression = tcv2;
+    var tcSlider = document.querySelector('[data-wiz-trunk-compress="' + tci2 + '"]');
+    if (tcSlider) tcSlider.value = tcv2;
+    wizRenderTrunks();
     return true;
   }
 
