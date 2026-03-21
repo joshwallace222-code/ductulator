@@ -17,6 +17,9 @@
 <link rel="author" href="https://www.perplexity.ai/computer">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Ragsdale Ductulator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3136,6 +3139,23 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysPlBody">
+      <!-- Supply Plenum Material -->
+      <div style="margin-top:8px;margin-bottom:8px">
+        <label class="input-label" style="margin-bottom:4px">Plenum Material</label>
+        <div class="wiz-shape-toggle" id="supPlMatToggle" style="margin-bottom:6px">
+          <div class="wiz-shape-btn active" data-wiz-sup-pl-mat="sheet_metal">Sheet Metal</div>
+          <div class="wiz-shape-btn" data-wiz-sup-pl-mat="ductboard">Ductboard</div>
+        </div>
+        <div id="supPlDbInfo" style="display:none">
+          <label class="input-label" style="margin-bottom:3px;font-size:10px">Ductboard R-Value</label>
+          <select class="input-field" id="supPlDbR" style="width:100%;margin-bottom:4px">
+            <option value="R4.2">R-4.2 (1" board)</option>
+            <option value="R6" selected>R-6 (1.5" board) — code minimum</option>
+            <option value="R8">R-8 (2" board)</option>
+          </select>
+          <div style="font-size:10px;color:#ff9800;margin-bottom:6px">Ductboard plenums have built-in insulation. R-6 is code minimum for unconditioned spaces.</div>
+        </div>
+      </div>
       <!-- Plenum Type -->
       <div style="margin-top:8px;margin-bottom:8px">
         <label class="input-label" style="margin-bottom:4px">Plenum Type</label>
@@ -3149,6 +3169,7 @@ footer a:hover { color: var(--text-muted); }
           <option value="bullhead">Bullhead Tee (Worst — 120ft EQ ⚠)</option>
         </select>
         <div style="font-size:10px;color:#888;margin-top:3px" id="plTypeNote">Tapered transition is the most efficient. Saves up to 0.11 IWC vs bullhead tee.</div>
+        <div id="supPlenumSVG" class="plenum-svg-wrap"></div>
       </div>
       <!-- Plenum Dimensions -->
       <div class="plenum-grid">
@@ -3202,6 +3223,23 @@ footer a:hover { color: var(--text-muted); }
       <span class="toggle-arrow">&#9660;</span>
     </div>
     <div class="section-body" id="sysRetPlBody">
+      <!-- Return Plenum Material -->
+      <div style="margin-top:8px;margin-bottom:8px">
+        <label class="input-label" style="margin-bottom:4px">Plenum Material</label>
+        <div class="wiz-shape-toggle" id="retPlMatToggle" style="margin-bottom:6px">
+          <div class="wiz-shape-btn active" data-wiz-ret-pl-mat="sheet_metal">Sheet Metal</div>
+          <div class="wiz-shape-btn" data-wiz-ret-pl-mat="ductboard">Ductboard</div>
+        </div>
+        <div id="retPlDbInfo" style="display:none">
+          <label class="input-label" style="margin-bottom:3px;font-size:10px">Ductboard R-Value</label>
+          <select class="input-field" id="retPlDbR" style="width:100%;margin-bottom:4px">
+            <option value="R4.2">R-4.2 (1" board)</option>
+            <option value="R6" selected>R-6 (1.5" board) — code minimum</option>
+            <option value="R8">R-8 (2" board)</option>
+          </select>
+          <div style="font-size:10px;color:#ff9800;margin-bottom:6px">Ductboard plenums have built-in insulation. R-6 is code minimum for unconditioned spaces.</div>
+        </div>
+      </div>
       <!-- Return Plenum Type -->
       <div style="margin-top:8px;margin-bottom:8px">
         <label class="input-label" style="margin-bottom:4px">Return Plenum Type</label>
@@ -3214,6 +3252,7 @@ footer a:hover { color: var(--text-muted); }
           <option value="90_vanes">90° Turn with Turning Vanes (20ft EQ)</option>
         </select>
         <div style="font-size:10px;color:#888;margin-top:3px">Right-angle return drops are common. Adding an internal radius saves ~35ft of equivalent length.</div>
+        <div id="retPlenumSVG" class="plenum-svg-wrap"></div>
       </div>
       <!-- Return Plenum Dimensions -->
       <div class="plenum-grid">
@@ -3714,6 +3753,24 @@ footer a:hover { color: var(--text-muted); }
 .wiz-fitting-svg svg {
   max-width: 120px;
   max-height: 80px;
+}
+@keyframes flowDash {
+  to { stroke-dashoffset: -20; }
+}
+.plenum-flow {
+  stroke-dasharray: 8 6;
+  animation: flowDash 0.8s linear infinite;
+}
+.plenum-svg-wrap {
+  animation: svgFadeSlide 0.3s ease-out;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+.plenum-svg-wrap svg {
+  max-width: 200px;
+  max-height: 120px;
+  width: 100%;
 }
 
 /* ===== WIZARD STEPS ===== */
@@ -6610,6 +6667,10 @@ var WIZ = {
   bootPosition: 'floor',
   ductLocation: 'conditioned',
   insulation: 'R6',
+  supPlenumMaterial: 'sheet_metal',
+  supPlenumR: 'R6',
+  retPlenumMaterial: 'sheet_metal',
+  retPlenumR: 'R6',
   trunks: [],
   branches: [],
   activeBranch: -1
@@ -6883,6 +6944,136 @@ function wizFittingSVG(type) {
   return s;
 }
 
+// ---- Plenum SVG illustrations ----
+function wizPlenumSVG(type, isReturn) {
+  var wc = isReturn ? '#ff9800' : '#d32f2f'; // duct wall color
+  var ac = '#4caf50'; // airflow
+  var bg = '#333';    // AHU box fill
+  var lc = '#888';    // labels/structure
+  var s = '<svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">';
+  // AHU box (common to all)
+  s += '<rect x="5" y="30" width="40" height="60" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
+  s += '<text x="25" y="64" text-anchor="middle" font-size="9" fill="#aaa">AHU</text>';
+
+  if (type === 'tapered') {
+    // Tapered transition narrowing to collar
+    s += '<path d="M45 30 L140 45 L140 75 L45 90 Z" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="140" y="45" width="30" height="30" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<line x1="55" y1="60" x2="160" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<polygon points="160,55 170,60 160,65" fill="' + ac + '"/>';
+  } else if (type === 'box') {
+    // Box plenum with 90deg turn
+    s += '<rect x="45" y="30" width="70" height="60" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="115" y="42" width="40" height="24" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Turbulence indicators
+    s += '<circle cx="80" cy="50" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".5"/>';
+    s += '<circle cx="90" cy="70" r="4" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".4"/>';
+    s += '<circle cx="70" cy="65" r="2.5" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".5"/>';
+    s += '<path d="M55 60 Q85 60 100 54 L145 54" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="145,49 155,54 145,59" fill="' + ac + '"/>';
+  } else if (type === 'extended') {
+    // Extended plenum with multiple takeoffs
+    s += '<rect x="45" y="38" width="130" height="44" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Takeoff collars
+    s += '<rect x="70" y="18" width="16" height="20" rx="2" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="105" y="18" width="16" height="20" rx="2" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<rect x="140" y="18" width="16" height="20" rx="2" stroke="' + wc + '" stroke-width="1.5" fill="none"/>';
+    s += '<line x1="55" y1="60" x2="165" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<line x1="78" y1="38" x2="78" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<line x1="113" y1="38" x2="113" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+    s += '<line x1="148" y1="38" x2="148" y2="22" class="plenum-flow" stroke="' + ac + '" stroke-width="1.5"/>';
+  } else if (type === '90_vanes') {
+    // 90deg turn with turning vanes
+    s += '<rect x="45" y="30" width="50" height="60" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="95" y="10" width="30" height="50" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Turning vanes (curved guides)
+    s += '<path d="M72 80 Q72 55 95 45" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
+    s += '<path d="M80 80 Q80 50 95 38" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
+    s += '<path d="M88 80 Q88 45 95 30" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
+    s += '<path d="M60 60 Q80 60 95 40 L110 18" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="106,12 114,18 106,20" fill="' + ac + '"/>';
+  } else if (type === '90_radius') {
+    // Smooth radiused 90deg turn
+    s += '<path d="M45 30 L45 90 L95 90 Q95 30 145 30 L145 60" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="130" y="10" width="30" height="30" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<path d="M55 60 Q70 60 80 50 Q95 30 120 20 L140 15" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="140,10 148,15 140,20" fill="' + ac + '"/>';
+  } else if (type === '90_square') {
+    // Sharp square 90deg turn — WARNING
+    s += '<rect x="45" y="30" width="55" height="60" rx="0" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="100" y="10" width="30" height="40" rx="0" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Sharp corner indicator
+    s += '<line x1="100" y1="50" x2="100" y2="30" stroke="#d32f2f" stroke-width="3"/>';
+    // Turbulence
+    s += '<path d="M85 60 Q95 55 98 42" stroke="#d32f2f" stroke-width="1" fill="none" stroke-dasharray="2 2"/>';
+    s += '<path d="M90 65 Q100 50 103 35" stroke="#d32f2f" stroke-width="1" fill="none" stroke-dasharray="2 2"/>';
+    s += '<circle cx="105" cy="38" r="3" stroke="#d32f2f" stroke-width="1" fill="none" opacity=".6"/>';
+    s += '<path d="M55 60 Q85 60 100 45 L115 20" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="112,14 118,22 110,22" fill="' + ac + '"/>';
+    // Warning badge
+    s += '<rect x="145" y="70" width="48" height="18" rx="4" fill="#d32f2f" opacity=".15" stroke="#d32f2f" stroke-width="1"/>';
+    s += '<text x="169" y="83" text-anchor="middle" font-size="8" font-weight="bold" fill="#d32f2f">120ft EQ</text>';
+  } else if (type === 'bullhead') {
+    // Bullhead tee — AHU at bottom center, T going left and right
+    s += '<rect x="80" y="60" width="40" height="40" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="10" y="30" width="180" height="30" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Re-draw AHU box at bottom
+    s += '<rect x="80" y="82" width="40" height="25" rx="4" fill="' + bg + '" stroke="' + lc + '" stroke-width="2"/>';
+    s += '<text x="100" y="98" text-anchor="middle" font-size="8" fill="#aaa">AHU</text>';
+    // Airflow splits left and right
+    s += '<line x1="100" y1="78" x2="100" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<line x1="100" y1="45" x2="30" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<line x1="100" y1="45" x2="170" y2="45" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<polygon points="30,40 20,45 30,50" fill="' + ac + '"/>';
+    s += '<polygon points="170,40 180,45 170,50" fill="' + ac + '"/>';
+    // Warning
+    s += '<rect x="65" y="5" width="70" height="18" rx="4" fill="#d32f2f" opacity=".15" stroke="#d32f2f" stroke-width="1"/>';
+    s += '<text x="100" y="17" text-anchor="middle" font-size="8" font-weight="bold" fill="#d32f2f">\u26A0 120ft EQ</text>';
+  } else if (type === 'drop_90') {
+    // Right-angle return drop (return-specific)
+    s += '<rect x="45" y="30" width="50" height="35" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="60" y="65" width="20" height="40" rx="2" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<path d="M70 100 L70 70 Q70 55 85 50" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="38,47 48,50 42,55" fill="' + ac + '"/>';
+    s += '<text x="130" y="80" font-size="8" fill="' + lc + '">65ft EQ</text>';
+  } else if (type === 'drop_radius') {
+    // Return drop with internal radius
+    s += '<rect x="45" y="30" width="50" height="35" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<rect x="60" y="65" width="20" height="40" rx="2" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<path d="M75 100 Q75 70 60 55" stroke="' + ac + '" stroke-width="1.5" fill="none"/>';
+    s += '<path d="M70 100 L70 75 Q70 60 55 48" class="plenum-flow" stroke="' + ac + '" stroke-width="2" fill="none"/>';
+    s += '<polygon points="48,45 55,52 50,55" fill="' + ac + '"/>';
+    s += '<text x="130" y="80" font-size="8" fill="' + lc + '">30ft EQ</text>';
+  } else if (type === 'filter_rack') {
+    // Filter rack return
+    s += '<rect x="45" y="30" width="60" height="60" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    // Filter lines inside
+    s += '<line x1="55" y1="35" x2="55" y2="85" stroke="' + lc + '" stroke-width="1" stroke-dasharray="3 2"/>';
+    s += '<line x1="65" y1="35" x2="65" y2="85" stroke="' + lc + '" stroke-width="1" stroke-dasharray="3 2"/>';
+    s += '<line x1="75" y1="35" x2="75" y2="85" stroke="' + lc + '" stroke-width="1" stroke-dasharray="3 2"/>';
+    s += '<line x1="85" y1="35" x2="85" y2="85" stroke="' + lc + '" stroke-width="1" stroke-dasharray="3 2"/>';
+    s += '<line x1="95" y1="35" x2="95" y2="85" stroke="' + lc + '" stroke-width="1" stroke-dasharray="3 2"/>';
+    s += '<rect x="105" y="42" width="40" height="24" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<line x1="115" y1="54" x2="135" y2="54" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+    s += '<text x="130" y="80" font-size="8" fill="' + lc + '">15ft EQ</text>';
+  } else {
+    // Generic fallback
+    s += '<rect x="45" y="35" width="80" height="50" rx="3" stroke="' + wc + '" stroke-width="2" fill="none"/>';
+    s += '<line x1="55" y1="60" x2="115" y2="60" class="plenum-flow" stroke="' + ac + '" stroke-width="2"/>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+function wizUpdatePlenumSVGs() {
+  var supEl = document.getElementById('supPlenumSVG');
+  var plTypeEl = document.getElementById('plType');
+  if (supEl && plTypeEl) supEl.innerHTML = wizPlenumSVG(plTypeEl.value, false);
+  var retEl = document.getElementById('retPlenumSVG');
+  var retPlTypeEl = document.getElementById('retPlType');
+  if (retEl && retPlTypeEl) retEl.innerHTML = wizPlenumSVG(retPlTypeEl.value, true);
+}
+
 // ---- navigation ----
 function wizGoTo(step) {
   step = parseInt(step);
@@ -7023,11 +7214,12 @@ function wizRenderTrunks() {
       html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg> Return</div>';
       html += '</div>';
 
-      // Material toggle (Metal / Flex)
+      // Material toggle (Metal / Flex / Ductboard)
       var tMat = t.material || 'metal';
       html += '<div class="wiz-shape-toggle" style="margin-bottom:8px">';
       html += '<div class="wiz-shape-btn' + (tMat === 'metal' ? ' active' : '') + '" data-wiz-trunk-mat="' + i + '" data-tmatval="metal">' + wizSvg('rect') + ' Metal</div>';
       html += '<div class="wiz-shape-btn' + (tMat === 'flex' ? ' active' : '') + '" data-wiz-trunk-mat="' + i + '" data-tmatval="flex">' + wizSvg('round') + ' Flex</div>';
+      html += '<div class="wiz-shape-btn' + (tMat === 'ductboard' ? ' active' : '') + '" data-wiz-trunk-mat="' + i + '" data-tmatval="ductboard">' + wizSvg('rect') + ' Ductboard</div>';
       html += '</div>';
 
       // Trunk compression (flex only)
@@ -7052,10 +7244,28 @@ function wizRenderTrunks() {
         html += '</div>';
       }
 
-      // Shape toggle (no Rect option for flex — flex is always round)
+      // Ductboard properties (always rectangular, built-in R-value)
+      if (tMat === 'ductboard') {
+        t.compression = 0; // no compression for rigid ductboard
+        html += '<div style="background:#1a1a1a;border:1px solid #444;border-radius:8px;padding:8px;margin-bottom:8px">';
+        html += '<div class="wiz-input-label" style="margin-bottom:4px">Ductboard R-Value (built-in insulation)</div>';
+        html += '<select class="input-field" data-wiz-trunk-dbr="' + i + '" style="width:100%">';
+        var dbR = t.ductboardR || 'R6';
+        html += '<option value="R4.2"' + (dbR === 'R4.2' ? ' selected' : '') + '>R-4.2 (1\u2033 board)</option>';
+        html += '<option value="R6"' + (dbR === 'R6' ? ' selected' : '') + '>R-6 (1.5\u2033 board) \u2014 code minimum</option>';
+        html += '<option value="R8"' + (dbR === 'R8' ? ' selected' : '') + '>R-8 (2\u2033 board)</option>';
+        html += '</select>';
+        html += '<div style="font-size:10px;color:#888;margin-top:4px">Ductboard: rigid fiberglass panels. 1.2\u00D7 friction vs metal. No separate insulation needed.</div>';
+        html += '</div>';
+      }
+
+      // Shape toggle (no Rect option for flex — flex is always round; ductboard is always rect)
       if (tMat === 'flex') {
         t.shape = 'round'; // force round for flex
         html += '<div style="font-size:10px;color:#888;margin-bottom:6px;font-style:italic">Flex duct is always round</div>';
+      } else if (tMat === 'ductboard') {
+        t.shape = 'rect'; // ductboard is always rectangular
+        html += '<div style="font-size:10px;color:#888;margin-bottom:6px;font-style:italic">Ductboard is always rectangular (flat panels)</div>';
       } else {
         html += '<div class="wiz-shape-toggle">';
         html += '<div class="wiz-shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
@@ -7132,6 +7342,8 @@ function wizSaveTrunks() {
     if (e45) t.elbows45 = parseInt(e45.value) || 0;
     if (w) t.width = w.value;
     if (h) t.height = h.value;
+    var dbr = document.querySelector('[data-wiz-trunk-dbr="' + i + '"]');
+    if (dbr) t.ductboardR = dbr.value;
   });
   if (typeof wizAutoSave === 'function') wizAutoSave();
 }
@@ -7210,7 +7422,8 @@ function wizMaxCFM(sizeInch, material, compression) {
   var D = parseFloat(sizeInch);
   var A = Math.PI * Math.pow(D / 24, 2); // sq ft
   var isFlex = material === 'flex';
-  var ff = isFlex ? wizFlexFactor(compression || 0) : 1;
+  var isDuctboard = material === 'ductboard';
+  var ff = isDuctboard ? 1.2 : (isFlex ? wizFlexFactor(compression || 0) : 1);
   // Binary search for max CFM where friction * ff <= 0.08
   var lo = 0, hi = 900 * A; // velocity-capped
   var best = 0;
@@ -7221,7 +7434,7 @@ function wizMaxCFM(sizeInch, material, compression) {
     else { hi = mid; }
     if (hi - lo < 0.5) break;
   }
-  // Also cap by Manual D velocity (700 for flex, 900 for metal supply, 700 for return)
+  // Also cap by Manual D velocity (700 for flex, 900 for metal/ductboard supply, 700 for return)
   var maxVel = isFlex ? 700 : 900;
   var maxCFMvel = maxVel * A;
   if (best > maxCFMvel) best = maxCFMvel;
@@ -7670,13 +7883,16 @@ function wizCalcRun(br) {
     var tLen = parseFloat(trunk.length) || 0;
     var tDia = wizEffDia(trunk);
     var tIsFlex = trunk.material === 'flex';
-    var tFF = tIsFlex ? wizFlexFactor(trunk.compression) : 1;
+    var tIsDuctboard = trunk.material === 'ductboard';
+    var tFF = tIsDuctboard ? 1.2 : (tIsFlex ? wizFlexFactor(trunk.compression) : 1);
     var tEffLen = tLen * tFF;
     var t90eq = (trunk.elbows90 || 0) * (tDia <= 6 ? 10 : tDia <= 8 ? 15 : tDia <= 10 ? 20 : 25);
     var t45eq = (trunk.elbows45 || 0) * 5;
     tel += tEffLen + t90eq + t45eq;
     if (tIsFlex && tLen) {
       breakdown.push({ name: trunk.label + ' flex (' + tLen + ' ft \u00D7' + tFF.toFixed(2) + ')', eq: Math.round(tEffLen * 10) / 10, type: 'duct' });
+    } else if (tIsDuctboard && tLen) {
+      breakdown.push({ name: trunk.label + ' ductboard (' + tLen + ' ft \u00D71.20)', eq: Math.round(tEffLen * 10) / 10, type: 'duct' });
     } else if (tLen) {
       breakdown.push({ name: trunk.label + ' straight (' + tLen + ' ft)', eq: tLen, type: 'duct' });
     }
@@ -8232,6 +8448,9 @@ function wizExportPDF() {
   var adjCFM = roomsCFM > 0 ? Math.round(roomsCFM * (1 + locAdj)) : 0;
   doc.text('Total System CFM: ' + (adjCFM || roomsCFM || '--') + (locAdj > 0 ? ' (+' + Math.round(locAdj*100) + '% for ' + WIZ.ductLocation.replace(/_/g,' ') + ')' : ''), lm, y); y += 5;
   doc.text('Duct Location: ' + (WIZ.ductLocation||'conditioned').replace(/_/g,' ') + '  |  Insulation: ' + ((WIZ_R_VALUES[WIZ.insulation]||{}).label || 'R-6'), lm, y); y += 5;
+  var supPlMatLabel = WIZ.supPlenumMaterial === 'ductboard' ? 'Ductboard (' + (WIZ.supPlenumR || 'R6') + ')' : 'Sheet Metal';
+  var retPlMatLabel = WIZ.retPlenumMaterial === 'ductboard' ? 'Ductboard (' + (WIZ.retPlenumR || 'R6') + ')' : 'Sheet Metal';
+  doc.text('Supply Plenum: ' + supPlMatLabel + '  |  Return Plenum: ' + retPlMatLabel, lm, y); y += 5;
   doc.text('Layout: ' + WIZ.layout + '  |  Trunks: ' + WIZ.trunks.length + '  |  Branches: ' + WIZ.branches.length, lm, y); y += 8;
 
   // Rooms
@@ -8427,6 +8646,28 @@ function wizHandleClick(ev) {
     return true;
   }
 
+  // --- Supply plenum material toggle ---
+  var supPlMat = t.closest('[data-wiz-sup-pl-mat]');
+  if (supPlMat) {
+    WIZ.supPlenumMaterial = supPlMat.getAttribute('data-wiz-sup-pl-mat');
+    document.querySelectorAll('#supPlMatToggle .wiz-shape-btn').forEach(function(b){ b.classList.remove('active'); });
+    supPlMat.classList.add('active');
+    var supDbInfo = document.getElementById('supPlDbInfo');
+    if (supDbInfo) supDbInfo.style.display = WIZ.supPlenumMaterial === 'ductboard' ? 'block' : 'none';
+    return true;
+  }
+
+  // --- Return plenum material toggle ---
+  var retPlMat = t.closest('[data-wiz-ret-pl-mat]');
+  if (retPlMat) {
+    WIZ.retPlenumMaterial = retPlMat.getAttribute('data-wiz-ret-pl-mat');
+    document.querySelectorAll('#retPlMatToggle .wiz-shape-btn').forEach(function(b){ b.classList.remove('active'); });
+    retPlMat.classList.add('active');
+    var retDbInfo = document.getElementById('retPlDbInfo');
+    if (retDbInfo) retDbInfo.style.display = WIZ.retPlenumMaterial === 'ductboard' ? 'block' : 'none';
+    return true;
+  }
+
   // --- Insulation ---
   var insBtn = t.closest('[data-wiz-ins]');
   if (insBtn) {
@@ -8472,6 +8713,11 @@ function wizHandleClick(ev) {
     var tmi = parseInt(trunkMat.getAttribute('data-wiz-trunk-mat'));
     WIZ.trunks[tmi].material = trunkMat.getAttribute('data-tmatval');
     if (WIZ.trunks[tmi].material === 'metal') WIZ.trunks[tmi].compression = 0;
+    if (WIZ.trunks[tmi].material === 'ductboard') {
+      WIZ.trunks[tmi].compression = 0;
+      WIZ.trunks[tmi].shape = 'rect'; // ductboard always rectangular
+      if (!WIZ.trunks[tmi].ductboardR) WIZ.trunks[tmi].ductboardR = 'R6';
+    }
     wizRenderTrunks();
     return true;
   }
@@ -8666,6 +8912,21 @@ function wizHandleClick(ev) {
 function wizHandleChange(ev) {
   var t = ev.target;
 
+  // Plenum type changed — update SVG
+  if (t.id === 'plType') {
+    var supSvgEl = document.getElementById('supPlenumSVG');
+    if (supSvgEl) supSvgEl.innerHTML = wizPlenumSVG(t.value, false);
+    return false; // let other handlers also process
+  }
+  if (t.id === 'retPlType') {
+    var retSvgEl = document.getElementById('retPlenumSVG');
+    if (retSvgEl) retSvgEl.innerHTML = wizPlenumSVG(t.value, true);
+    return false; // let other handlers also process
+  }
+  // Plenum ductboard R-value
+  if (t.id === 'supPlDbR') { WIZ.supPlenumR = t.value; return true; }
+  if (t.id === 'retPlDbR') { WIZ.retPlenumR = t.value; return true; }
+
   // Branch compression slider change
   if (t.hasAttribute('data-wiz-br-compress')) {
     var ci = parseInt(t.getAttribute('data-wiz-br-compress'));
@@ -8707,6 +8968,16 @@ function wizHandleChange(ev) {
     var tcSlider = document.querySelector('[data-wiz-trunk-compress="' + tci2 + '"]');
     if (tcSlider) tcSlider.value = tcv2;
     wizRenderTrunks();
+    return true;
+  }
+
+  // Ductboard R-value change
+  if (t.hasAttribute('data-wiz-trunk-dbr')) {
+    var dbrIdx = parseInt(t.getAttribute('data-wiz-trunk-dbr'));
+    if (WIZ.trunks[dbrIdx]) {
+      WIZ.trunks[dbrIdx].ductboardR = t.value;
+      wizRenderTrunks();
+    }
     return true;
   }
 
@@ -8809,6 +9080,8 @@ wizGoTo = function(step) {
   } else {
     wizUpdateBar();
   }
+  // Render plenum SVGs on load
+  wizUpdatePlenumSVGs();
 })();
 
 
