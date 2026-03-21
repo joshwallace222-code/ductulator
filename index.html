@@ -3580,10 +3580,22 @@ footer a:hover { color: var(--text-muted); }
       Static Pressure Budget
     </div>
     <div style="font-size:11px;color:#888;margin-bottom:8px">Total system must stay under equipment rated external static pressure. Most residential units: 0.5 IWC.</div>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
       <div style="flex:1"><label class="input-label">Equipment ESP (IWC)</label><input type="number" class="input-field" id="wizESP" value="0.50" min="0.1" max="1.5" step="0.05" style="font-family:'SF Mono',monospace;font-size:14px"></div>
       <div style="flex:1"><label class="input-label">Coil PD (IWC)</label><input type="number" class="input-field" id="wizCoilPD" value="0.07" min="0" max="0.5" step="0.01" style="font-family:'SF Mono',monospace;font-size:14px"></div>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1"><label class="input-label">Safety Margin %</label>
+        <select class="input-field" id="wizSafetyMargin" style="font-family:'SF Mono',monospace;font-size:14px">
+          <option value="0">0% (exact design)</option>
+          <option value="10" selected>10% (recommended)</option>
+          <option value="15">15% (conservative)</option>
+          <option value="20">20% (extra safe)</option>
+        </select>
+      </div>
+      <div style="flex:0.6"></div>
+    </div>
+    <div style="font-size:10px;color:#888;margin-bottom:8px">Safety margin accounts for field installation variations — bends not matching design, flex not fully stretched, last-minute routing changes. 10-15% recommended.</div>
     <div id="wizBudgetBreakdown"></div>
   </div>
 
@@ -5966,6 +5978,7 @@ document.getElementById('page-system').addEventListener('click', function(ev) {
 
 // Input events
 document.getElementById('page-system').addEventListener('input', function(ev) {
+  if (typeof wizHandleChange === 'function' && wizHandleChange(ev)) return;
   const t = ev.target;
   if (t.id==='sysDSize'){SS.runs[SS.activeRun].ductSize=parseInt(t.value)||8;calcSystem();return;}
   if (t.id==='sysASP'){SS.runs[SS.activeRun].asp=parseFloat(t.value)||0.50;calcSystem();return;}
@@ -5985,6 +5998,7 @@ document.getElementById('page-system').addEventListener('input', function(ev) {
 });
 
 document.getElementById('page-system').addEventListener('change', function(ev) {
+  if (typeof wizHandleChange === 'function' && wizHandleChange(ev)) return;
   if (ev.target.id==='sysDSize'){SS.runs[SS.activeRun].ductSize=parseInt(ev.target.value)||8;calcSystem();}
   var ct2=ev.target.closest('[data-cfm-type]');
   if(ct2){cfmRooms[parseInt(ct2.dataset.cfmType)].roomType=ct2.value;renderCfmEst();}
@@ -6130,6 +6144,7 @@ function calcSysRetFilter() {
   if (!sysPage) return;
   
   sysPage.addEventListener('change', function(ev) {
+    if (typeof wizHandleChange === 'function' && wizHandleChange(ev)) return;
     var t = ev.target;
     // Filter toggle
     if (t.dataset.sysFilterToggle !== undefined) {
@@ -7436,16 +7451,26 @@ function wizRenderResults() {
     var filterResults = document.getElementById('sysRetFilterResults');
     if (filterResults) {
       var pdEl = filterResults.querySelector('[id*="FiltPD"]') || filterResults.querySelector('.filter-inline-value');
+      // Also try the stat cards: second .filter-inline-stat-val is typically Filter PD
+      if (!pdEl) {
+        var statVals = filterResults.querySelectorAll('.filter-inline-stat-val');
+        if (statVals.length >= 2) pdEl = statVals[1]; // 0=Face Vel, 1=Filter PD
+      }
       if (pdEl) filterPD = parseFloat(pdEl.textContent) || 0;
     }
     // Fallback: check sysRetFilterState
-    if (filterPD === 0 && typeof sysRetFilterState !== 'undefined' && sysRetFilterState.pd) {
-      filterPD = sysRetFilterState.pd;
+    if (filterPD === 0 && typeof sysRetFilterState !== 'undefined' && sysRetFilterState.filterPD) {
+      filterPD = sysRetFilterState.filterPD;
     }
   }
 
-  // Available static for ductwork
-  var availableStatic = equipESP - coilPD - filterPD;
+  // Safety margin — reduces available static to account for field installation variations
+  var safetyEl = document.getElementById('wizSafetyMargin');
+  var safetyPct = safetyEl ? parseInt(safetyEl.value) || 0 : 0;
+  var safetyDeduction = equipESP * (safetyPct / 100);
+
+  // Available static for ductwork (after coil, filter, AND safety margin)
+  var availableStatic = equipESP - coilPD - filterPD - safetyDeduction;
   if (availableStatic < 0) availableStatic = 0;
 
   // Use available static for friction rate calculation
@@ -7551,7 +7576,7 @@ function wizRenderResults() {
   var budgetEl = document.getElementById('wizBudgetBreakdown');
   if (budgetEl) {
     var ductPD = maxTEL > 0 ? (sysFR * maxTEL / 100) : 0; // actual duct PD for critical path
-    var totalUsed = ductPD + filterPD + coilPD;
+    var totalUsed = ductPD + filterPD + coilPD + safetyDeduction;
     var remaining = equipESP - totalUsed;
     var budgetOk = remaining >= 0;
     var budgetColor = remaining >= 0.05 ? '#4caf50' : remaining >= 0 ? '#ff9800' : '#d32f2f';
@@ -7566,6 +7591,9 @@ function wizRenderResults() {
       bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Filter pressure drop</span><span style="font-family:\'SF Mono\',monospace;color:#ff9800">-' + filterPD.toFixed(2) + '</span></div>';
     } else {
       bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#666">\u2212 Filter (none selected)</span><span style="font-family:\'SF Mono\',monospace;color:#666">-0.00</span></div>';
+    }
+    if (safetyPct > 0) {
+      bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Safety margin (' + safetyPct + '%)</span><span style="font-family:\'SF Mono\',monospace;color:#ff9800">-' + safetyDeduction.toFixed(2) + '</span></div>';
     }
     bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333;font-weight:600"><span style="color:#e0e0e0">= Available for ductwork</span><span style="font-family:\'SF Mono\',monospace;color:#4caf50">' + availableStatic.toFixed(2) + ' IWC</span></div>';
     bH += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #333"><span style="color:#ccc">\u2212 Duct PD (critical path)</span><span style="font-family:\'SF Mono\',monospace;color:' + (ductPD > availableStatic ? '#d32f2f' : '#ccc') + '">-' + ductPD.toFixed(3) + '</span></div>';
@@ -7751,9 +7779,12 @@ function wizExportPDF() {
   });
   var espEl = document.getElementById('wizESP');
   var coilEl = document.getElementById('wizCoilPD');
+  var safetyEl = document.getElementById('wizSafetyMargin');
   var equipESP = espEl ? parseFloat(espEl.value) || 0.50 : 0.50;
   var coilPD = coilEl ? parseFloat(coilEl.value) || 0.07 : 0.07;
-  var avail = equipESP - coilPD;
+  var pdfSafetyPct = safetyEl ? parseInt(safetyEl.value) || 0 : 0;
+  var pdfSafetyDed = equipESP * (pdfSafetyPct / 100);
+  var avail = equipESP - coilPD - pdfSafetyDed;
   var sysFR = maxTEL > 0 ? avail / maxTEL * 100 : 0;
 
   if (y > 240) { doc.addPage(); y = 15; }
@@ -7764,11 +7795,14 @@ function wizExportPDF() {
   doc.setFont('helvetica', 'normal');
   doc.text('Equipment ESP: ' + equipESP.toFixed(2) + ' IWC', lm+2, y); y += 4;
   doc.text('Coil PD: -' + coilPD.toFixed(2), lm+2, y); y += 4;
+  if (pdfSafetyPct > 0) {
+    doc.text('Safety margin (' + pdfSafetyPct + '%): -' + pdfSafetyDed.toFixed(2), lm+2, y); y += 4;
+  }
   doc.text('Available for ductwork: ' + avail.toFixed(2) + ' IWC', lm+2, y); y += 4;
   doc.text('Longest TEL: ' + Math.round(maxTEL) + ' ft', lm+2, y); y += 4;
   doc.text('System Friction Rate: ' + sysFR.toFixed(3) + ' IWC/100ft', lm+2, y); y += 4;
   var ductPD = maxTEL > 0 ? sysFR * maxTEL / 100 : 0;
-  var remaining = equipESP - coilPD - ductPD;
+  var remaining = equipESP - coilPD - pdfSafetyDed - ductPD;
   doc.setFont('helvetica', 'bold');
   doc.text('RESULT: ' + (remaining >= 0.05 ? 'PASS' : remaining >= 0 ? 'TIGHT' : 'OVER BUDGET') + ' (remaining: ' + remaining.toFixed(3) + ' IWC)', lm+2, y); y += 8;
 
@@ -8149,8 +8183,8 @@ function wizHandleChange(ev) {
     return true;
   }
 
-  // ESP / Coil PD change -> re-render results budget
-  if (t.id === 'wizESP' || t.id === 'wizCoilPD') {
+  // ESP / Coil PD / Safety Margin change -> re-render results budget
+  if (t.id === 'wizESP' || t.id === 'wizCoilPD' || t.id === 'wizSafetyMargin') {
     if (WIZ.step === 4) wizRenderResults();
     return true;
   }
