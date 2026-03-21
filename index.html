@@ -6963,6 +6963,44 @@ function wizRenderBranchForm(br, i) {
   h += '</select></div>';
   h += '</div>';
 
+  // Runouts — sub-runs off this branch
+  if (!br.runouts) br.runouts = [];
+  if (br.runouts.length > 0) {
+    h += '<div class="wiz-input-label" style="margin-top:8px;margin-bottom:4px;color:#ff9800">Runouts off this branch</div>';
+    br.runouts.forEach(function(ro, ri) {
+      var roFF = (ro.material === 'flex' && ro.compression) ? wizFlexFactor(ro.compression) : 1;
+      h += '<div style="background:#1a1a1a;border:1px solid #444;border-radius:6px;padding:8px;margin-bottom:6px">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+      h += '<span style="font-size:11px;font-weight:600;color:#ff9800">Runout ' + (ri+1) + (ro.room ? ' \u2014 ' + ro.room : '') + '</span>';
+      h += '<div data-wiz-rm-runout="' + i + '" data-ro-idx="' + ri + '" style="cursor:pointer;color:#888;font-size:16px;padding:2px 6px">\u00D7</div>';
+      h += '</div>';
+      h += '<div class="wiz-input-row">';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">Room</div><input type="text" class="input-field" value="' + (ro.room||'') + '" data-wiz-ro-room="' + i + '-' + ri + '"></div>';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">CFM</div><input type="number" class="input-field" value="' + (ro.cfm||'') + '" placeholder="CFM" data-wiz-ro-cfm="' + i + '-' + ri + '"></div>';
+      h += '</div>';
+      h += '<div class="wiz-input-row">';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">Size</div><select class="input-field" data-wiz-ro-size="' + i + '-' + ri + '">';
+      WIZ_ROUND_SIZES.forEach(function(s){ h += '<option value="'+s+'"'+(ro.size==s?' selected':'')+'>'+s+'\u2033</option>'; });
+      h += '</select></div>';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">Length (ft)</div><input type="number" class="input-field" value="' + (ro.length||'6') + '" min="1" max="100" data-wiz-ro-len="' + i + '-' + ri + '"></div>';
+      h += '</div>';
+      h += '<div class="wiz-input-row">';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">Ends At</div><select class="input-field" data-wiz-ro-boot="' + i + '-' + ri + '">';
+      Object.keys(WIZ_BOOT_EQ).forEach(function(k){ h += '<option value="'+k+'"'+(ro.bootType===k?' selected':'')+'>'+WIZ_BOOT_EQ[k].name+'</option>'; });
+      h += '</select></div>';
+      h += '<div class="wiz-input-group"><div class="wiz-input-label">Material</div><select class="input-field" data-wiz-ro-mat="' + i + '-' + ri + '">';
+      h += '<option value="metal"' + (ro.material!=='flex'?' selected':'') + '>Metal</option>';
+      h += '<option value="flex"' + (ro.material==='flex'?' selected':'') + '>Flex</option>';
+      h += '</select></div>';
+      h += '</div>';
+      if (ro.material === 'flex') {
+        h += '<div class="wiz-input-row"><div class="wiz-input-group"><div class="wiz-input-label">Compression %</div><input type="number" class="input-field" value="' + (ro.compression||'') + '" min="4" max="30" placeholder="%" data-wiz-ro-comp="' + i + '-' + ri + '"></div><div class="wiz-input-group"></div></div>';
+      }
+      h += '</div>';
+    });
+  }
+  h += '<div data-wiz-add-runout="' + i + '" style="cursor:pointer;text-align:center;padding:8px;margin:6px 0;border:1px dashed #555;border-radius:6px;font-size:11px;color:#ff9800;font-weight:600">+ Add Runout off this branch</div>';
+
   // Fittings
   h += '<div class="wiz-input-label" style="margin-top:4px;margin-bottom:6px">Fittings (tap to add)</div>';
   h += '<div class="wiz-fit-btns">';
@@ -7014,7 +7052,27 @@ function wizSaveBranch(idx) {
   if (bootEl)     br.bootType    = bootEl.value;
   if (widthEl)    br.width       = widthEl.value;
   if (heightEl)   br.height      = heightEl.value;
-  if (compressEl) br.compression = parseInt(compressEl.value) || 4;
+  if (compressEl) br.compression = parseInt(compressEl.value) || 0;
+  // Save runouts
+  if (br.runouts) {
+    br.runouts.forEach(function(ro, ri) {
+      var key = idx + '-' + ri;
+      var roRoom = document.querySelector('[data-wiz-ro-room="' + key + '"]');
+      var roCfm  = document.querySelector('[data-wiz-ro-cfm="' + key + '"]');
+      var roSize = document.querySelector('[data-wiz-ro-size="' + key + '"]');
+      var roLen  = document.querySelector('[data-wiz-ro-len="' + key + '"]');
+      var roBoot = document.querySelector('[data-wiz-ro-boot="' + key + '"]');
+      var roMat  = document.querySelector('[data-wiz-ro-mat="' + key + '"]');
+      var roComp = document.querySelector('[data-wiz-ro-comp="' + key + '"]');
+      if (roRoom) ro.room = roRoom.value;
+      if (roCfm)  ro.cfm  = roCfm.value;
+      if (roSize) ro.size = roSize.value;
+      if (roLen)  ro.length = roLen.value;
+      if (roBoot) ro.bootType = roBoot.value;
+      if (roMat)  ro.material = roMat.value;
+      if (roComp) ro.compression = parseInt(roComp.value) || 0;
+    });
+  }
 }
 
 // ---- STEP 4: RESULTS ----
@@ -7502,6 +7560,27 @@ function wizHandleClick(ev) {
     var ftype = addFit.getAttribute('data-fit-type');
     wizSaveBranch(afi);
     WIZ.branches[afi].fittings.push({ type: ftype });
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Add runout to branch ---
+  var addRunout = t.closest('[data-wiz-add-runout]');
+  if (addRunout) {
+    var ari = parseInt(addRunout.getAttribute('data-wiz-add-runout'));
+    wizSaveBranch(ari);
+    if (!WIZ.branches[ari].runouts) WIZ.branches[ari].runouts = [];
+    WIZ.branches[ari].runouts.push({ room:'', cfm:'', size:'6', length:'6', bootType:'90boot', material:'metal', compression:0 });
+    wizRenderBranches();
+    return true;
+  }
+
+  // --- Remove runout from branch ---
+  var rmRunout = t.closest('[data-wiz-rm-runout]');
+  if (rmRunout) {
+    var rri = parseInt(rmRunout.getAttribute('data-wiz-rm-runout'));
+    var roIdx = parseInt(rmRunout.getAttribute('data-ro-idx'));
+    WIZ.branches[rri].runouts.splice(roIdx, 1);
     wizRenderBranches();
     return true;
   }
