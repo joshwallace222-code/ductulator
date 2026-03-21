@@ -6652,11 +6652,16 @@ function wizRenderTrunks() {
         html += '</div>';
       }
 
-      // Shape toggle
-      html += '<div class="wiz-shape-toggle">';
-      html += '<div class="wiz-shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
-      html += '<div class="wiz-shape-btn' + (t.shape === 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
-      html += '</div>';
+      // Shape toggle (no Rect option for flex — flex is always round)
+      if (tMat === 'flex') {
+        t.shape = 'round'; // force round for flex
+        html += '<div style="font-size:10px;color:#888;margin-bottom:6px;font-style:italic">Flex duct is always round</div>';
+      } else {
+        html += '<div class="wiz-shape-toggle">';
+        html += '<div class="wiz-shape-btn' + (t.shape !== 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
+        html += '<div class="wiz-shape-btn' + (t.shape === 'rect' ? ' active' : '') + '" data-wiz-trunk-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
+        html += '</div>';
+      }
 
       // Size
       if (t.shape === 'rect') {
@@ -6916,12 +6921,17 @@ function wizRenderBranchForm(br, i) {
     h += '</div>';
   }
 
-  // Shape
-  h += '<div class="wiz-input-label" style="margin-bottom:4px">Duct Shape</div>';
-  h += '<div class="wiz-shape-toggle">';
-  h += '<div class="wiz-shape-btn' + (br.shape !== 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
-  h += '<div class="wiz-shape-btn' + (br.shape === 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
-  h += '</div>';
+  // Shape (no Rect for flex — flex is always round)
+  if (br.material === 'flex') {
+    br.shape = 'round';
+    h += '<div style="font-size:10px;color:#888;margin-bottom:6px;font-style:italic">Flex duct is always round</div>';
+  } else {
+    h += '<div class="wiz-input-label" style="margin-bottom:4px">Duct Shape</div>';
+    h += '<div class="wiz-shape-toggle">';
+    h += '<div class="wiz-shape-btn' + (br.shape !== 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="round">' + wizSvg('round') + ' Round</div>';
+    h += '<div class="wiz-shape-btn' + (br.shape === 'rect' ? ' active' : '') + '" data-wiz-br-shape="' + i + '" data-shape="rect">' + wizSvg('rect') + ' Rect</div>';
+    h += '</div>';
+  }
 
   // Size fields
   if (br.shape === 'rect') {
